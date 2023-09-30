@@ -10,7 +10,7 @@ BUILD := build
 OBJDIR := build/objects
 DEPDIR := build/dependencies
 RESULTSDIR := build/results
-RESULTS = $(patsubst $(TESTSDIR)/test_%.c,$(RESULTSDIR)/test_%.txt,$(wildcard $(TESTSDIR)/test_*.c))
+RESULTS := $(patsubst $(TESTSDIR)/test_%.c,$(RESULTSDIR)/test_%.txt,$(wildcard $(TESTSDIR)/test_*.c))
 
 BUILDPATHS := $(BUILD) $(OBJDIR) $(RESULTSDIR) $(DEPDIR)
 
@@ -65,11 +65,15 @@ $(RESULTSDIR):
 	@mkdir $(RESULTSDIR)
 
 test: $(BUILDPATHS) $(RESULTS)
-	@echo -e "\n-----------------------\n\033[33mIGNORES:\033[0m\n-----------------------\033[33"
-	@echo -e `grep -s IGNORE $(RESULTSDIR)/*.txt` "\033[0m" 
 	@echo -e "\n-----------------------\n\033[0;31mFAILURES:\n\033[0m-----------------------\033[0;31m"
-	@echo -e `grep -s FAIL $(RESULTSDIR)/*.txt` "\033[0m\n"
-	@echo -e "\033[0;32mDONE\033[0m"
+	@find build/results -type f -name "*.txt" -exec grep -H 'FAIL' {} \; | head -n -1
+#@echo -e `head -n-4 $(RESULTSDIR)/*.txt | column -t -s: | awk '/FAIL/ {print, next}'`
+#@echo -e "\n-----------------------\n\033[33mIGNORES:\033[0m\n-----------------------\033[33"
+#@echo -e `grep -s IGNORE $(RESULTSDIR)/*.txt` "\033[0m" 
+	$(eval p=$(shell head -n-4 $(RESULTSDIR)/*.txt | grep -sF "PASS" | wc -l))
+	$(eval f=$(shell head -n-4 $(RESULTSDIR)/*.txt | grep -sF "FAIL" | wc -l))
+	$(eval t=$(shell head -n-4 $(RESULTSDIR)/*.txt | wc -l))
+	@echo -e "\n\033[0;32m $(p) Passed\033[0m, \033[0;31m $(f) Failed\033[0m, $(t) Total"
 
 run: $(BUILDPATHS) $(TARGET)
 	$(BUILD)/$(TARGET)

@@ -73,7 +73,7 @@ test: $(BUILDPATHS) $(RESULTS)
 	$(eval p=$(shell head -n-4 $(RESULTSDIR)/*.txt | grep -sF "PASS" | wc -l))
 	$(eval f=$(shell head -n-4 $(RESULTSDIR)/*.txt | grep -sF "FAIL" | wc -l))
 	$(eval t=$(shell head -n-4 $(RESULTSDIR)/*.txt | wc -l))
-	@echo -e "\n\033[0;32m $(p) Passed\033[0m, \033[0;31m $(f) Failed\033[0m, $(t) Total"
+	@echo -e "\n\033[0;32m $(p) Passed\033[0m,\033[0;31m $(f) Failed\033[0m, $(t) Total"
 
 run: $(BUILDPATHS) $(TARGET)
 	$(BUILD)/$(TARGET)

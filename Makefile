@@ -32,7 +32,7 @@ $(TARGET): $(OBJECTS)
 
 # Universal rule for source files
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@ -Iinclude
 
 # Make results
 $(RESULTSDIR)/%.txt: $(BUILD)/%.out
@@ -40,7 +40,7 @@ $(RESULTSDIR)/%.txt: $(BUILD)/%.out
 
 # Universal rule for test source files
 $(OBJDIR)/%.o: $(TESTSDIR)/%.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@ -Iinclude
 
 # Compile and link tests
 $(BUILD)/test_%.out: $(OBJDIR)/test_%.o $(OBJDIR)/%.o $(OBJDIR)/unity.o

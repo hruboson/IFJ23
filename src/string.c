@@ -29,17 +29,19 @@ void clear_string (String *string) {
     string->data = NULL;
 }
 
-void string_append(String * string, const char * str_to_append) {
+void append_string(String * string, const char * str_to_append) {
     if (string == NULL)
         return;
     
     for (int i = 0; str_to_append[i] != '\0'; i++) {
         if (string->length + 1 > string->capacity) { // pokud by se to po pridani znaku uz nevlezlo, zvetsi se 2x
-            string->data = (char *) malloc(sizeof(char) * string->capacity * 2);
+            char *new_data = (char *) realloc(string->data, sizeof(char) * string->capacity * 2);
 
-            if (string->data == NULL) {
+            if (new_data == NULL) {
                 exit(1); //TODO: asi zase neco vracet
             }
+            string->data = new_data;
+            //TODO: pri reallocu se nemusi prekopirovavat data ze?
 
             string->capacity *= 2;
         } else {

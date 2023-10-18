@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#define STR_INITIAL_CAPACITY 16 //TODO kdyztak zmenit na jinou hodnotu
+
 typedef struct String {
     char* data;
     size_t length, capacity;

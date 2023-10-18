@@ -4,4 +4,5 @@ typedef struct AST {
     // TODO
 } AST;
 
-void free_ast( AST* );
+void init_ast( AST* );
+void clear_ast( AST* );

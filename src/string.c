@@ -29,7 +29,7 @@ void clear_string (String *string) {
     string->data = NULL;
 }
 
-void append_string(String * string, const char * str_to_append) {
+void string_append(String * string, const char * str_to_append) {
     if (string == NULL)
         return;
     

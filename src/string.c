@@ -2,8 +2,6 @@
 
 #include <stdlib.h>
 
-//TODO: je potreba checkovat jestli je string NULL nebo si to ma zkontrolovat uzivatel?
-
 void init_string(String *string) {
     if (string == NULL)
         return;
@@ -14,22 +12,22 @@ void init_string(String *string) {
     string->data = (char *) malloc(sizeof(char) * STR_INITIAL_CAPACITY);
 
     if (string->data == NULL) {
-        exit(1); //TODO: tady by se mozna melo neco vracet z te funkce
+        exit(99);
     }
 }
 
-void clear_string (String *string) {
+void free_string (String *string) {
     if (string == NULL)
         return;
     
     string->length = 0;
-    string->capacity = STR_INITIAL_CAPACITY;
+    string->capacity = 0;
 
     free(string->data);
     string->data = NULL;
 }
 
-void string_append(String * string, const char * str_to_append) {
+void append_string(String * string, const char * str_to_append) {
     if (string == NULL)
         return;
     
@@ -38,10 +36,10 @@ void string_append(String * string, const char * str_to_append) {
             char *new_data = (char *) realloc(string->data, sizeof(char) * string->capacity * 2);
 
             if (new_data == NULL) {
-                exit(1); //TODO: asi zase neco vracet
+                free_string(string);
+                exit(99);
             }
             string->data = new_data;
-            //TODO: pri reallocu se nemusi prekopirovavat data ze?
 
             string->capacity *= 2;
         } else {
@@ -49,3 +47,6 @@ void string_append(String * string, const char * str_to_append) {
         }
     }
 }
+
+//TODO
+void append_string_c( String*, char );

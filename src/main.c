@@ -9,7 +9,7 @@ int process_file( FILE* file, AST* ast, IR* ir, String* target_code ) {
 	int ret;
 
 	/* convert source code into an AST */
-	ret = semantic( source_code, ast );
+	ret = semantic( file, ast );
 	if ( ret ) {
 		return ret;
 	}

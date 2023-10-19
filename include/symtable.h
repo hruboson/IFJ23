@@ -2,8 +2,11 @@
 
 #include <stddef.h>
 
+#include "string.h"
+
 typedef struct SymbolRecord {
-    char* symbol;
+    String symbol;
+    size_t hash;
 } SymbolRecord;
 
 typedef struct SymbolTable {
@@ -14,5 +17,5 @@ typedef struct SymbolTable {
 SymbolTable* init_symboltable( void );
 void free_symboltable( SymbolTable* );
 
-void symboltable_insert( SymbolTable*, const char* symbol );
+int symboltable_insert( SymbolTable*, String* symbol, size_t* index );
 

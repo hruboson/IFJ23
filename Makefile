@@ -30,6 +30,10 @@ TARGET = IFJ.out
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ -o $(BUILD)/$@
 
+# Build is essentially same as make ifj.out
+build: $(OBJECTS)
+	$(CC) $(CFLAGS) $^ -o $(BUILD)/IFJ.out
+
 # Universal rule for source files
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 	$(CC) -c $(CFLAGS) $< -o $@ -Iinclude

@@ -42,10 +42,10 @@ void append_string(String *string, const char *str_to_append) {
             string->data = new_data;
 
             string->capacity *= 2;
-        } else {
-            string->data[(string->length)++] = str_to_append[i];
         }
+        string->data[(string->length)++] = str_to_append[i];
     }
+    
 }
 
 void append_string_c(String *string, char c) {

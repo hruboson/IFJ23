@@ -78,6 +78,8 @@ test: $(BUILDPATHS) $(RESULTS)
 run: $(BUILDPATHS) $(TARGET)
 	$(BUILD)/$(TARGET)
 
+build: $(BUILDPATHS) $(TARGET)
+
 clean:
 	rm -f $(OBJDIR)/*.o $(BUILD)/*.out $(RESULTSDIR)/*.txt $(DEPDIR)/*.d 
 

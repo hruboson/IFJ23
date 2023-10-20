@@ -30,10 +30,6 @@ TARGET = IFJ.out
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ -o $(BUILD)/$@
 
-# Build is essentially same as make ifj.out
-build: $(OBJECTS)
-	$(CC) $(CFLAGS) $^ -o $(BUILD)/IFJ.out
-
 # Universal rule for source files
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 	$(CC) -c $(CFLAGS) $< -o $@ -Iinclude
@@ -70,7 +66,7 @@ $(RESULTSDIR):
 
 test: $(BUILDPATHS) $(RESULTS)
 	@echo -e "\n-----------------------\n\033[0;31mFAILURES:\n\033[0m-----------------------\033[0;31m"
-	@find build/results -type f -name "*.txt" -exec grep -H 'FAIL' {} \; | head -n -1
+	@find build/results -type f -name "*.txt" -exec grep -H 'FAIL' {} \;
 #@echo -e `head -n-4 $(RESULTSDIR)/*.txt | column -t -s: | awk '/FAIL/ {print, next}'`
 #@echo -e "\n-----------------------\n\033[33mIGNORES:\033[0m\n-----------------------\033[33"
 #@echo -e `grep -s IGNORE $(RESULTSDIR)/*.txt` "\033[0m" 

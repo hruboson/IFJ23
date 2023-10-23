@@ -48,7 +48,7 @@ int main(int argc, char const *argv[]) {
 	int ret = process_file( source_code, &ast, &ir, &target_code );
 	if ( ret == 0 ) { /* on success */
 		/* output target code to stdout */
-		fputs( target_code.data );
+		fputs( target_code.data, stdout );
 	}
 
 	/* free resources */

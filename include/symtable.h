@@ -14,7 +14,8 @@ typedef struct SymbolTable {
     size_t size;
 } SymbolTable;
 
-SymbolTable* init_symboltable( void );
+void init_symboltable( SymbolTable* );
+void clear_symboltable( SymbolTable* );
 void free_symboltable( SymbolTable* );
 
 int symboltable_insert( SymbolTable*, String* symbol, size_t* index );

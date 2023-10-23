@@ -1,8 +1,10 @@
 #pragma once
 
 #include "symtable.h"
-#include <stdbool.h>
 #include "string.h"
+
+#include <stdbool.h>
+#include <stdio.h>
 
 typedef enum TokenType {
 	TOKENTYPE_NEWLINE,

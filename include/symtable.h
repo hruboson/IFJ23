@@ -10,13 +10,13 @@ typedef struct SymbolRecord {
 } SymbolRecord;
 
 typedef struct SymbolTable {
-    SymbolRecord* symbols;
-    size_t size;
+    SymbolRecord** symbols;
+    size_t size, count;
 } SymbolTable;
 
 void init_symboltable( SymbolTable* );
 void clear_symboltable( SymbolTable* );
 void free_symboltable( SymbolTable* );
 
-int symboltable_insert( SymbolTable*, String* symbol, size_t* index );
+int symboltable_insert( SymbolTable*, String* symbol, SymbolRecord** rec );
 

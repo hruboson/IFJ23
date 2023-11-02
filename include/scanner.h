@@ -62,7 +62,7 @@ typedef struct Token {
 		int int_;
 		double double_;
 		String str_;
-		size_t id_index;
+		SymbolRecord* id;
 		Keyword keyword;
 	} value;
 } Token;

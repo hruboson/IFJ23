@@ -1,16 +1,24 @@
 #include "scanner.h"
 
 #include <string.h>
+#include <assert.h>
+#include <ctype.h>
 
-void string_append( String* s, const char* c ) {
+#define arraysize( x ) ( sizeof( x ) / sizeof( x[ 0 ] ) )
+
+/* temp funcions until we standardize them */
+void
+string_append( String* s, const char* c ) {
 	append_string( s, c );
 }
 
-void string_append_c( String* s, char c ) {
+void
+string_append_c( String* s, char c ) {
 	append_string_c( s, c );
 }
 
-void clear_string( String* s ) {
+void
+clear_string( String* s ) {
 	free_string( s );
 }
 
@@ -25,6 +33,7 @@ typedef enum State {
 	STATE_EQUALS,
 	STATE_QUESTION,
 	STATE_EXCLAMATION,
+	STATE_MINUS,
 	STATE_NUMBER,
 	STATE_NUMBER_DOT,
 	STATE_NUMBER_DECIMAL,
@@ -32,32 +41,65 @@ typedef enum State {
 	STATE_NUMBER_EXPONENT,
 	STATE_STRING,
 	STATE_STRING_EMPTY,
+	STATE_STRING_BODY,
+	STATE_STRING_BODY_SLASH,
+	STATE_STRING_BODY_U,
+	STATE_STRING_BODY_U_B,
 	STATE_STRING_3,
 	STATE_STRING_3_BODY,
+	STATE_STRING_3_BODY_QUOTE,
+	STATE_STRING_3_BODY_QUOTE2,
 } State;
 
 /*
  * returns true when string is a keyword, false when it is not
  */
-bool is_keyword( String* id, Keyword* k ) {
+bool
+is_keyword( String* id, Keyword* k ) {
 
-	if ( strcmp( id->data, "nil" ) == 0 ) {
-		*k = KEYWORD_NIL;
-		return true;
+	struct a {
+		const char* id;
+		Keyword key;
+	};
+
+	/* list of all keywords */
+	struct a a[] = {
+		{ "Double", KEYWORD_DOUBLE },
+		{ "else",   KEYWORD_ELSE },
+		{ "func",   KEYWORD_FUNC },
+		{ "if",     KEYWORD_IF },
+		{ "Int",    KEYWORD_INT },
+		{ "let",    KEYWORD_LET },
+		{ "nil",    KEYWORD_NIL },
+		{ "return", KEYWORD_RETURN },
+		{ "String", KEYWORD_STRING },
+		{ "var",    KEYWORD_VAR },
+		{ "while",  KEYWORD_WHILE },
+	};
+
+	// linear search for now
+	//   suggestion: compare lengths, hash map
+	for ( size_t i = 0; i < arraysize( a ); i++ ) {
+		if ( strcmp( a[ i ].id, id->data ) == 0 ) {
+			*k = a[ i ].key;
+			return true;
+		}
 	}
 
 	return false;
 }
 
-int get_token( FILE* f, SymbolTable* symtab, Token* token ) {
+int
+get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 
 	State state = STATE_START;
 	int c, ret;
 
 	int whole = 0;
+	char hex_count = 0;
 	double decimal = 0.0;
 	size_t decimal_position = 1;
-	int exponent = 0;
+	size_t exponent = 0;
 	char exponent_sign = 0; // 0 +, 1 -
 
 	String string;
@@ -91,6 +133,7 @@ int get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 					return 99;
 				break;
 			case '"':
+				init_string( &string );
 				state = STATE_STRING;
 				break;
 			/* operators */
@@ -107,8 +150,8 @@ int get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				token->type = TOKENTYPE_PLUS;
 				return 0;
 			case '-':
-				token->type = TOKENTYPE_MINUS;
-				return 0;
+				state = STATE_MINUS;
+				break;
 			case '=':
 				state = STATE_EQUALS;
 				break;
@@ -121,10 +164,42 @@ int get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 			case '?':
 				state = STATE_QUESTION;
 				break;
+			case ',':
+				token->type = TOKENTYPE_COMMA;
+				return 0;
+			case ':':
+				token->type = TOKENTYPE_COLON;
+				return 0;
+			case '(':
+				token->type = TOKENTYPE_PAR_L;
+				return 0;
+			case ')':
+				token->type = TOKENTYPE_PAR_R;
+				return 0;
+			case '{':
+				token->type = TOKENTYPE_BRACE_L;
+				return 0;
+			case '}':
+				token->type = TOKENTYPE_BRACE_R;
+				return 0;
 			default:
 				return 1;
 			}
 			break;
+		case STATE_MINUS:
+			if ( c == '>' ) {
+				token->type = TOKENTYPE_ARROW;
+				return 0;
+			}
+
+			if ( c != EOF ) {
+				c = ungetc( c, f );
+				if ( c == EOF )
+					return 99;
+			}
+
+			token->type = TOKENTYPE_MINUS;
+			return 0;
 		case STATE_QUESTION:
 			if ( c == '?' ) {
 				token->type = TOKENTYPE_QUESTIONMARK2;
@@ -240,7 +315,7 @@ int get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 
 				/* insert identifier into the symbol table */
 				token->type = TOKENTYPE_ID;
-				ret = symboltable_insert( symtab, &string, &token->value.id_index );
+				ret = symboltable_insert( symtab, &string, &token->value.id );
 				if ( ret )
 					return ret;
 
@@ -276,8 +351,19 @@ int get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				decimal_position *= 10;
 				decimal += ( c - '0' ) / (double)decimal_position;
 				break;
+			case 'E':
+				state = STATE_NUMBER_E;
+				break;
 			default:
-				return 1;
+				if ( c != EOF ) {
+					c = ungetc( c, f );
+					if ( c == EOF )
+						return 99;
+				}
+
+				token->type = TOKENTYPE_DOUBLE;
+				token->value.double_ = whole + decimal;
+				return 0;
 			}
 			break;
 		case STATE_NUMBER_E:
@@ -313,7 +399,16 @@ int get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				}
 
 				token->type = TOKENTYPE_DOUBLE;
-				token->value.double_ = ( whole + decimal ); // TODO: exponent
+				token->value.double_ = ( whole + decimal );
+				if ( exponent_sign == 1 ) {
+					for ( size_t i = 0; i < exponent; i++ ) {
+						token->value.double_ /= 10;
+					}
+				} else {
+					for ( size_t i = 0; i < exponent; i++ ) {
+						token->value.double_ *= 10;
+					}
+				}
 				return 0;
 			}
 			break;
@@ -326,9 +421,103 @@ int get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				break;
 			case '\n':
 				return 1;
+			default:
+				if ( c != EOF ) {
+					c = ungetc( c, f );
+					if ( c == EOF )
+						return 99;
+				}
 
+				state = STATE_STRING_BODY;
+				break;
 			}
 			break;
+		case STATE_STRING_BODY:
+			if ( c == '"' ) {
+				token->type = TOKENTYPE_STRING;
+				token->value.str_ = string;
+				return 0;
+			} else if ( c == '\\' ) {
+				state = STATE_STRING_BODY_SLASH;
+				break;
+			} else if ( c > 31 ) {
+				string_append_c( &string, ( char )c);
+			} else {
+				return 1;
+			}
+			break;
+		case STATE_STRING_BODY_SLASH:
+			switch ( c ) {
+			case '\\':
+				state = STATE_STRING_BODY;
+				string_append_c( &string, '\\' );
+				break;
+			case '"':
+				state = STATE_STRING_BODY;
+				string_append_c( &string, '"' );
+				break;
+			case 'n':
+				state = STATE_STRING_BODY;
+				string_append_c( &string, '\n' );
+				break;
+			case 't':
+				state = STATE_STRING_BODY;
+				string_append_c( &string, '\t' );
+				break;
+			case 'r':
+				state = STATE_STRING_BODY;
+				string_append_c( &string, '\r' );
+				break;
+			case 'u':
+				state = STATE_STRING_BODY_U;
+				break;
+			default:
+				return 1;
+			}
+			break;
+		case STATE_STRING_BODY_U:
+			if ( c == '{' ) {
+				state = STATE_STRING_BODY_U_B;
+				hex_count = 0;
+				break;
+			}
+			return 1;
+		case STATE_STRING_BODY_U_B:
+			if ( isxdigit( c ) ) {
+
+				// support up to 6 hex digits
+				if ( hex_count >= 6 )
+					return 1;
+
+				whole = whole * 16;
+				if ( c >= '0' && c <= '9' )
+					whole += c - '0';
+				else if ( c >= 'a' && c <= 'f' )
+					whole += c - 'a' + 10;
+				else
+					whole += c - 'A' + 10;
+
+				hex_count++;
+
+				break;
+			}
+
+			if ( c == '}' ) {
+				if ( hex_count == 0 )
+					return 1;
+
+				/* add hex value to string */
+				while ( hex_count > 0 ) {
+					string_append_c( &string, whole & 0xff );
+					whole >>= 8;
+					hex_count -= 2;
+				}
+
+				state = STATE_STRING_BODY;
+				break;
+			}
+
+			return 1;
 		case STATE_STRING_EMPTY:
 			switch ( c ) {
 			case '"':
@@ -355,7 +544,52 @@ int get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				return 1;
 			}
 			break;
-		default: // unhandeled state
+		case STATE_STRING_3_BODY:
+
+			if ( c == EOF ) {
+				return 1;
+			}
+
+			if ( c == '"' ) {
+				state = STATE_STRING_3_BODY_QUOTE;
+				break;
+			}
+
+			string_append_c( &string, c );
+
+			break;
+		case STATE_STRING_3_BODY_QUOTE:
+			if ( c == EOF )
+				return 1;
+
+			if ( c == '"' ) {
+				state = STATE_STRING_3_BODY_QUOTE2;
+				break;
+			}
+
+			c = ungetc( c, f );
+			if ( c == EOF )
+				return 99;
+
+			state = STATE_STRING_3_BODY;
+			string_append_c( &string, '"' );
+
+			break;
+		case STATE_STRING_3_BODY_QUOTE2:
+			if ( c == EOF )
+				return 1;
+
+			if ( c == '"' ) {
+				token->type = TOKENTYPE_STRING;
+				token->value.str_ = string;
+				return 0;
+			}
+
+			state = STATE_STRING_3_BODY;
+			string_append( &string, "\"\"" );
+
+			break;
+		default: // unhandeled/invalid state
 #ifdef NDEBUG
 			fprintf( stderr, "scanner: error: unhandeled state: %i\n\t%s:%lu\n", state, __FILE__, __LINE__ );
 #endif

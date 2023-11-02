@@ -66,3 +66,16 @@ void append_string_c(String *string, char c) {
     string->data[(string->length)++] = c;
     string->data[(string->length)] = '\0';
 }
+
+bool string_eq( const String* a, const String* b ) {
+	if ( a == NULL || b == NULL )
+		return false;
+
+	if ( a == b )
+		return true;
+
+	if ( a->length != b->length )
+		return false;
+
+	return strcmp( a->data, b->data ) == 0;
+}

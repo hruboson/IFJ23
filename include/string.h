@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdbool.h>
 
 #define STR_INITIAL_CAPACITY 16 //TODO kdyztak zmenit na jinou hodnotu
 
@@ -14,3 +15,5 @@ void free_string( String* );
 
 void append_string( String*, const char* );
 void append_string_c( String*, char );
+
+bool string_eq( const String*, const String* );

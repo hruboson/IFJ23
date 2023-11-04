@@ -27,6 +27,8 @@ typedef enum State {
 	STATE_SLASH,
 	STATE_COMMENT_LINE,
 	STATE_COMMENT_BLOCK,
+	STATE_COMMENT_BLOCK_SLASH,
+	STATE_COMMENT_BLOCK_STAR,
 	STATE_IDENTIF,
 	STATE_GREATER,
 	STATE_LESSER,
@@ -47,6 +49,7 @@ typedef enum State {
 	STATE_STRING_BODY_U_B,
 	STATE_STRING_3,
 	STATE_STRING_3_BODY,
+	STATE_STRING_3_BODY_NEWLINE,
 	STATE_STRING_3_BODY_QUOTE,
 	STATE_STRING_3_BODY_QUOTE2,
 } State;
@@ -97,6 +100,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 
 	int whole = 0;
 	char hex_count = 0;
+	size_t nested_comment_count = 0;
 	double decimal = 0.0;
 	size_t decimal_position = 1;
 	size_t exponent = 0;
@@ -550,12 +554,30 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				return 1;
 			}
 
+			if ( c == '\n' ) {
+				state = STATE_STRING_3_BODY_NEWLINE;
+				break;
+			}
+
+			string_append_c( &string, c );
+
+			break;
+		case STATE_STRING_3_BODY_NEWLINE:
+			if ( c == EOF )
+				return 1;
+
 			if ( c == '"' ) {
 				state = STATE_STRING_3_BODY_QUOTE;
 				break;
 			}
 
-			string_append_c( &string, c );
+			c = ungetc( c, f );
+			if ( c == EOF )
+				return 99;
+
+
+			state = STATE_STRING_3_BODY;
+			string_append_c( &string, '\n' );
 
 			break;
 		case STATE_STRING_3_BODY_QUOTE:
@@ -572,7 +594,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				return 99;
 
 			state = STATE_STRING_3_BODY;
-			string_append_c( &string, '"' );
+			string_append( &string, "\n\"" );
 
 			break;
 		case STATE_STRING_3_BODY_QUOTE2:
@@ -585,12 +607,70 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				return 0;
 			}
 
+			c = ungetc( c, f );
+			if ( c == EOF )
+				return 99;
+
 			state = STATE_STRING_3_BODY;
-			string_append( &string, "\"\"" );
+			string_append( &string, "\n\"\"" );
 
 			break;
+		case STATE_COMMENT_LINE:
+			switch ( c ) {
+			case EOF:
+				token->type = TOKENTYPE_EOF;
+				return 0;
+			case '\n':
+				token->type = TOKENTYPE_NEWLINE;
+				return 0;
+			default:
+				/* nothing */
+			}
+			break;
+		case STATE_COMMENT_BLOCK:
+			switch ( c ) {
+			case EOF:
+				// not ended comment
+				return 1;
+			case '/':
+				state = STATE_COMMENT_BLOCK_SLASH;
+				break;
+			case '*':
+				state = STATE_COMMENT_BLOCK_STAR;
+				break;
+			default:
+				/* nothing */
+			}
+			break;
+		case STATE_COMMENT_BLOCK_SLASH:
+			switch ( c ) {
+			case '*':
+				state = STATE_COMMENT_BLOCK;
+				nested_comment_count++;
+				break;
+			case '/':
+				break;
+			default:
+				state = STATE_COMMENT_BLOCK;
+			}
+			break;
+		case STATE_COMMENT_BLOCK_STAR:
+			switch ( c ) {
+			case '/':
+				if ( nested_comment_count == 0 ) {
+					state = STATE_START;
+					break;
+				}
+				nested_comment_count--;
+				break;
+			case '*':
+				break;
+			default:
+				state = STATE_COMMENT_BLOCK;
+			}
+			break;
 		default: // unhandeled/invalid state
-#ifdef NDEBUG
+#ifndef NDEBUG
 			fprintf( stderr, "scanner: error: unhandeled state: %i\n\t%s:%lu\n", state, __FILE__, __LINE__ );
 #endif
 			return 99;

@@ -54,7 +54,7 @@ int main(int argc, char const *argv[]) {
 	/* free resources */
 	clear_ast( &ast );
 	clear_ir( &ir );
-	free_string( &target_code );
+	clear_string( &target_code );
 
 	return ret;
 }

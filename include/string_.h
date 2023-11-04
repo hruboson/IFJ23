@@ -11,9 +11,10 @@ typedef struct String {
 } String;
 
 void init_string( String* );
-void free_string( String* );
+void clear_string( String* );
 
-void append_string( String*, const char* );
-void append_string_c( String*, char );
+void string_append( String*, const char* );
+void string_append_c( String*, char );
 
 bool string_eq( const String*, const String* );
+

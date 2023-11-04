@@ -14,7 +14,7 @@ hash( String* s ) {
         int c;
 	const char* str = s->data;
 
-        while ( c = *str++ )
+        while ( ( c = *str++ ) )
             hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
         return hash;

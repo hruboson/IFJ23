@@ -6,22 +6,6 @@
 
 #define arraysize( x ) ( sizeof( x ) / sizeof( x[ 0 ] ) )
 
-/* temp funcions until we standardize them */
-void
-string_append( String* s, const char* c ) {
-	append_string( s, c );
-}
-
-void
-string_append_c( String* s, char c ) {
-	append_string_c( s, c );
-}
-
-void
-clear_string( String* s ) {
-	free_string( s );
-}
-
 typedef enum State {
 	STATE_START,
 	STATE_SLASH,
@@ -671,7 +655,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 			break;
 		default: // unhandeled/invalid state
 #ifndef NDEBUG
-			fprintf( stderr, "scanner: error: unhandeled state: %i\n\t%s:%lu\n", state, __FILE__, __LINE__ );
+			fprintf( stderr, "scanner: error: unhandeled state: %i\n\t%s:%u\n", state, __FILE__, __LINE__ );
 #endif
 			return 99;
 		}

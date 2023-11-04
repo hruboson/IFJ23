@@ -1,70 +1,76 @@
-#include "../include/string.h"
+#include "../include/string_.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 void init_string(String *string) {
-    if (string == NULL)
-        return;
+	if (string == NULL)
+		return;
 
-    string->capacity = STR_INITIAL_CAPACITY;
-    string->length = 0;
+	string->capacity = STR_INITIAL_CAPACITY;
+	string->length = 0;
 
-    string->data = (char *)malloc(sizeof(char) * STR_INITIAL_CAPACITY);
+	string->data = (char *)malloc(sizeof(char) * STR_INITIAL_CAPACITY);
 
-    if (string->data == NULL) {
-        exit(99);
-    }
+	if (string->data == NULL) {
+		exit(99);
+	}
 }
 
-void free_string(String *string) {
-    if (string == NULL)
-        return;
+void clear_string(String *string) {
+	if (string == NULL)
+		return;
 
-    string->length = 0;
-    string->capacity = 0;
+	string->length = 0;
+	string->capacity = 0;
 
-    free(string->data);
-    string->data = NULL;
+	free(string->data);
+	string->data = NULL;
 }
 
-void append_string(String *string, const char *str_to_append) {
-    if (string == NULL)
-        return;
+void string_append(String *string, const char *str_to_append) {
+	if (string == NULL || str_to_append == NULL || str_to_append[ 0 ] == '\0')
+		return;
 
-    for (int i = 0; str_to_append[i] != '\0'; i++) {
-        if (string->length + 1 > string->capacity) {  // pokud by se to po pridani znaku uz nevlezlo, zvetsi se 2x
-            char *new_data = (char *)realloc(string->data, sizeof(char) * string->capacity * 2);
+	size_t append_length = strlen( str_to_append );
+	size_t old_length = string->length;
+	string->length += append_length;
+	bool cap_changed = false;
 
-            if (new_data == NULL) {
-                free_string(string);
-                exit(99);
-            }
-            string->data = new_data;
+	while ( string->length + 2 > string->capacity ) {
+		cap_changed = true;
+		string->capacity *= 2;
+	}
 
-            string->capacity *= 2;
-        }
-        string->data[(string->length)++] = str_to_append[i];
-    }
-    
+	if ( cap_changed ) {
+		char* new_data = realloc( string->data, string->capacity );
+		if ( new_data == NULL ) {
+			exit( 99 );
+		}
+		string->data = new_data;
+	}
+
+	memcpy( string->data + old_length, str_to_append, append_length );
+	string->data[string->length] = '\0';
 }
 
-void append_string_c(String *string, char c) {
-    if (string == NULL)
-        return;
+void string_append_c(String *string, char c) {
+	if (string == NULL)
+		return;
 
-    if (string->length + 2 > string->capacity) {
-        char *new_data = (char *)realloc(string->data, sizeof(char) * string->capacity * 2);
-        if (new_data == NULL) {
-            free_string(string);
-            exit(99);
-        }
-        string->data = new_data;
+	if (string->length + 2 > string->capacity) {
+		char *new_data = (char *)realloc(string->data, sizeof(char) * string->capacity * 2);
+		if (new_data == NULL) {
+			clear_string(string);
+			exit(99);
+		}
+		string->data = new_data;
 
-        string->capacity *= 2;
-    }
+		string->capacity *= 2;
+	}
 
-    string->data[(string->length)++] = c;
-    string->data[(string->length)] = '\0';
+	string->data[(string->length)++] = c;
+	string->data[(string->length)] = '\0';
 }
 
 bool string_eq( const String* a, const String* b ) {

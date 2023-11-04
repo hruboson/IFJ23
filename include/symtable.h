@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-#include "string.h"
+#include "string_.h"
 
 typedef struct SymbolRecord {
     String symbol;

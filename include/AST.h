@@ -1,7 +1,9 @@
 #pragma once
 
+#include "statement.h"
+
 typedef struct AST {
-    // TODO
+    Statement* statement;
 } AST;
 
 void init_ast( AST* );

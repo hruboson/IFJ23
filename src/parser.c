@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "token_stack.h"
+#include "AST.h"
 
 int parse(FILE* f, AST* ast){
     TokenStack stack;
@@ -30,3 +31,6 @@ int parse(FILE* f, AST* ast){
 
     return ret;
 }
+
+int parse_statement(FILE*, TokenStack*, Statement**);
+int parse_expression(FILE*, TokenStack*, Expression**);

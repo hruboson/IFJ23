@@ -1,5 +1,6 @@
 #pragma once
 
+#include "symtable.h"
 #include "string_.h"
 
 typedef enum ExpressionType {

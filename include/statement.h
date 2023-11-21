@@ -30,16 +30,16 @@ typedef struct Statement {
         struct {
             Expression* exp;
             bool check_nil;
-            Statement* body;
-            Statement* else_;
+            struct Statement* body;
+            struct Statement* else_;
         } if_;
         struct {
             Expression* exp;
-            Statement* body;
+            struct Statement* body;
         } while_;
         struct {
             Expression* exp
         } return_;
     };
-    Statement* next;
+    struct Statement* next;
 } Statement;

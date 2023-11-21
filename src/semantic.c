@@ -1,5 +1,5 @@
 #include "semantic.h"
 
-int semantic(FILE*, AST*) {
+int semantic(FILE* f, AST* ast) {
     return 0;
 }

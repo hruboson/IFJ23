@@ -13,6 +13,8 @@ int parse(FILE*, AST*);
 int parse_statement(FILE*, TokenStack*, Statement**);
 int parse_expression(FILE*, TokenStack*, Expression**);
 
+
+//todo remove {} - this is header!!!
 // <statement> -> if ( <exp> ) { <statementList> } [else { <statementList> }]
 bool if_() {
 }

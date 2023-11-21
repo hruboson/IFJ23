@@ -10,72 +10,46 @@
 #include "token_stack.h"
 
 int parse(FILE*, AST*);
-int parse_statement(FILE*, TokenStack*, Statement**);
-int parse_expression(FILE*, TokenStack*, Expression**);
+int parse_statement(FILE*, SymbolTable*, Statement**);
+int parse_expression(FILE*, SymbolTable*, Expression**);
 
-
-//todo remove {} - this is header!!!
 // <statement> -> if ( <exp> ) { <statementList> } [else { <statementList> }]
-bool if_() {
-}
+bool if_();
 // <statement> -> if let <id> { <statementList> } [else { <statementList> }]
-bool if_let() {
-}
+bool if_let();
 // <statement> -> while ( <exp> ) { <statementList> }
-bool while_() {
-}
+bool while_();
 // <statement> -> <id> = <exp> \n
-bool assign() {
-}
+bool assign();
 // <statement> -> let <id> [: <type>] = <exp> \n
-bool let() {
-}
+bool let();
 // <statement> -> var <id> [: <type>] = <exp> \n
-bool var() {
-}
+bool var();
 // <statement> -> let <id> : <type> [= <exp>] \n
-bool let_type() {
-}
+bool let_type();
 // <statement> -> var <id> : <type> [= <exp>] \n
-bool var_type() {
-}
-
+bool var_type();
 // <statement> -> return <exp> \n
-bool return_exp() {
-}
+bool return_exp();
 // <statement> -> <func>
-bool func() {
-}
-
+bool func();
 // <statementList> -> <statement>
-bool statement() {
-}
+bool statement();
 // <statementList> -> <statement> <statementList>
-bool statement_list() {
-}
+bool statement_list();
 // <func> -> func <id> ( [<id> <id> : <type>] ) [-> <type>] { <statementList> }
-bool func_definition() {
-}
+bool func_definition();
 // <exp> -> <id>( [ [<id>:] <exp> ] ) \n
-bool func_call() {
-}
+bool func_call();
 // <type> -> {Double, Int, String}[?]
-bool type() {
-}
-
+bool type();
 // <exp> -> <id> [!]
-bool id() {
-}
+bool id();
 // <exp> -> <id> ?? <exp>
-bool is_nil() {
-}
+bool is_nil();
 // <exp> -> {Double, Int, String} //takto ty tokeny int, double, string ?
-bool value() {
-}
+bool value();
 // <exp> -> <exp> <operator> <exp>
-bool exp_op_exp() {
-}
-
+bool exp_op_exp();
 // <operator> -> +, -, *, /, %, >, >=, <, <=, ==, !=
-bool op() {
-}
+bool op();

@@ -41,76 +41,190 @@ int parse_statement(FILE* f, SymbolTable* symtab, Statement** statement) {
     get_token(f, symtab, token);
     if (token->type == TOKENTYPE_EOF) return -1;
 
+    // <statement> -> if let <id> { <statementList> } [else { <statementList> }]
     // <statement> -> if ( <exp> ) { <statementList> } [else { <statementList> }]
-    // todo check newlines
-    if (token->type == TOKENTYPE_KEYWORD) {
-        if (token->value.keyword == KEYWORD_IF) {  // nevim jak se to pise
+    // TODO check newlines
+
+    // TODO: je potreba kontrolovat jestli je to TOKENTYPE_KEYWORD pred zkontrolovanim token->value.keyword?
+    if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_IF) {
+        bool is_let = false;
+        Expression exp;
+
+        get_token(f, symtab, token);
+        if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_LET) {
             get_token(f, symtab, token);
-            if (token->type == TOKENTYPE_PAR_L) {
-                // TODO neco udelat s <exp>
-                Expression exp;
+            if (token->type != TOKENTYPE_ID) {  // TODO: staci to takto?
+                return 2;                       // TODO: ma se vracet nejake cislo != 0 oznacujici chybu? jake?
+            }
+            is_let = true;
+
+        } else if (token->type == TOKENTYPE_PAR_L) {
+            // TODO neco udelat s <exp>
+            // exp = ...
+            get_token(f, symtab, token);
+            if (token->type != TOKENTYPE_PAR_R) {  // TODO: staci to takto?
+                return 2;
+            }
+        }
+
+        get_token(f, symtab, token);
+        if (token->type == TOKENTYPE_BRACE_L) {
+            // TODO neco udelat s <stmntList>
+            Statement if_statement_list[] = {};  // TODO udělal strukturu pro statementlist
+                                                 // parseStatement( pro vnitřek if );
+
+            get_token(f, symtab, token);
+            if (token->type == TOKENTYPE_BRACE_R) {
+                // bez rozsireni je vzdy else
+
                 get_token(f, symtab, token);
-                if (token->type == TOKENTYPE_PAR_R) {
+                if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_ELSE) {
+                    // TODO: else block can be empty
+
                     get_token(f, symtab, token);
                     if (token->type == TOKENTYPE_BRACE_L) {
                         // TODO neco udelat s <stmntList>
-                        Statement ifStatementList[] = {};  // todo udělal strukturu pro statementlist
-                                                           // parseStatement( pro vnitřek if );
+                        Statement else_statement_list[] = {};  // TODO udělal strukturu pro statementlist
+                                                               // parseStatement( pro vnitřek if );
+
                         get_token(f, symtab, token);
-                        if (token->type == TOKENTYPE_BRACE_L) {
-                            get_token(f, symtab, token);
-                            if (token->type == TOKENTYPE_BRACE_R) {
-                                // bez rozsireni je vzdy else
-                                if (token->type == TOKENTYPE_KEYWORD) {
-                                    get_token(f, symtab, token);
-                                    if (token->value.keyword == KEYWORD_ELSE) {  // nevim jak se to pise
-                                                                                 // else block can be empty
-                                        get_token(f, symtab, token);
-                                        if (token->type == TOKENTYPE_PAR_L) {
-                                            // TODO neco udelat s <stmntList>
-                                            Statement elseStatementList[] = {};  // todo udělal strukturu pro statementlist
-                                            get_token(f, symtab, token);
-                                            if (token->type == TOKENTYPE_PAR_R) {
-                                                get_token(f, symtab, token);
-                                                if (token->type == TOKENTYPE_BRACE_L) {
-                                                    get_token(f, symtab, token);
-                                                    if (token->type == TOKENTYPE_BRACE_R) {
-                                                        Statement elseStatement;
-                                                        elseStatement.if_.exp = NULL;
-                                                        elseStatement.if_.check_nil = false;
-                                                        elseStatement.if_.body = elseStatementList;
-                                                        elseStatement.if_.else_ = NULL;
+                        if (token->type == TOKENTYPE_BRACE_R) {
+                            Statement else_statement;
+                            else_statement.if_.exp = NULL;
+                            else_statement.if_.check_nil = false;
+                            else_statement.if_.body = else_statement_list;
+                            else_statement.if_.else_ = NULL;
 
-                                                        (*statement)->if_.exp = &exp;
-                                                        (*statement)->if_.check_nil = false;
-                                                        (*statement)->if_.body = ifStatementList;
-                                                        (*statement)->if_.else_ = &elseStatement;
-
-                                                        return 0;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                            if (is_let) {
+                                (*statement)->if_.exp = &exp;
+                                (*statement)->if_.check_nil = false;
+                            } else {
+                                (*statement)->if_.exp = NULL;
+                                (*statement)->if_.check_nil = true;
                             }
+
+                            (*statement)->if_.body = if_statement_list;
+                            (*statement)->if_.else_ = &else_statement;
+
+                            return 0;
                         }
                     }
                 }
             }
         }
+
+        return 2;
     }
-    // <statement>-><id> = <exp> \n
-    if (token->type == TOKENTYPE_ID) {
+
+    // <statement> -> while ( <exp> ) { <statementList> }
+    // TODO check/handle newlines
+    else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_WHILE) {
+        bool is_let = false;
+        Expression exp;
+
         get_token(f, symtab, token);
-        if (token->type == TOKENTYPE_EQUALS) {
-            // parse exp
-			get_token(f, symtab, token);
-			if(token->type == TOKENTYPE_NEWLINE){
-				return 0;
-			}
+        if (token->type == TOKENTYPE_PAR_L) {
+            // TODO neco udelat s <exp>
+            // exp = ...
+
+            get_token(f, symtab, token);
+            if (token->type == TOKENTYPE_PAR_R) {
+                get_token(f, symtab, token);
+                if (token->type == TOKENTYPE_BRACE_L) {
+                    // TODO neco udelat s <stmntList>
+                    Statement while_statement_list[] = {};  // TODO udělal strukturu pro statementlist
+                                                            // parseStatement( pro vnitřek while );
+
+                    get_token(f, symtab, token);
+                    if (token->type == TOKENTYPE_BRACE_R) {
+                        (*statement)->while_.exp = NULL;
+                        (*statement)->while_.body = while_statement_list;
+
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        return 2;
+    }
+
+    // <statement> -> let <id> [: <type>] = <exp> \n
+    // <statement> -> var <id> [: <type>] = <exp> \n
+    // <statement> -> let <id> : <type> [= <exp>] \n
+    // <statement> -> var <id> : <type> [= <exp>] \n
+    else if (token->type == TOKENTYPE_KEYWORD && (token->value.keyword == KEYWORD_LET || token->value.keyword == KEYWORD_VAR)) {
+        // TODO: ma se misto tohoto primo pridavat do VarTable?
+        TokenType var_type;  // Null if not specified
+        bool nil_allowed = false;
+
+        get_token(f, symtab, token);
+        if (token->type == TOKENTYPE_ID) {
+            get_token(f, symtab, token);
+            if (token->type == TOKENTYPE_COLON) {
+                get_token(f, symtab, token);
+                // TODO: takto kontrolovat type?
+                if (token->type == TOKENTYPE_INT || token->type == TOKENTYPE_DOUBLE || token->type == TOKENTYPE_STRING) {
+                    var_type = token->type;
+
+                    get_token(f, symtab, token);
+                    if (token->type == TOKENTYPE_QUESTIONMARK) {
+                        nil_allowed = true;
+                        get_token(f, symtab, token);
+                    }
+
+                    if (token->type == TOKENTYPE_NEWLINE) {
+                        return 0;
+                    }
+                }
+
+                return 2;
+            }
+
+            if (token->type == TOKENTYPE_EQUALS) {
+                if (var_type != NULL) {  // both type and "=" specified => not allowed
+                    return 2;
+                }
+
+                // TODO parse exp
+
+                get_token(f, symtab, token);
+                if (token->type == TOKENTYPE_NEWLINE) {
+                    return 0;
+                }
+
+                return 2;
+            }
         }
     }
+
+    // <statement> -> return <exp> \n
+    else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_RETURN) {
+        // TODO parse exp
+
+        get_token(f, symtab, token);
+        if (token->type == TOKENTYPE_NEWLINE) {
+            return 0;
+        }
+
+        return 2;
+    }
+
+    // TODO: <statement> -> <func>
+
+    // <statement> -> <id> = <exp> \n
+    else if (token->type == TOKENTYPE_ID) {
+        get_token(f, symtab, token);
+        if (token->type == TOKENTYPE_EQUALS) {
+            // TODO parse exp
+
+            get_token(f, symtab, token);
+            if (token->type == TOKENTYPE_NEWLINE) {
+                return 0;
+            }
+        }
+    }
+
     return 2;
 }
 

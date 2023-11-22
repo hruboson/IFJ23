@@ -8,3 +8,7 @@ typedef struct AST {
 
 void init_ast( AST* );
 void clear_ast( AST* );
+void ast_append( AST*, Statement* );
+void ast_get( AST*, Statement* );
+
+void print_ast( AST* );

@@ -8,9 +8,10 @@
 #include "scanner.h"
 #include "statement.h"
 #include "token_stack.h"
+#include "table.h"
 
 int parse(FILE*, AST*);
-int parse_statement(FILE*, SymbolTable*, Statement**);
+int parse_statement(FILE*, SymbolTable*, Statement**, VarTable*, FuncTable*);
 int parse_expression(FILE*, SymbolTable*, Expression**);
 
 // <statement> -> if ( <exp> ) { <statementList> } [else { <statementList> }]

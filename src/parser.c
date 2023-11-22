@@ -1,6 +1,7 @@
 #include "parser.h"
 
 #include "AST.h"
+#include "table.h"
 #include "token_stack.h"
 
 int parse(FILE* f, AST* ast) {
@@ -16,11 +17,16 @@ int parse(FILE* f, AST* ast) {
     Statement* st;
     Statement** next_st = &ast->statement;
 
+    VarTable var_table;
+    FuncTable func_table;
+    AST ast;
+
     while (ret == 0) {
-        ret = parse_statement(f, &symtab, &st);
+        ret = parse_statement(f, &symtab, &st, &var_table, &func_table);
         if (ret)
             break;
 
+        ast->statement = st;
         *next_st = st;
         next_st = &st->next;
     }
@@ -35,7 +41,7 @@ int parse(FILE* f, AST* ast) {
     return ret;
 }
 
-int parse_statement(FILE* f, SymbolTable* symtab, Statement** statement) {
+int parse_statement(FILE* f, SymbolTable* symtab, Statement** statement, VarTable* var_table, FuncTable* func_table) {
     Token* token;
 
     get_token(f, symtab, token);
@@ -44,7 +50,6 @@ int parse_statement(FILE* f, SymbolTable* symtab, Statement** statement) {
     // <statement> -> if let <id> { <statementList> } [else { <statementList> }]
     // <statement> -> if ( <exp> ) { <statementList> } [else { <statementList> }]
     // TODO check newlines
-
     // TODO: je potreba kontrolovat jestli je to TOKENTYPE_KEYWORD pred zkontrolovanim token->value.keyword?
     if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_IF) {
         bool is_let = false;
@@ -155,6 +160,8 @@ int parse_statement(FILE* f, SymbolTable* symtab, Statement** statement) {
     // <statement> -> var <id> : <type> [= <exp>] \n
     else if (token->type == TOKENTYPE_KEYWORD && (token->value.keyword == KEYWORD_LET || token->value.keyword == KEYWORD_VAR)) {
         // TODO: ma se misto tohoto primo pridavat do VarTable?
+        //? should this be DataType ?
+        Variable var;
         TokenType var_type;  // Null if not specified
         bool nil_allowed = false;
 
@@ -164,18 +171,27 @@ int parse_statement(FILE* f, SymbolTable* symtab, Statement** statement) {
             if (token->type == TOKENTYPE_COLON) {
                 get_token(f, symtab, token);
                 // TODO: takto kontrolovat type?
-                if (token->type == TOKENTYPE_INT || token->type == TOKENTYPE_DOUBLE || token->type == TOKENTYPE_STRING) {
-                    var_type = token->type;
+                DataType dt;
+                switch (token->type) {
+                    case KEYWORD_DOUBLE:
+                        dt.type = VARTYPE_DOUBLE;
+                    case KEYWORD_INT:
+                        dt.type = VARTYPE_INT;
+                    case KEYWORD_STRING:
+                        dt.type = VARTYPE_STRING;
+                    default:
+                        return 2; //! check this 
+                }
 
+                get_token(f, symtab, token);
+                if (token->type == TOKENTYPE_QUESTIONMARK) {
+                    dt.nil_allowed = true;
                     get_token(f, symtab, token);
-                    if (token->type == TOKENTYPE_QUESTIONMARK) {
-                        nil_allowed = true;
-                        get_token(f, symtab, token);
-                    }
+                }
+                var.type = dt;
 
-                    if (token->type == TOKENTYPE_NEWLINE) {
-                        return 0;
-                    }
+                if (token->type == TOKENTYPE_NEWLINE) {
+                    return 0;
                 }
 
                 return 2;
@@ -221,6 +237,96 @@ int parse_statement(FILE* f, SymbolTable* symtab, Statement** statement) {
             get_token(f, symtab, token);
             if (token->type == TOKENTYPE_NEWLINE) {
                 return 0;
+            }
+        }
+    }
+
+    // <func> -> func <id> ( [<id> <id> : <type>] ) [-> <type>] { <statementList> }
+    else if (token->type == KEYWORD_FUNC) {
+        Function func;
+
+        get_token(f, symtab, token);
+        if (token->type == TOKENTYPE_ID) {
+            func.id = token->value.id;  //? correct ?
+            get_token(f, symtab, token);
+            if (token->type == TOKENTYPE_PAR_L) {
+                get_token(f, symtab, token);
+
+                // parsing params
+                Parameter par;
+                if (token->type == TOKENTYPE_UNDERSCORE) {  // func id = (_ intern)
+
+                    get_token(f, symtab, token);
+                    if (token->type == TOKENTYPE_ID) {
+                        //? correct ?
+                        par.intern_id = token->value.id;
+                        par.extern_id = par.intern_id;
+
+                        DataType dt;
+
+                        get_token(f, symtab, token);
+                        if (token->type == TOKENTYPE_COLON) {
+                            get_token(f, symtab, token);
+                            switch (token->type) {
+                                case KEYWORD_DOUBLE:
+                                    dt.type = VARTYPE_DOUBLE;
+                                case KEYWORD_INT:
+                                    dt.type = VARTYPE_INT;
+                                case KEYWORD_STRING:
+                                    dt.type = VARTYPE_STRING;
+                                default:
+                                    return 2; //! check this
+                            }
+                            par.type = dt;
+                        }
+                        if (token->type == TOKENTYPE_COMMA) {  // more params
+                            // todo recursive call for parameters
+                        } else if (token->type == TOKENTYPE_PAR_R) {
+                            get_token(f, symtab, token);
+                            if (token->type == TOKENTYPE_BRACE_L) {
+                                get_token(f, symtab, token);
+
+                                // todo parse body
+                            }
+                        }
+                    }
+                } else if (token->type == TOKENTYPE_ID) {  // func id = (extern intern)
+                    par.intern_id = token->value.id;
+                    get_token(f, symtab, token);
+                    if (token->type == TOKENTYPE_ID) {
+                        //? correct ?
+
+                        par.extern_id = token->value.id;
+
+                        DataType dt;
+
+                        get_token(f, symtab, token);
+                        if (token->type == TOKENTYPE_COLON) {
+                            get_token(f, symtab, token);
+                            switch (token->type) {
+                                case KEYWORD_DOUBLE:
+                                    dt.type = VARTYPE_DOUBLE;
+                                case KEYWORD_INT:
+                                    dt.type = VARTYPE_INT;
+                                case KEYWORD_STRING:
+                                    dt.type = VARTYPE_STRING;
+                                default:
+                                    return 2;  //! check this
+                            }
+                        }
+
+                        if (token->type == TOKENTYPE_COMMA) {  // more params
+                            // todo recursive call for parameters
+                        } else if (token->type == TOKENTYPE_PAR_R) {
+                            get_token(f, symtab, token);
+                            if (token->type == TOKENTYPE_BRACE_L) {
+                                get_token(f, symtab, token);
+
+                                // todo parse body
+                            }
+                        }
+                    }
+                }
             }
         }
     }

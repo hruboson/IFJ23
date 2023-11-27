@@ -1,5 +1,6 @@
 #include "unity.h"
 #include "../include/symtable_stack.h"
+#include "stdlib.h"
 
 #define STACK_SIZE 10
 

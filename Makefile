@@ -20,6 +20,7 @@ UNITY := unity/src
 # Declare all source files and object files to be created
 SOURCES := $(wildcard *.c) $(wildcard $(SRCDIR)/*.c)
 OBJECTS := $(patsubst %.c, $(OBJDIR)/%.o, $(notdir $(SOURCES)))
+OBJECTS_WITHOUT_MAIN := $(filter-out $(OBJDIR)/main.o,$(OBJECTS))
 TESTSOURCES := $(wildcard *.c) $(wildcard $(TESTSDIR)/*.c)
 TESTOBJECTS := $(patsubst %.c, $(OBJDIR)/test_%.o, $(notdir $(TESTSOURCES)))
 
@@ -43,7 +44,7 @@ $(OBJDIR)/%.o: $(TESTSDIR)/%.c
 	$(CC) -c $(CFLAGS) $< -o $@ -Iinclude
 
 # Compile and link tests
-$(BUILD)/test_%.out: $(OBJDIR)/test_%.o $(OBJDIR)/%.o $(OBJDIR)/unity.o
+$(BUILD)/test_%.out: $(OBJDIR)/test_%.o $(OBJDIR)/%.o $(OBJDIR)/unity.o $(OBJECTS_WITHOUT_MAIN)
 	$(CC) -o $@ $^
 
 $(BUILD)/test_scanner.out: $(OBJDIR)/test_scanner.o $(OBJDIR)/scanner.o $(OBJDIR)/unity.o $(OBJDIR)/string.o $(OBJDIR)/symtable.o

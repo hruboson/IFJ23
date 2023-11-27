@@ -693,6 +693,7 @@ get_token( Input* in, SymbolTable* symtab, Token* token ) {
 				token->type = TOKENTYPE_NEWLINE;
 				return 0;
 			default:
+				break;
 				/* nothing */
 			}
 			break;
@@ -708,6 +709,7 @@ get_token( Input* in, SymbolTable* symtab, Token* token ) {
 				state = STATE_COMMENT_BLOCK_STAR;
 				break;
 			default:
+				break;
 				/* nothing */
 			}
 			break;

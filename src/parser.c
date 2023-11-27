@@ -155,7 +155,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	// <statement> -> let <id> [: <type>] = <exp> \n
 	// <statement> -> var <id> [: <type>] = <exp> \n
 	// <statement> -> var <id> : <type> [= <exp>] \n
-	// var a : int = 5
+	//TODO: je toto validni? var a : Int\n
 	else if (token->type == TOKENTYPE_KEYWORD && (token->value.keyword == KEYWORD_LET || token->value.keyword == KEYWORD_VAR)) {
 		
 		// Data type is null if not specified
@@ -192,8 +192,14 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 					if (token->type == TOKENTYPE_NEWLINE) {
 						return 0;
+					} else {
+						return 2;
 					}
+				} else {
+					return 2;
 				}
+			} else {
+				(*statement)->var.data_type = KEYWORD_NIL;
 			}
 
 			if (token->type == TOKENTYPE_EQUALS) {
@@ -212,10 +218,9 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 				if (token->type == TOKENTYPE_NEWLINE) {
 					return 0;
 				}
-
-				return 2;
 			}
 		}
+		return 2;
 	}
 
 	// <statement> -> return <exp> \n

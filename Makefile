@@ -57,6 +57,16 @@ $(OBJDIR)/%.o: $(UNITY)/%.c $(UNITY)/%.h
 $(DEPDIR)/%.d: $(TESTSDIR)/%.c
 	$(CC) -MM -MG -MF $@ $<
 
+# Create tools
+.PHONY: tools
+tools: $(BUILD)/tokenizer
+
+$(BUILD)/tokenizer: $(OBJDIR)/tokenizer.o $(OBJDIR)/symtable.o $(OBJDIR)/scanner.o $(OBJDIR)/string.o
+	$(CC) -o $@ $^
+
+$(OBJDIR)/tokenizer.o: tools/tokenizer.c
+	$(CC) -c -o $@ $< -Iinclude
+
 # Create directories
 $(OBJDIR):
 	@mkdir $(OBJDIR)

@@ -10,9 +10,9 @@
 #include "token_stack.h"
 #include "table.h"
 
-int parse(FILE*, AST*);
-int parse_statement(FILE*, SymbolTable*, Statement**, VarTable*, FuncTable*);
-int parse_expression(FILE*, SymbolTable*, Expression**);
+int parse(Input*, AST*);
+int parse_statement(Input*, SymbolTable*, Statement**, VarTable*, FuncTable*);
+int parse_expression(Input*, SymbolTable*, Expression**);
 
 // <statement> -> if ( <exp> ) { <statementList> } [else { <statementList> }]
 bool if_();

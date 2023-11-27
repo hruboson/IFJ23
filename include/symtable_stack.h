@@ -17,6 +17,6 @@ void clear_symtable_stack(SymbolTableStack* stack);
 void symtable_stack_push(SymbolTableStack* stack, SymbolTable* symtable);
 void symtable_stack_pop(SymbolTableStack* stack, SymbolTable* symtable);
 void symtable_stack_peek(SymbolTableStack* stack, SymbolTable* symtable);
-Variable* var_table_stack_get_var(VarTableStack* stack, SymbolRecord* id);
+//Variable* var_table_stack_get_var(VarTableStack* stack, SymbolRecord* id); -> throws error -> fix
 
 bool symtable_stack_is_empty(SymbolTableStack* stack);

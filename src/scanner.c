@@ -73,6 +73,8 @@ typedef enum State {
 	STATE_STRING_3_BODY_NEWLINE,
 	STATE_STRING_3_BODY_QUOTE,
 	STATE_STRING_3_BODY_QUOTE2,
+	STATE_STRING_3_BODY_INV_QUOTE,
+	STATE_STRING_3_BODY_INV_QUOTE2,
 } State;
 
 /*
@@ -582,12 +584,51 @@ get_token( Input* in, SymbolTable* symtab, Token* token ) {
 				return 1;
 			}
 
+			if ( c == '"' ) {
+				state = STATE_STRING_3_BODY_INV_QUOTE;
+				break;
+			}
+
 			if ( c == '\n' ) {
 				state = STATE_STRING_3_BODY_NEWLINE;
 				break;
 			}
 
 			string_append_c( &string, c );
+
+			break;
+		case STATE_STRING_3_BODY_INV_QUOTE:
+			if ( c == '"' ) {
+				state = STATE_STRING_3_BODY_INV_QUOTE2;
+				break;
+			}
+
+			string_append_c( &string, '"' );
+
+			if ( c != EOF ) {
+				c = in_ungetc( in, c );
+				if ( c == EOF )
+					return 99;
+			}
+
+			state = STATE_STRING_3_BODY;
+
+			break;
+		case STATE_STRING_3_BODY_INV_QUOTE2:
+			if ( c == '"' ) {
+				return 1;
+			}
+
+			string_append_c( &string, '"' );
+			string_append_c( &string, '"' );
+
+			if ( c != EOF ) {
+				c = in_ungetc( in, c );
+				if ( c == EOF )
+					return 99;
+			}
+
+			state = STATE_STRING_3_BODY;
 
 			break;
 		case STATE_STRING_3_BODY_NEWLINE:

@@ -3,8 +3,45 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #define arraysize( x ) ( sizeof( x ) / sizeof( x[ 0 ] ) )
+
+int
+in_getc( Input* i ) {
+	if ( i->type == INT_FILE )
+		return getc( i->file.f );
+	if ( i->type == INT_STRING ) {
+		if ( i->string.store != 0 ) {
+			char o = i->string.store;
+			i->string.store = 0;
+			return o;
+		}
+
+		if ( i->string.s[ i->string.i ] == 0 )
+			return EOF;
+
+		size_t i_i = i->string.i;
+		i->string.i++;
+
+		return i->string.s[ i_i ];
+	}
+
+	exit( 99 );
+}
+
+int
+in_ungetc( Input* i, char c ) {
+	if ( i->type == INT_FILE )
+		return ungetc( c, i->file.f );
+	if ( i->type == INT_STRING ) {
+		i->string.store = c;
+		return c;
+	}
+
+	exit( 99 );
+}
+
 
 typedef enum State {
 	STATE_START,
@@ -77,7 +114,7 @@ is_keyword( String* id, Keyword* k ) {
 }
 
 int
-get_token( FILE* f, SymbolTable* symtab, Token* token ) {
+get_token( Input* in, SymbolTable* symtab, Token* token ) {
 
 	State state = STATE_START;
 	int c, ret;
@@ -93,7 +130,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 	String string;
 
 	while ( true ) {
-		c = getc( f );
+		c = in_getc( in );
 		switch ( state ) {
 		case STATE_START:
 			switch ( c ) {
@@ -110,13 +147,13 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 			case '_':
 				state = STATE_IDENTIF;
 				init_string( &string );
-				c = ungetc( c, f );
+				c = in_ungetc( in, c );
 				if ( c == EOF )
 					return 99;
 				break;
 			case '0' ... '9':
 				state = STATE_NUMBER;
-				c = ungetc( c, f );
+				c = in_ungetc( in, c );
 				if ( c == EOF )
 					return 99;
 				break;
@@ -181,7 +218,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 			}
 
 			if ( c != EOF ) {
-				c = ungetc( c, f );
+				c = in_ungetc( in, c );
 				if ( c == EOF )
 					return 99;
 			}
@@ -195,7 +232,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 			}
 
 			if ( c != EOF ) {
-				c = ungetc( c, f );
+				c = in_ungetc( in, c );
 				if ( c == EOF )
 					return 99;
 			}
@@ -209,7 +246,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 			}
 
 			if ( c != EOF ) {
-				c = ungetc( c, f );
+				c = in_ungetc( in, c );
 				if ( c == EOF )
 					return 99;
 			}
@@ -223,7 +260,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 			}
 
 			if ( c != EOF ) {
-				c = ungetc( c, f );
+				c = in_ungetc( in, c );
 				if ( c == EOF )
 					return 99;
 			}
@@ -237,7 +274,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 			}
 
 			if ( c != EOF ) {
-				c = ungetc( c, f );
+				c = in_ungetc( in, c );
 				if ( c == EOF )
 					return 99;
 			}
@@ -252,7 +289,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 
 
 			if ( c != EOF ) {
-				c = ungetc( c, f );
+				c = in_ungetc( in, c );
 				if ( c == EOF )
 					return 99;
 			}
@@ -269,7 +306,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				break;
 			default:
 				if ( c != EOF ) {
-					c = ungetc( c, f );
+					c = in_ungetc( in, c );
 					if ( c == EOF )
 						return 99;
 				}
@@ -288,9 +325,16 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				break;
 			default:
 				if ( c != EOF ) {
-					c = ungetc( c, f );
+					c = in_ungetc( in, c );
 					if ( c == EOF )
 						return 99;
+				}
+
+				/* check for underscore */
+				if ( string.length == 1 && string.data[ 0 ] == '_' ) {
+					clear_string( &string );
+					token->type = TOKENTYPE_UNDERSCORE;
+					return 0;
 				}
 
 				/* check if identifier is a keyword */
@@ -323,7 +367,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				break;
 			default:
 				if ( c != EOF ) {
-					c = ungetc( c, f );
+					c = in_ungetc( in, c );
 					if ( c == EOF )
 						return 99;
 				}
@@ -344,7 +388,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				break;
 			default:
 				if ( c != EOF ) {
-					c = ungetc( c, f );
+					c = in_ungetc( in, c );
 					if ( c == EOF )
 						return 99;
 				}
@@ -358,7 +402,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 			switch ( c ) {
 			case '0' ... '9':
 				state = STATE_NUMBER_EXPONENT;
-				c = ungetc( c, f );
+				c = in_ungetc( in, c );
 				if ( c == EOF )
 					return 99;
 				break;
@@ -381,7 +425,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				break;
 			default:
 				if ( c != EOF ) {
-					c = ungetc( c, f );
+					c = in_ungetc( in, c );
 					if ( c == EOF )
 						return 99;
 				}
@@ -411,7 +455,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				return 1;
 			default:
 				if ( c != EOF ) {
-					c = ungetc( c, f );
+					c = in_ungetc( in, c );
 					if ( c == EOF )
 						return 99;
 				}
@@ -513,7 +557,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				break;
 			default:
 				if ( c != EOF ) {
-					c = ungetc( c, f );
+					c = in_ungetc( in, c );
 					if ( c == EOF )
 						return 99;
 				}
@@ -555,7 +599,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				break;
 			}
 
-			c = ungetc( c, f );
+			c = in_ungetc( in, c );
 			if ( c == EOF )
 				return 99;
 
@@ -573,7 +617,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				break;
 			}
 
-			c = ungetc( c, f );
+			c = in_ungetc( in, c );
 			if ( c == EOF )
 				return 99;
 
@@ -591,7 +635,7 @@ get_token( FILE* f, SymbolTable* symtab, Token* token ) {
 				return 0;
 			}
 
-			c = ungetc( c, f );
+			c = in_ungetc( in, c );
 			if ( c == EOF )
 				return 99;
 

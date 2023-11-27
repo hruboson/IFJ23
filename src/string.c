@@ -15,6 +15,8 @@ void init_string(String *string) {
 	if (string->data == NULL) {
 		exit(99);
 	}
+
+	string->data[ 0 ] = 0;
 }
 
 void clear_string(String *string) {

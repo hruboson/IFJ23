@@ -46,6 +46,9 @@ $(OBJDIR)/%.o: $(TESTSDIR)/%.c
 $(BUILD)/test_%.out: $(OBJDIR)/test_%.o $(OBJDIR)/%.o $(OBJDIR)/unity.o
 	$(CC) -o $@ $^
 
+$(BUILD)/test_scanner.out: $(OBJDIR)/test_scanner.o $(OBJDIR)/scanner.o $(OBJDIR)/unity.o $(OBJDIR)/string.o $(OBJDIR)/symtable.o
+	$(CC) -o $@ $^
+
 # Compile Unity
 $(OBJDIR)/%.o: $(UNITY)/%.c $(UNITY)/%.h
 	$(CC) -c $(CFLAGS) $< -o $@

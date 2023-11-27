@@ -38,7 +38,7 @@ typedef struct Statement {
             struct Statement* body;
         } while_;
         struct {
-            Expression* exp
+            Expression* exp;
         } return_;
     };
     struct Statement* next;

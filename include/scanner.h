@@ -67,4 +67,26 @@ typedef struct Token {
 	} value;
 } Token;
 
-int get_token( FILE*, SymbolTable*, Token* );
+typedef enum InputType {
+	INT_FILE,
+	INT_STRING,
+} InputType;
+
+typedef struct Input {
+	InputType type;
+	union {
+		struct {
+			FILE* f;
+		} file;
+		struct {
+			const char* s;
+			size_t i;
+			char store;
+		} string;
+	};
+} Input;
+
+int in_getc( Input* );
+int in_ungetc( Input*, char );
+
+int get_token( Input*, SymbolTable*, Token* );

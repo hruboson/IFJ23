@@ -4,12 +4,12 @@
 
 #include <stdio.h>
 
-int process_file( FILE* file, AST* ast, IR* ir, String* target_code ) {
+int process_file( Input* in, AST* ast, IR* ir, String* target_code ) {
 
 	int ret;
 
 	/* convert source code into an AST */
-	ret = semantic( file, ast );
+	ret = semantic( in, ast );
 	if ( ret ) {
 		return ret;
 	}
@@ -34,7 +34,11 @@ int process_file( FILE* file, AST* ast, IR* ir, String* target_code ) {
 }
 
 int main(int argc, char const *argv[]) {
-	FILE* source_code = stdin;
+
+	Input in = {
+		.type = INT_FILE,
+		.file.f = stdin,
+	};
 
 	/* init resources */
 	AST ast;
@@ -45,7 +49,7 @@ int main(int argc, char const *argv[]) {
 	init_string( &target_code );
 
 	/* process source code into target code */
-	int ret = process_file( source_code, &ast, &ir, &target_code );
+	int ret = process_file( &in, &ast, &ir, &target_code );
 	if ( ret == 0 ) { /* on success */
 		/* output target code to stdout */
 		fputs( target_code.data, stdout );

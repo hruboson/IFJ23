@@ -1,9 +1,10 @@
 #include "parser.h"
 
 #include "AST.h"
-#include "table.h"
+
 #include "token_stack.h"
 #include "stdlib.h"
+#include "vartable_stack.h"
 
 int parse(Input* input, AST* ast) {
 	SymbolTable symtab;
@@ -14,11 +15,12 @@ int parse(Input* input, AST* ast) {
 	Statement* st;
 	Statement** next_st = &ast->statement;
 
-	VarTable var_table;
+	VarTableStack var_table_stack;
+
 	FuncTable func_table;
 
 	while (ret == 0) {
-		ret = parse_statement(input, &symtab, &st, &var_table, &func_table);
+		ret = parse_statement(input, &symtab, &st, &var_table_stack, &func_table);
 		if (ret)
 			break;
 
@@ -36,7 +38,7 @@ int parse(Input* input, AST* ast) {
 	return ret;
 }
 
-int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, VarTable* var_table, FuncTable* func_table) {
+int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, VarTableStack* var_table_stack, FuncTable* func_table) {
 	Token _token;
 	Token* token = &_token;
 
@@ -155,12 +157,12 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	// <statement> -> var <id> : <type> [= <exp>] \n
 	// var a : int = 5
 	else if (token->type == TOKENTYPE_KEYWORD && (token->value.keyword == KEYWORD_LET || token->value.keyword == KEYWORD_VAR)) {
-		Statement st;
+		
 		// Data type is null if not specified
 		bool nil_allowed = false;
 		int ret;
 
-		st.var.modifiable = token->value.keyword == KEYWORD_VAR;
+		(*statement)->var.modifiable = token->value.keyword == KEYWORD_VAR;
 
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_ID) {
@@ -173,18 +175,18 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 					switch (token->value.keyword) {
 						case KEYWORD_DOUBLE:
-							st.var.data_type = KEYWORD_DOUBLE;
+							(*statement)->var.data_type = KEYWORD_DOUBLE;
 						case KEYWORD_INT:
-							st.var.data_type = KEYWORD_INT;
+							(*statement)->var.data_type = KEYWORD_INT;
 						case KEYWORD_STRING:
-							st.var.data_type = VARTYPE_STRING;
+							(*statement)->var.data_type = KEYWORD_STRING;
 						default:
 							return 2;
 					}
 
 					get_token(input, symtab, token);
 					if (token->type == TOKENTYPE_QUESTIONMARK) {
-						st.var.allow_nil = true;
+						(*statement)->var.allow_nil = true;
 						get_token(input, symtab, token);
 					}
 
@@ -347,7 +349,7 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp) {
 
 		*exp = (Expression*)malloc(sizeof(Expression));
 		if (*exp == NULL) {
-			return 99;
+			exit(99);
 		}
 
 		switch (token->value.keyword) {

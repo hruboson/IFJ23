@@ -80,8 +80,8 @@ typedef struct Input {
 		} file;
 		struct {
 			const char* s;
-			size_t i;
-			char store;
+			size_t i; // index ve stringu
+			char store; // pri in_ungetc se tam ulozi znak
 		} string;
 	};
 } Input;

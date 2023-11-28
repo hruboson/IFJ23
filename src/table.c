@@ -1,4 +1,5 @@
 #include "table.h"
+
 #include "stdlib.h"
 
 void init_func_table(FuncTable* table) {
@@ -30,15 +31,18 @@ void func_table_insert(FuncTable* table, Function func) {
 }
 
 Function* func_table_get(FuncTable* table, SymbolRecord* id) {
+    Function* f;
     for (size_t i = 0; i < table->funcs_size; i++) {
-        Function* list = &(table->funcs[i]);
-        if (list) {
-            if (list->id->hash == id->hash) {
-                return list;
+        f = &(table->funcs[i]);
+        if (f) {
+            if (f->id->hash == id->hash) {
+                return f;
             }
         }
         i++;
     }
+
+    return NULL;
 }
 
 void init_var_table(VarTable* table) {
@@ -53,6 +57,30 @@ void clear_var_table(VarTable* table) {
     table->vars = NULL;
 }
 void var_table_insert(VarTable* table, Variable var) {
+    if (table->vars == NULL) {
+        table->vars = malloc(sizeof(Variable) * VAR_TABLE_INIT_SIZE);
+        table->vars_cap = VAR_TABLE_INIT_SIZE;
+    }
+
+    if (table->vars_size >= (table->vars_cap / 2)) {
+        table->vars = realloc(table->vars, sizeof(Variable) * (table->vars_cap * 2));
+        table->vars_cap = table->vars_cap * 2;
+    }
+
+    table->vars[table->vars_size] = var;
+    table->vars_size++;
 }
 Variable* var_table_get(VarTable* table, SymbolRecord* id) {
+    Variable* var;
+    for (size_t i = 0; i < table->vars_size; i++) {
+        var = &(table->vars[i]);
+        if (var) {
+            if (var->id->hash == id->hash) {
+                return var;
+            }
+        }
+        i++;
+    }
+
+    return NULL;
 }

@@ -2,6 +2,7 @@
 #include "scanner.h"
 #include "symtable.h"
 #include "unity.h"
+#include "table.h"
 
 //! always needs to be defined
 void setUp() {

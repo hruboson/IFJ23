@@ -1,6 +1,8 @@
 #pragma once
 #include "symtable.h"
 
+#define FUNC_TABLE_INIT_SIZE 64
+
 typedef enum VarType {
     VARTYPE_VOID,  // for functions
     VARTYPE_STRING,
@@ -39,7 +41,7 @@ typedef struct VarTable {
     Variable* vars;
 } VarTable;
 
-typedef struct FuncTable {  // todo rename to better suiting name
+typedef struct FuncTable {
     // linear for now
     // global table
     size_t funcs_size;

@@ -365,16 +365,16 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp) {
 		exit(99);
 	}
 
-	switch (token->value.keyword) {
-		case KEYWORD_DOUBLE:
+	switch (token->type) {
+		case TOKENTYPE_DOUBLE:
 			(*exp)->type = ET_DOUBLE;
 			(*exp)->double_ = token->value.double_;
 			break;
-		case KEYWORD_INT:
+		case TOKENTYPE_INT:
 			(*exp)->type = ET_INT;
 			(*exp)->int_ = token->value.int_;
 			break;
-		case KEYWORD_STRING:
+		case TOKENTYPE_STRING:
 			(*exp)->type = ET_STRING;
 			(*exp)->str_ = token->value.str_;
 			break;

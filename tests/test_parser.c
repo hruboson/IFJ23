@@ -497,6 +497,8 @@ void test_let_string_simple_nil_allowed(void) {
 	TEST_ASSERT_EQUAL_STRING("retezec", st->var.exp->str_.data);
 }
 
+//TODO: test na dve promenne zasebou a zkontrolovat:
+// jestli se ulozi druha do statement->next prvni a druhy statement->next bude null
 
 int main(void) {
     UNITY_BEGIN();

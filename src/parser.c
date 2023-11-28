@@ -183,10 +183,13 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 					switch (token->value.keyword) {
 						case KEYWORD_DOUBLE:
 							(*statement)->var.data_type = VARTYPE_DOUBLE;
+							break;
 						case KEYWORD_INT:
 							(*statement)->var.data_type = VARTYPE_INT;
+							break;
 						case KEYWORD_STRING:
 							(*statement)->var.data_type = VARTYPE_STRING;
+							break;
 						default:
 							return 2;
 					}
@@ -197,11 +200,10 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 						get_token(input, symtab, token);
 					}
 
+					//TODO: newline tam nemuze byt pokud to je let ze?
 					if (token->type == TOKENTYPE_NEWLINE) {
 						return 0;
-					} else {
-						return 2;
-					}
+					} 
 				} else {
 					return 2;
 				}
@@ -215,9 +217,12 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 				// vraci bool jestli je ten exp validni
 				// vraci expression pointer
 				// vraci ukazatel na to kde skoncila
-				ret = parse_expression(input, symtab, &exp);
+				Token out_token;
+				ret = parse_expression(input, symtab, &exp, NULL, &out_token);
+				printf("expression created========\n");
+				//TODO: pridavat do functiontable
 
-				//TODO: semantic_variable(VarTableStack, FunctionTable, Statement, bool is_valid) is_valid = jestli prosla
+				//TODO: is_valid = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
 
 				(*statement)->var.exp = exp;
 
@@ -225,7 +230,12 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 					return ret;
 				}
 
-				get_token(input, symtab, token);
+				if (&out_token != NULL) {
+					token = &out_token;
+				} else {
+					get_token(input, symtab, token);
+				}
+
 				if (token->type == TOKENTYPE_NEWLINE) {
 					return 0;
 				}
@@ -291,10 +301,13 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 							switch (token->value.keyword) {
 								case KEYWORD_DOUBLE:
 									dt.type = VARTYPE_DOUBLE;
+									break;
 								case KEYWORD_INT:
 									dt.type = VARTYPE_INT;
+									break;
 								case KEYWORD_STRING:
 									dt.type = VARTYPE_STRING;
+									break;
 								default:
 									return 2; //! check this
 							}
@@ -327,10 +340,13 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 							switch (token->type) {
 								case KEYWORD_DOUBLE:
 									dt.type = VARTYPE_DOUBLE;
+									break;
 								case KEYWORD_INT:
 									dt.type = VARTYPE_INT;
+									break;
 								case KEYWORD_STRING:
 									dt.type = VARTYPE_STRING;
+									break;
 								default:
 									return 2;  //! check this
 							}
@@ -355,12 +371,16 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	return 2;
 }
 
-//TODO: muze dostat i vratit token
-int parse_expression(Input* input, SymbolTable* symtab, Expression** exp) {
+// in_token Token, ktery muze dostat od parse_statement 
+// out_token Token, ktery muze vratit parse_statementu
+int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token* in_token, Token* out_token) {
 	Token _token;
 	Token* token = &_token;
-
-	get_token(input, symtab, token);
+	if (in_token != NULL) {
+		token = in_token;
+	} else {
+		get_token(input, symtab, token);
+	}
 
 	*exp = (Expression*)malloc(sizeof(Expression));
 	if (*exp == NULL) {
@@ -383,5 +403,8 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp) {
 		default:
 			return 2;
 	}
+
+	//TODO: out_token
+
 	return 0;
 }

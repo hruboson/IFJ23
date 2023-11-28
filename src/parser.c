@@ -180,11 +180,11 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 					switch (token->value.keyword) {
 						case KEYWORD_DOUBLE:
-							(*statement)->var.data_type = KEYWORD_DOUBLE;
+							(*statement)->var.data_type = VARTYPE_DOUBLE;
 						case KEYWORD_INT:
-							(*statement)->var.data_type = KEYWORD_INT;
+							(*statement)->var.data_type = VARTYPE_INT;
 						case KEYWORD_STRING:
-							(*statement)->var.data_type = KEYWORD_STRING;
+							(*statement)->var.data_type = VARTYPE_STRING;
 						default:
 							return 2;
 					}
@@ -204,7 +204,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 					return 2;
 				}
 			} else {
-				(*statement)->var.data_type = KEYWORD_NIL;
+				(*statement)->var.data_type = VARTYPE_VOID;
 			}
 
 			if (token->type == TOKENTYPE_EQUALS) {

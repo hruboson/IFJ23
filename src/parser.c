@@ -21,6 +21,7 @@ int parse(Input* input, AST* ast) {
 
 	while (ret == 0) {
 		ret = parse_statement(input, &symtab, &st, &var_table_stack, &func_table);
+
 		if (ret)
 			break;
 
@@ -41,6 +42,9 @@ int parse(Input* input, AST* ast) {
 int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, VarTableStack* var_table_stack, FuncTable* func_table) {
 	Token _token;
 	Token* token = &_token;
+
+	VarTable var_table;
+	init_var_table(&var_table);
 
 	*statement = (Statement*)malloc(sizeof(Statement));
 
@@ -200,10 +204,22 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 						get_token(input, symtab, token);
 					}
 
-					//TODO: newline tam nemuze byt pokud to je let ze?
-					if (token->type == TOKENTYPE_NEWLINE) {
+					// var a : Int \n => correct
+					if ((*statement)->var.modifiable && token->type == TOKENTYPE_NEWLINE) {
+						// pridani do vartable
+						//CHECK: Variable se ma vytvorit tady?
+						//ternary op je tam kvuli tomu kdyby se allow_nil rovnalo NULL aby se do .nil_allowed nepriradilo null ale false
+						DataType dt = { .type = (*statement)->var.data_type, .nil_allowed = (*statement)->var.allow_nil == true ? true : false};
+						Variable var = { .id = (*statement)->var.id, .type = dt, .initialized = false};
+						var_table_insert(&var_table, var);
+						//vartable_stack_push(var_table_stack, &var_table);
+						
 						return 0;
-					} 
+						
+					} else if (!(*statement)->var.modifiable && token->type == TOKENTYPE_NEWLINE) {
+						// let a : Int \n => error
+						return 2;
+					}
 				} else {
 					return 2;
 				}
@@ -214,13 +230,16 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			if (token->type == TOKENTYPE_EQUALS) {
 				Expression *exp;
 				
-				// vraci bool jestli je ten exp validni
-				// vraci expression pointer
-				// vraci ukazatel na to kde skoncila
 				Token out_token;
 				ret = parse_expression(input, symtab, &exp, NULL, &out_token);
-				printf("expression created========\n");
-				//TODO: pridavat do functiontable
+				
+				// pridani do vartable
+				//CHECK: Variable se ma vytvorit tady?
+				//ternary op je tam kvuli tomu kdyby se allow_nil rovnalo NULL aby se do .nil_allowed nepriradilo null ale false
+				DataType dt = { .type = (*statement)->var.data_type, .nil_allowed = (*statement)->var.allow_nil == true ? true : false}; 
+				Variable var = { .id = (*statement)->var.id, .type = dt, .initialized = true};
+				var_table_insert(&var_table, var);
+				//vartable_stack_push(var_table_stack, &var_table);
 
 				//TODO: is_valid = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
 
@@ -230,17 +249,22 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 					return ret;
 				}
 
-				if (&out_token != NULL) {
+				if (&out_token != NULL) { //FIX: warning: comparison of address of 'out_token' not equal to a null pointer is always true
 					token = &out_token;
 				} else {
 					get_token(input, symtab, token);
 				}
 
 				if (token->type == TOKENTYPE_NEWLINE) {
+					printf("RET 0 %d\n", __LINE__);
 					return 0;
 				}
 			}
 		}
+		//TODO: nejake testy konci tady i kdyz by nemely
+		//TODO: co je jeste divnejsi, ze kdyz spustim stejne testy vickrat
+		//		tak nekdy skonci return 2 a nekdy return 0
+		printf("RET 2 %d\n", __LINE__);
 		return 2;
 	}
 
@@ -371,6 +395,9 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	return 2;
 }
 
+// vraci bool jestli je ten exp validni
+// vraci expression pointer
+// vraci ukazatel na to kde skoncila
 // in_token Token, ktery muze dostat od parse_statement 
 // out_token Token, ktery muze vratit parse_statementu
 int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token* in_token, Token* out_token) {

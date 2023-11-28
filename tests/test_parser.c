@@ -27,7 +27,8 @@ void test_var_int_simple(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -54,7 +55,8 @@ void test_let_int_simple(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == false);
@@ -81,7 +83,8 @@ void test_var_double_simple(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -108,7 +111,8 @@ void test_let_double_simple(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == false);
@@ -135,7 +139,8 @@ void test_var_string_simple(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -162,7 +167,8 @@ void test_let_string_simple(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == false);
@@ -189,7 +195,8 @@ void test_var_int_simple_explicit_type(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -216,7 +223,8 @@ void test_let_int_simple_explicit_type(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == false);
@@ -243,7 +251,8 @@ void test_var_double_simple_explicit_type(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -270,7 +279,8 @@ void test_let_double_simple_explicit_type(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == false);
@@ -297,7 +307,8 @@ void test_var_string_simple_explicit_type(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -324,7 +335,8 @@ void test_let_string_simple_explicit_type(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == false);
@@ -351,7 +363,8 @@ void test_var_int_simple_nil_allowed(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -378,7 +391,8 @@ void test_let_int_simple_nil_type(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == false);
@@ -405,7 +419,8 @@ void test_var_double_simple_nil_allowed(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -432,7 +447,8 @@ void test_let_double_simple_nil_allowed(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == false);
@@ -486,7 +502,8 @@ void test_let_string_simple_nil_allowed(void) {
 
 	Statement *st;
 
-	parse_statement(&in, &symtab, &st, NULL, NULL);
+	int ret = parse_statement(&in, &symtab, &st, NULL, NULL);
+	// TEST_ASSERT_EQUAL_INT(0, ret);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == false);
@@ -500,6 +517,51 @@ void test_let_string_simple_nil_allowed(void) {
 
 //TODO: test na dve promenne zasebou a zkontrolovat:
 // jestli se ulozi druha do statement->next prvni a druhy statement->next bude null
+
+void test_two_variables(void) {
+	const char* data = "var num1 : Int = 5\n var num2 : Double = 5.0\n";
+	Input in = {
+		.type = INT_STRING,
+		.string = {
+			.s = data,
+			.i = 0, .store = 0,
+		},
+	};
+
+	SymbolTable symtab;
+
+	init_symboltable( &symtab );
+
+	AST ast;
+	init_ast(&ast);
+
+	Statement *st = ast.statement;
+
+	int ret = parse(&in, &ast);
+	TEST_ASSERT(ast.statement != NULL);
+	//FIX: tady je taky ret = 2
+	TEST_ASSERT_EQUAL_INT(0, ret);
+
+	TEST_ASSERT(st->type == ST_VAR);
+	TEST_ASSERT(st->var.modifiable == true);
+	TEST_ASSERT(st->var.allow_nil == false);
+	TEST_ASSERT(st->var.data_type == VARTYPE_INT);
+	TEST_ASSERT(st->var.id != NULL);
+	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num1");
+	TEST_ASSERT(st->var.exp != NULL);
+	TEST_ASSERT_EQUAL_INT(5, st->var.exp->int_);
+
+	st = ast.statement->next;
+
+	TEST_ASSERT(st->type == ST_VAR);
+	TEST_ASSERT(st->var.modifiable == true);
+	TEST_ASSERT(st->var.allow_nil == false);
+	TEST_ASSERT(st->var.data_type == VARTYPE_DOUBLE);
+	TEST_ASSERT(st->var.id != NULL);
+	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num2");
+	TEST_ASSERT(st->var.exp != NULL);
+	TEST_ASSERT_EQUAL_DOUBLE(5.0, st->var.exp->int_);
+}
 
 int main(void) {
     UNITY_BEGIN();
@@ -522,6 +584,8 @@ int main(void) {
     RUN_TEST(test_let_double_simple_nil_allowed);
     RUN_TEST(test_var_string_simple_nil_allowed);
     RUN_TEST(test_let_string_simple_nil_allowed);
+
+	RUN_TEST(test_two_variables);
 
     return UNITY_END();
 }

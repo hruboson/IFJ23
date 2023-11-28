@@ -1,4 +1,5 @@
 #include "AST.h"
+#include "stdlib.h";
 
 void init_ast(AST* ast) {
     ast->statement = NULL;

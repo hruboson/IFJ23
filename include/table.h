@@ -2,6 +2,7 @@
 #include "symtable.h"
 
 #define FUNC_TABLE_INIT_SIZE 64
+#define VAR_TABLE_INIT_SIZE 64
 
 typedef enum VarType {
     VARTYPE_VOID,  // for functions

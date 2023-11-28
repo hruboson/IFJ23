@@ -172,6 +172,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_ID) {
 
+			(*statement)->var.id = token->value.id;
+
 			get_token(input, symtab, token);
 			if (token->type == TOKENTYPE_COLON) {
 				get_token(input, symtab, token);

@@ -1,8 +1,7 @@
 #include "unity.h"
-#include "../include/symtable_stack.h"
+#include "../include/vartable_stack.h"
 #include "stdlib.h"
-
-#define STACK_SIZE 10
+#include "symtable.h"
 
 //! always needs to be defined
 void setUp() {}
@@ -10,11 +9,11 @@ void tearDown() {}
 
 void test_init_symtable_stack_with_valid_pointer(void) {
     // test that the function initializes the stack correctly when the stack pointer is valid
-    SymbolTableStack* stack = malloc(sizeof(SymbolTableStack));
-    init_symtable_stack(stack);
+    VarTableStack* stack = malloc(sizeof(VarTableStack));
+    init_vartable_stack(stack);
     TEST_ASSERT_EQUAL_INT(-1, stack->size); // check that the size is -1
-    TEST_ASSERT_NOT_NULL(stack->symtables); // check that the symtables pointer is not NULL
-    free(stack->symtables); // free the allocated memory
+    TEST_ASSERT_NOT_NULL(stack->vartables); // check that the symtables pointer is not NULL
+    free(stack->vartables); // free the allocated memory
     free(stack); // free the allocated memory
 }
 

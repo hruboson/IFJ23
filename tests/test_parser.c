@@ -33,9 +33,9 @@ void test_var_int_simple(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_VOID);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_INT(st->var.exp->int_, 5);
+	TEST_ASSERT_EQUAL_INT(5, st->var.exp->int_);
 }
 
 void test_let_int_simple(void) {
@@ -60,9 +60,9 @@ void test_let_int_simple(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_VOID);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_INT(st->var.exp->int_, 5);
+	TEST_ASSERT_EQUAL_INT(5, st->var.exp->int_);
 }
 
 void test_var_double_simple(void) {
@@ -87,9 +87,9 @@ void test_var_double_simple(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_VOID);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_DOUBLE(st->var.exp->double_, 5.0);
+	TEST_ASSERT_EQUAL_DOUBLE(5.0, st->var.exp->double_);
 }
 
 void test_let_double_simple(void) {
@@ -114,9 +114,9 @@ void test_let_double_simple(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_VOID);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_DOUBLE(st->var.exp->double_, 5.0);
+	TEST_ASSERT_EQUAL_DOUBLE(5.0, st->var.exp->double_);
 }
 
 void test_var_string_simple(void) {
@@ -141,7 +141,7 @@ void test_var_string_simple(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_VOID);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "str");
+	TEST_ASSERT_EQUAL_STRING("str", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
 	TEST_ASSERT_EQUAL_STRING(st->var.exp->str_.data, "retezec");
 }
@@ -168,7 +168,7 @@ void test_let_string_simple(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_VOID);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "str");
+	TEST_ASSERT_EQUAL_STRING("str", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
 	TEST_ASSERT_EQUAL_STRING(st->var.exp->str_.data, "retezec");
 }
@@ -195,9 +195,9 @@ void test_var_int_simple_explicit_type(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_INT);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_INT(st->var.exp->int_, 5);
+	TEST_ASSERT_EQUAL_INT(5, st->var.exp->int_);
 }
 
 void test_let_int_simple_explicit_type(void) {
@@ -222,9 +222,9 @@ void test_let_int_simple_explicit_type(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_INT);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_INT(st->var.exp->int_, 5);
+	TEST_ASSERT_EQUAL_INT(5, st->var.exp->int_);
 }
 
 void test_var_double_simple_explicit_type(void) {
@@ -249,9 +249,9 @@ void test_var_double_simple_explicit_type(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_DOUBLE);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_DOUBLE(st->var.exp->double_, 5.0);
+	TEST_ASSERT_EQUAL_DOUBLE(5.0, st->var.exp->double_);
 }
 
 void test_let_double_simple_explicit_type(void) {
@@ -276,9 +276,9 @@ void test_let_double_simple_explicit_type(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_DOUBLE);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_DOUBLE(st->var.exp->double_, 5.0);
+	TEST_ASSERT_EQUAL_DOUBLE(5.0, st->var.exp->double_);
 }
 
 void test_var_string_simple_explicit_type(void) {
@@ -303,9 +303,9 @@ void test_var_string_simple_explicit_type(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_STRING);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "str");
+	TEST_ASSERT_EQUAL_STRING("str", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.exp->str_.data, "retezec");
+	TEST_ASSERT_EQUAL_STRING("retezec", st->var.exp->str_.data);
 }
 
 void test_let_string_simple_explicit_type(void) {
@@ -330,9 +330,9 @@ void test_let_string_simple_explicit_type(void) {
 	TEST_ASSERT(st->var.allow_nil == false);
 	TEST_ASSERT(st->var.data_type == VARTYPE_STRING);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "str");
+	TEST_ASSERT_EQUAL_STRING("str", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.exp->str_.data, "retezec");
+	TEST_ASSERT_EQUAL_STRING("retezec", st->var.exp->str_.data);
 }
 
 void test_var_int_simple_nil_allowed(void) {
@@ -359,7 +359,7 @@ void test_var_int_simple_nil_allowed(void) {
 	TEST_ASSERT(st->var.id != NULL);
 	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_INT(st->var.exp->int_, 5);
+	TEST_ASSERT_EQUAL_INT(5, st->var.exp->int_);
 }
 
 void test_let_int_simple_nil_type(void) {
@@ -384,9 +384,9 @@ void test_let_int_simple_nil_type(void) {
 	TEST_ASSERT(st->var.allow_nil == true);
 	TEST_ASSERT(st->var.data_type == VARTYPE_INT);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_INT(st->var.exp->int_, 5);
+	TEST_ASSERT_EQUAL_INT(5, st->var.exp->int_);
 }
 
 void test_var_double_simple_nil_allowed(void) {
@@ -411,9 +411,9 @@ void test_var_double_simple_nil_allowed(void) {
 	TEST_ASSERT(st->var.allow_nil == true);
 	TEST_ASSERT(st->var.data_type == VARTYPE_DOUBLE);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_DOUBLE(st->var.exp->double_, 5.0);
+	TEST_ASSERT_EQUAL_DOUBLE(5.0, st->var.exp->double_);
 }
 
 void test_let_double_simple_nil_allowed(void) {
@@ -438,9 +438,9 @@ void test_let_double_simple_nil_allowed(void) {
 	TEST_ASSERT(st->var.allow_nil == true);
 	TEST_ASSERT(st->var.data_type == VARTYPE_DOUBLE);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num");
+	TEST_ASSERT_EQUAL_STRING("num", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_DOUBLE(st->var.exp->double_, 5.0);
+	TEST_ASSERT_EQUAL_DOUBLE(5.0, st->var.exp->double_);
 }
 
 void test_var_string_simple_nil_allowed(void) {
@@ -465,9 +465,9 @@ void test_var_string_simple_nil_allowed(void) {
 	TEST_ASSERT(st->var.allow_nil == true);
 	TEST_ASSERT(st->var.data_type == VARTYPE_STRING);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "str");
+	TEST_ASSERT_EQUAL_STRING("str", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.exp->str_.data, "retezec");
+	TEST_ASSERT_EQUAL_STRING("retezec", st->var.exp->str_.data);
 }
 
 void test_let_string_simple_nil_allowed(void) {
@@ -492,9 +492,9 @@ void test_let_string_simple_nil_allowed(void) {
 	TEST_ASSERT(st->var.allow_nil == true);
 	TEST_ASSERT(st->var.data_type == VARTYPE_STRING);
 	TEST_ASSERT(st->var.id != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "str");
+	TEST_ASSERT_EQUAL_STRING("str", st->var.id->symbol.data);
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_STRING(st->var.exp->str_.data, "retezec");
+	TEST_ASSERT_EQUAL_STRING("retezec", st->var.exp->str_.data);
 }
 
 

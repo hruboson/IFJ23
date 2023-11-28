@@ -42,6 +42,12 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	Token _token;
 	Token* token = &_token;
 
+	*statement = (Statement*)malloc(sizeof(Statement));
+
+	if (*statement == NULL) {
+		exit(99);
+	}
+
 	get_token(input, symtab, token);
 	if (token->type == TOKENTYPE_EOF) return -1;
 
@@ -155,7 +161,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	// <statement> -> let <id> [: <type>] = <exp> \n
 	// <statement> -> var <id> [: <type>] = <exp> \n
 	// <statement> -> var <id> : <type> [= <exp>] \n
-	//TODO: je toto validni? var a : Int\n
 	else if (token->type == TOKENTYPE_KEYWORD && (token->value.keyword == KEYWORD_LET || token->value.keyword == KEYWORD_VAR)) {
 		
 		// Data type is null if not specified

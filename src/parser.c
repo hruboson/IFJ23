@@ -43,9 +43,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	Token _token;
 	Token* token = &_token;
 
-	VarTable var_table;
-	init_var_table(&var_table);
-
 	*statement = (Statement*)malloc(sizeof(Statement));
 
 	if (*statement == NULL) {
@@ -62,6 +59,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_IF) {
 		bool is_let = false;
 		Expression exp;
+
+		//TODO: pusnout vartable pri vstupu do scope (tady)
 
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_LET) {
@@ -135,6 +134,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		bool is_let = false;
 		Expression *exp;
 
+		//TODO: pusnout vartable pri vstupu do scope (tady)
+
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_PAR_L) {
 			// TODO neco udelat s <exp>
@@ -205,15 +206,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 					}
 
 					// var a : Int \n => correct
-					if ((*statement)->var.modifiable && token->type == TOKENTYPE_NEWLINE) {
-						// pridani do vartable
-						//CHECK: Variable se ma vytvorit tady?
-						//ternary op je tam kvuli tomu kdyby se allow_nil rovnalo NULL aby se do .nil_allowed nepriradilo null ale false
-						DataType dt = { .type = (*statement)->var.data_type, .nil_allowed = (*statement)->var.allow_nil == true ? true : false};
-						Variable var = { .id = (*statement)->var.id, .type = dt, .initialized = false};
-						var_table_insert(&var_table, var);
-						//vartable_stack_push(var_table_stack, &var_table);
-						
+					if ((*statement)->var.modifiable && token->type == TOKENTYPE_NEWLINE) {					
 						return 0;
 						
 					} else if (!(*statement)->var.modifiable && token->type == TOKENTYPE_NEWLINE) {
@@ -232,14 +225,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 				
 				Token out_token;
 				ret = parse_expression(input, symtab, &exp, NULL, &out_token);
-				
-				// pridani do vartable
-				//CHECK: Variable se ma vytvorit tady?
-				//ternary op je tam kvuli tomu kdyby se allow_nil rovnalo NULL aby se do .nil_allowed nepriradilo null ale false
-				DataType dt = { .type = (*statement)->var.data_type, .nil_allowed = (*statement)->var.allow_nil == true ? true : false}; 
-				Variable var = { .id = (*statement)->var.id, .type = dt, .initialized = true};
-				var_table_insert(&var_table, var);
-				//vartable_stack_push(var_table_stack, &var_table);
 
 				//TODO: is_valid = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
 
@@ -298,6 +283,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	// <func> -> func <id> ( [<id> <id> : <type>] ) [-> <type>] { <statementList> }
 	else if (token->type == KEYWORD_FUNC) {
 		Function func;
+
+		//TODO: pusnout vartable pri vstupu do scope (tady)
 
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_ID) {

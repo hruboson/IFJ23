@@ -32,17 +32,23 @@ first(x):
 		id, t_double, t_int, t_string, (
 ______________________________________________________________________________________
 
-<exp> 	-> <exp1> <exp'>
-<exp'>	-> ?? <exp>
-<exp1>	-> <exp2> <exp1'>
-<exp1'>	-> {==, !=, <, >, <=, >=} <exp1>
-<exp2>	-> <exp3> <exp2'>
-<exp2'>	-> {+, -} <exp2>
-<exp3>	-> <exp4> <exp3'>
-<exp3'>	-> {*, /} <exp3>
-<exp4>	-> <exp5> <exp4'>
-<exp4'>	-> !
-<exp5>	-> (<exp>), int, string, double
+1. <exp> 	-> <exp1> <exp'>
+2. <exp'>	-> ?? <exp>
+3. <exp1>	-> <exp2> <exp1'>
+4. <exp1'>	-> {==, !=, <, >, <=, >=} <exp1>
+5. <exp2>	-> <exp3> <exp2'>
+6. <exp2'>	-> {+, -} <exp2>
+7. <exp3>	-> <exp4> <exp3'>
+8. <exp3'>	-> {*, /} <exp3>
+9. <exp4>	-> <exp5> <exp4'>
+10. <exp4'>	-> !
+11. <exp5>	-> (<exp>), t_int, t_string, t_double		id[([[id:]<exp>[,[id:]<exp>]*])]
 
-id[([[id:]<exp>[,[id:]<exp>]*])]
+first(x):
+	<exp'>	??
+	<exp1'>	==, !=, <, >, <=, >=
+	<exp2'> +, -
+	<exp3'> *, \
+	<exp4'> !
+	<exp5> (, t_int, t_string, t_double, id
 

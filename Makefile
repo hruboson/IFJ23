@@ -1,4 +1,4 @@
-CFLAGS = -std=c11 -Wall -Wextra -I$(UNITY) -I$(SRCDIR) -I. -g
+CFLAGS = -std=c11 -Wall -Wextra -I$(UNITY) -I$(SRCDIR) -I. -g -DUNITY_INCLUDE_DOUBLE
 CC = gcc
 
 # Source code paths

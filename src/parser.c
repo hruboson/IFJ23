@@ -217,6 +217,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 				// vraci ukazatel na to kde skoncila
 				ret = parse_expression(input, symtab, &exp);
 
+				//TODO: semantic_variable(VarTableStack, FunctionTable, Statement, bool is_valid) is_valid = jestli prosla
+
 				(*statement)->var.exp = exp;
 
 				if (ret != 0) {

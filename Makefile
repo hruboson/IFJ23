@@ -11,8 +11,9 @@ OBJDIR := build/objects
 DEPDIR := build/dependencies
 RESULTSDIR := build/results
 RESULTS := $(patsubst $(TESTSDIR)/test_%.c,$(RESULTSDIR)/test_%.txt,$(wildcard $(TESTSDIR)/test_*.c))
+HEADERS := $(wildcard include/*.h)
 
-BUILDPATHS := $(BUILD) $(OBJDIR) $(RESULTSDIR) $(DEPDIR)
+BUILDPATHS := $(BUILD) $(OBJDIR) $(RESULTSDIR) $(DEPDIR) $(HEADERS)
 
 # Unity testing library
 UNITY := unity/src
@@ -24,11 +25,13 @@ OBJECTS_WITHOUT_MAIN := $(filter-out $(OBJDIR)/main.o,$(OBJECTS))
 TESTSOURCES := $(wildcard *.c) $(wildcard $(TESTSDIR)/*.c)
 TESTOBJECTS := $(patsubst %.c, $(OBJDIR)/test_%.o, $(notdir $(TESTSOURCES)))
 
+### TODO RELEASE BUILD with -g
+
 # Name of the program
 TARGET = IFJ.out
 
 # Compile the program (without tests)
-$(TARGET): $(OBJECTS)
+$(TARGET): $(OBJECTS) $(HEADERS)
 	$(CC) $(CFLAGS) $^ -o $(BUILD)/$@
 
 # Universal rule for source files

@@ -217,6 +217,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 				// vraci ukazatel na to kde skoncila
 				ret = parse_expression(input, symtab, &exp);
 
+				(*statement)->var.exp = exp;
+
 				if (ret != 0) {
 					return ret;
 				}
@@ -351,37 +353,33 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	return 2;
 }
 
+//TODO: muze dostat i vratit token
 int parse_expression(Input* input, SymbolTable* symtab, Expression** exp) {
 	Token _token;
 	Token* token = &_token;
 
 	get_token(input, symtab, token);
 
-	if (token->type == TOKENTYPE_KEYWORD) {
-
-		*exp = (Expression*)malloc(sizeof(Expression));
-		if (*exp == NULL) {
-			exit(99);
-		}
-
-		switch (token->value.keyword) {
-			case KEYWORD_DOUBLE:
-				(*exp)->type = ET_DOUBLE;
-				(*exp)->double_ = token->value.double_;
-				break;
-			case KEYWORD_INT:
-				(*exp)->type = ET_INT;
-				(*exp)->int_ = token->value.int_;
-				break;
-			case KEYWORD_STRING:
-				(*exp)->type = ET_STRING;
-				(*exp)->str_ = token->value.str_;
-				break;
-			default:
-				return 2;
-		}
-		return 0;
+	*exp = (Expression*)malloc(sizeof(Expression));
+	if (*exp == NULL) {
+		exit(99);
 	}
 
-	return 2;
+	switch (token->value.keyword) {
+		case KEYWORD_DOUBLE:
+			(*exp)->type = ET_DOUBLE;
+			(*exp)->double_ = token->value.double_;
+			break;
+		case KEYWORD_INT:
+			(*exp)->type = ET_INT;
+			(*exp)->int_ = token->value.int_;
+			break;
+		case KEYWORD_STRING:
+			(*exp)->type = ET_STRING;
+			(*exp)->str_ = token->value.str_;
+			break;
+		default:
+			return 2;
+	}
+	return 0;
 }

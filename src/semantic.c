@@ -1,8 +1,9 @@
 #include "semantic.h"
 
+// obecná sémantická chyba
 #define ERROR(msg) do { \
     fprintf(stderr, "Chyba: %s (%s:%d): %s\n", __func__, __FILE__, __LINE__, msg); \
-    exit(9); \
+    exit(9);  \
 } while (0)
 
 #define SEMANTIC_ERROR_UNDEFINED_VARIABLE(id) do { \
@@ -15,8 +16,20 @@
     exit(7); \
 } while (0)
 
+// Helper function
+void insert_to_var_table(Statement *statement, VarTable *var_table){
+    // pridani do vartable
+    //ternary op je tam kvuli tomu kdyby se allow_nil rovnalo NULL aby se do .nil_allowed nepriradilo null ale false
+    DataType dt = { .type = statement->var.data_type, .nil_allowed = statement->var.allow_nil == true ? true : false}; 
+    Variable var = { .id = statement->var.id, .type = dt, .initialized = !(statement->var.exp == NULL) };
+    var_table_insert(var_table, var);
+}
+
 // Var x = 5
 bool semantic_variable(VarTableStack *stack, FuncTable *table, Statement *statement) {
+    VarTable *var_table;
+    vartable_stack_peek(stack, var_table);
+
     if (!stack) {
         ERROR("Neplatný ukazatel na zásobník proměnných");
     }
@@ -26,32 +39,47 @@ bool semantic_variable(VarTableStack *stack, FuncTable *table, Statement *statem
         SEMANTIC_ERROR_UNDEFINED_VARIABLE(statement->var.exp->id);
     }
 
-    switch (get_var->type.type) {
+    switch (statement->var.data_type) {
         case VARTYPE_INT:
-            if (statement->type != ET_INT) {
+            if (statement->var.exp->type != ET_INT) {
                 SEMANTIC_ERROR_TYPE_MISMATCH;
+            } else {
+                insert_to_var_table(statement, var_table);
             }
             break;
         case VARTYPE_DOUBLE:
-            if (statement->type != ET_DOUBLE) {
+            if (statement->var.exp->type != ET_DOUBLE) {
                 SEMANTIC_ERROR_TYPE_MISMATCH;
+            } else {
+                insert_to_var_table(statement, var_table);
             }
             break;
         case VARTYPE_STRING:
-            if (statement->type != ET_STRING) {
+            if (statement->var.exp->type != ET_STRING) {
                 SEMANTIC_ERROR_TYPE_MISMATCH;
+            } else {
+                insert_to_var_table(statement, var_table);
             }
             break;
         case VARTYPE_VOID:
-            if (statement->type != ET_STRING && statement->type != ET_INT && statement->type != ET_DOUBLE) {
-                SEMANTIC_ERROR_TYPE_MISMATCH;
+            switch(statement->var.exp->type){
+                case ET_STRING:
+                    statement->var.data_type = VARTYPE_STRING;
+                    break;
+                case ET_INT:
+                    statement->var.data_type = VARTYPE_INT;
+                    break;
+                case ET_DOUBLE:
+                    statement->var.data_type = VARTYPE_DOUBLE;
+                    break; 
+                default:
+                    SEMANTIC_ERROR_TYPE_MISMATCH;
             }
-            break;
+            insert_to_var_table(statement, var_table);
+                
         default:
-            ERROR("Neznámý typ proměnné");
+            ERROR("Neznámý typ proměnné"); 
     }
-
-    get_var->initialized = true;
     return true;
 }
 

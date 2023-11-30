@@ -543,9 +543,6 @@ void test_two_variables(void) {
 	//FIX: tady je taky ret = 2
 	TEST_ASSERT_EQUAL_INT(0, ret);
 
-
-	printf("LINE: %d\n", __LINE__);
-
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
 	TEST_ASSERT(st->var.allow_nil == false);
@@ -556,8 +553,6 @@ void test_two_variables(void) {
 	TEST_ASSERT_EQUAL_INT(5, st->var.exp->int_);
 
 	st = st->next;
-
-	printf("LINE: %d\n", __LINE__);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -621,9 +616,9 @@ int main(void) {
     RUN_TEST(test_let_double_simple_nil_allowed);
     RUN_TEST(test_var_string_simple_nil_allowed);
     RUN_TEST(test_let_string_simple_nil_allowed);
-	printf("LINE: %d\n", __LINE__);
+
 	RUN_TEST(test_two_variables);
-	printf("LINE: %d\n", __LINE__);
+
 	RUN_TEST(test_while_simple_int_exp);
 
     return UNITY_END();

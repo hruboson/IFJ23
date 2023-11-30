@@ -7,11 +7,7 @@
 #include "vartable_stack.h"
 
 int parse(Input* input, AST* ast) {
-
 	int ret = 0;
-
-	Statement* st;
-	Statement** next_st = &ast->statement;
 
 	VarTableStack var_table_stack;
 	init_vartable_stack(&var_table_stack);
@@ -19,19 +15,11 @@ int parse(Input* input, AST* ast) {
 	FuncTable func_table;
 	init_func_table(&func_table);
 
-	while (ret == 0) {
-		ret = parse_statement(input,
-			&ast->symtab, &st,
-			&var_table_stack, &func_table
-		);
-
-		if (ret)
-			break;
-
-		*next_st = st;
-		next_st = &st->next;
-	}
-
+	ret = parse_statement_list(input,
+		&ast->symtab, &ast->statement,
+		&var_table_stack, &func_table, 
+		NULL
+	);
 
 	if (ret == -1)
 		ret = 0;
@@ -159,8 +147,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		if (token->type == TOKENTYPE_NEWLINE) {
 			get_token(input, symtab, token);
 		}
-
-		printf("LINE: %d, TOKENTYPE: %d\n", __LINE__, token->type);
 			
 		Token out_token;
 		bool out_token_returned;
@@ -194,8 +180,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			}
 
 			// TODO neco udelat s <stmntList>
-			Statement while_statement_list[] = {};  // TODO udělal strukturu pro statementlist
-													// parseStatement( pro vnitřek while );
+			//parse_statement_list(input, symtab, (*statement)->while_.body, var_table_stack, func_table, );
 			
 			// newline check
 			get_token(input, symtab, token);
@@ -205,12 +190,11 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			
 			if (token->type == TOKENTYPE_BRACE_R) {
 				(*statement)->while_.exp = NULL;
-				(*statement)->while_.body = while_statement_list;
 
 				return 0;
 			}
 		}
-
+		printf("RETURN 2: %d\n", __LINE__);
 		return 2;
 	}
 
@@ -300,8 +284,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			}
 		}
 		//TODO: nejake testy konci tady i kdyz by nemely
-		//TODO: co je jeste divnejsi, ze kdyz spustim stejne testy vickrat
-		//		tak nekdy skonci return 2 a nekdy return 0
 		printf("RET 2 %d\n", __LINE__);
 		return 2;
 	}
@@ -442,6 +424,32 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	return 2;
 }
 
+//TODO: oznacovat ze jsem v bloku i ze jsem ve funkci v parametrech
+// pokud jsem v bloku, nemuzu udelat return ani definici funkce
+// pokud jsem ve funkci, nemuzu udelat definici funkce
+int parse_statement_list(Input *input, SymbolTable* symtab, Statement** statement, VarTableStack* var_table_stack, FuncTable* func_table, Statement *current_function) {
+	int ret = 0;
+
+	Statement* st;
+	Statement** next_st = statement;
+
+	while (ret == 0) {
+		ret = parse_statement(input,
+			symtab, &st, 
+			var_table_stack, 
+			func_table
+		);
+
+		if (ret)
+			break;
+
+		*next_st = st;
+		next_st = &st->next;
+	}
+
+	return ret;
+}
+
 // vraci bool jestli je ten exp validni
 // vraci expression pointer
 // vraci ukazatel na to kde skoncila
@@ -462,21 +470,32 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 		exit(99);
 	}
 
-	printf("TOKENTYPE: %d\n", token->type);
-
 	switch (token->type) {
 		case TOKENTYPE_DOUBLE:
 			(*exp)->type = ET_DOUBLE;
 			(*exp)->double_ = token->value.double_;
 			break;
+
 		case TOKENTYPE_INT:
 			(*exp)->type = ET_INT;
 			(*exp)->int_ = token->value.int_;
 			break;
+
 		case TOKENTYPE_STRING:
 			(*exp)->type = ET_STRING;
 			(*exp)->str_ = token->value.str_;
 			break;
+
+		case TOKENTYPE_KEYWORD:
+			if (token->type != KEYWORD_NIL) {
+				return 2;
+			}
+			(*exp)->type = ET_NIL;
+			break;
+
+		case TOKENTYPE_ID:
+			(*exp)->type = ET_ID;
+			(*exp)->id = token->value.id;
 		default:
 			return 2;
 	}

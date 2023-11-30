@@ -30,7 +30,9 @@ void insert_to_var_table(Statement *statement, VarTable *var_table){
 
 // Var x = 5
 bool semantic_variable(VarTableStack *stack, FuncTable *table, Statement *statement) {
-    VarTable *var_table;
+    VarTable var_table_;
+    VarTable *var_table = &var_table_;
+    
     vartable_stack_peek(stack, var_table);
 
     if (!stack) {

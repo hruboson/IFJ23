@@ -537,7 +537,8 @@ void test_two_variables(void) {
 
 	Statement *st = ast.statement;
 
-	int ret = parse(&in, &ast);
+	//! vartablestack and functable are null here for now - do they need to be checked ? (compiles fine)
+	int ret = parse(&in, &ast, NULL, NULL);
 	TEST_ASSERT(ast.statement != NULL);
 	//FIX: tady je taky ret = 2
 	TEST_ASSERT_EQUAL_INT(0, ret);

@@ -1,64 +1,64 @@
-#include "semantic.h"
-#include "ir_generator.h"
-#include "code_generator.h"
-
 #include <stdio.h>
 
-int process_file( Input* in, AST* ast, IR* ir, String* target_code ) {
+#include "code_generator.h"
+#include "ir_generator.h"
+#include "semantic.h"
 
-	int ret;
+int process_file(Input* in, AST* ast, IR* ir, String* target_code) {
+    int ret;
 
-	/* convert source code into an AST */
-	ret = semantic( in, ast );
-	if ( ret ) {
-		return ret;
-	}
+    /* convert source code into an AST */
+    VarTableStack var_table_stack;
+	FuncTable func_table;
+    ret = semantic(in, ast, var_table_stack, func_table);
+    if (ret) {
+        return ret;
+    }
 
-	/* convert AST to internal representation */
-	ret = convert_to_ir( ast, ir );
-	clear_ast( ast );
-	if ( ret ) {
-		return ret;
-	}
+    /* convert AST to internal representation */
+    ret = convert_to_ir(ast, ir);
+    clear_ast(ast);
+    if (ret) {
+        return ret;
+    }
 
-	// optimize
-	// TODO
+    // optimize
+    // TODO
 
-	/* convert internal code to target code */
-	ret = generate_code( ir, target_code );
-	if ( ret ) {
-		return ret;
-	}
+    /* convert internal code to target code */
+    ret = generate_code(ir, target_code);
+    if (ret) {
+        return ret;
+    }
 
-	return 0;
+    return 0;
 }
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char const* argv[]) {
+    Input in = {
+        .type = INT_FILE,
+        .file.f = stdin,
+    };
 
-	Input in = {
-		.type = INT_FILE,
-		.file.f = stdin,
-	};
+    /* init resources */
+    AST ast;
+    init_ast(&ast);
+    IR ir;
+    init_ir(&ir);
+    String target_code;
+    init_string(&target_code);
 
-	/* init resources */
-	AST ast;
-	init_ast( &ast );
-	IR ir;
-	init_ir( &ir );
-	String target_code;
-	init_string( &target_code );
+    /* process source code into target code */
+    int ret = process_file(&in, &ast, &ir, &target_code);
+    if (ret == 0) { /* on success */
+        /* output target code to stdout */
+        fputs(target_code.data, stdout);
+    }
 
-	/* process source code into target code */
-	int ret = process_file( &in, &ast, &ir, &target_code );
-	if ( ret == 0 ) { /* on success */
-		/* output target code to stdout */
-		fputs( target_code.data, stdout );
-	}
+    /* free resources */
+    clear_ast(&ast);
+    clear_ir(&ir);
+    clear_string(&target_code);
 
-	/* free resources */
-	clear_ast( &ast );
-	clear_ir( &ir );
-	clear_string( &target_code );
-
-	return ret;
+    return ret;
 }

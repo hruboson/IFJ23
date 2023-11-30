@@ -2,6 +2,7 @@
 
 #include "symtable.h"
 #include "string_.h"
+#include "table.h" // for DataType
 
 typedef enum ExpressionType {
     ET_EXCLAMATION,
@@ -15,12 +16,13 @@ typedef enum ExpressionType {
     ET_GT,
     ET_LTE,
     ET_GTE,
-    ET_NIL_TEST,
+    ET_NIL_TEST, // '??' token
     ET_ID,
     ET_INT,
     ET_DOUBLE,
     ET_STRING,
-    ET_FUNC
+    ET_FUNC,
+    ET_NIL,
 } ExpressionType;
 
 typedef struct Expression Expression;
@@ -32,6 +34,7 @@ typedef struct Argument {
 
 struct Expression {
     ExpressionType type;
+    DataType data_type;
     union {
         String str_;
         double double_;

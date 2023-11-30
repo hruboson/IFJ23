@@ -535,12 +535,16 @@ void test_two_variables(void) {
 	AST ast;
 	init_ast(&ast);
 
+	int ret = parse(&in, &ast);
+
 	Statement *st = ast.statement;
 
-	int ret = parse(&in, &ast);
-	TEST_ASSERT(ast.statement != NULL);
+	TEST_ASSERT(st != NULL);
 	//FIX: tady je taky ret = 2
 	TEST_ASSERT_EQUAL_INT(0, ret);
+
+
+	printf("LINE: %d\n", __LINE__);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -551,7 +555,9 @@ void test_two_variables(void) {
 	TEST_ASSERT(st->var.exp != NULL);
 	TEST_ASSERT_EQUAL_INT(5, st->var.exp->int_);
 
-	st = ast.statement->next;
+	st = st->next;
+
+	printf("LINE: %d\n", __LINE__);
 
 	TEST_ASSERT(st->type == ST_VAR);
 	TEST_ASSERT(st->var.modifiable == true);
@@ -560,7 +566,7 @@ void test_two_variables(void) {
 	TEST_ASSERT(st->var.id != NULL);
 	TEST_ASSERT_EQUAL_STRING(st->var.id->symbol.data, "num2");
 	TEST_ASSERT(st->var.exp != NULL);
-	TEST_ASSERT_EQUAL_DOUBLE(5.0, st->var.exp->int_);
+	TEST_ASSERT_EQUAL_DOUBLE(5.0, st->var.exp->double_);
 
 }
 
@@ -615,9 +621,9 @@ int main(void) {
     RUN_TEST(test_let_double_simple_nil_allowed);
     RUN_TEST(test_var_string_simple_nil_allowed);
     RUN_TEST(test_let_string_simple_nil_allowed);
-
+	printf("LINE: %d\n", __LINE__);
 	RUN_TEST(test_two_variables);
-
+	printf("LINE: %d\n", __LINE__);
 	RUN_TEST(test_while_simple_int_exp);
 
     return UNITY_END();

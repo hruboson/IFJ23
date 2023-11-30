@@ -13,4 +13,4 @@
 
 int parse(Input*, AST*);
 int parse_statement(Input*, SymbolTable*, Statement**, VarTableStack*, FuncTable*);
-int parse_expression(Input*, SymbolTable*, Expression**, Token*, Token*);
+int parse_expression(Input*, SymbolTable*, Expression**, Token*, Token*, bool*);

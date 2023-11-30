@@ -163,7 +163,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		printf("LINE: %d, TOKENTYPE: %d\n", __LINE__, token->type);
 			
 		Token out_token;
-		ret = parse_expression(input, symtab, &exp, NULL, &out_token);
+		bool out_token_returned;
+		ret = parse_expression(input, symtab, &exp, NULL, &out_token, &out_token_returned);
 
 		//TODO: is_valid = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
 
@@ -173,7 +174,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			return ret;
 		}
 
-		if (&out_token != NULL) { //FIX: warning: comparison of address of 'out_token' not equal to a null pointer is always true
+		if (out_token_returned) {
 			token = &out_token;
 		} else {
 			get_token(input, symtab, token);
@@ -275,7 +276,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 				Expression *exp;
 				
 				Token out_token;
-				ret = parse_expression(input, symtab, &exp, NULL, &out_token);
+				bool out_token_returned;
+				ret = parse_expression(input, symtab, &exp, NULL, &out_token, &out_token_returned);
 
 				//TODO: is_valid = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
 
@@ -285,7 +287,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 					return ret;
 				}
 
-				if (&out_token != NULL) { //FIX: warning: comparison of address of 'out_token' not equal to a null pointer is always true
+				if (out_token_returned) {
 					token = &out_token;
 				} else {
 					get_token(input, symtab, token);
@@ -445,7 +447,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 // vraci ukazatel na to kde skoncila
 // in_token Token, ktery muze dostat od parse_statement 
 // out_token Token, ktery muze vratit parse_statementu
-int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token* in_token, Token* out_token) {
+int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token* in_token, Token* out_token, bool* out_token_returned) {
 	
 	Token _token;
 	Token* token = &_token;
@@ -480,6 +482,7 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 	}
 
 	//TODO: out_token
+	*out_token_returned = false;
 
 	return 0;
 }

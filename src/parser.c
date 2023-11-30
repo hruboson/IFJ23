@@ -6,19 +6,21 @@
 #include "stdlib.h"
 #include "vartable_stack.h"
 
-int parse(Input* input, AST* ast, VarTableStack* var_table_stack, FuncTable* func_table) {
-	SymbolTable symtab;
-	init_symboltable(&symtab);
+int parse(Input* input, AST* ast) {
 
 	int ret = 0;
 
 	Statement* st;
 	Statement** next_st = &ast->statement;
 
+	VarTableStack var_table_stack;
+
+	FuncTable func_table;
+
 	while (ret == 0) {
 		ret = parse_statement(input,
 			&ast->symtab, &st,
-			var_table_stack, func_table
+			&var_table_stack, &func_table
 		);
 
 		if (ret)

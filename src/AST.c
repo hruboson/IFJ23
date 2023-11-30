@@ -4,7 +4,7 @@
 
 void init_ast(AST* ast) {
     ast->statement = NULL;
-    init_symboltable( &ast->symtab );
+    init_symboltable(&ast->symtab);
 }
 
 void clear_ast(AST* ast) {
@@ -15,19 +15,18 @@ void clear_ast(AST* ast) {
             free(curr);
             curr = tmp;
         }*/
-		ast->statement = NULL;
+        ast->statement = NULL;
     }
-    clear_symboltable( &ast->symtab );
+    clear_symboltable(&ast->symtab);
 }
 
 void ast_append(AST* ast, Statement* st) {
-    Statement* curr = ast->statement;
-
-    if (!curr) {
+    if (!(ast->statement)) { // adding first statement
         ast->statement = st;
         return;
     }
-	
+
+    Statement* curr = ast->statement;
     while (curr->next) {
         curr = curr->next;
     }
@@ -35,24 +34,8 @@ void ast_append(AST* ast, Statement* st) {
     curr->next = st;
 }
 
-void ast_first(AST* ast, Statement* st) {
-    st = ast->statement;
-}
-
 void ast_get(AST* ast, Statement* st) {
     // todo
-}
-
-void ast_delete_last(AST* ast) {
-    if (ast->statement) {
-        Statement* curr = ast->statement;
-        Statement* prev = ast->statement;
-        while (curr->next) {
-			prev = curr;
-            curr = curr->next;
-        }
-		prev->next = NULL;
-    }
 }
 
 void print_ast(AST* ast) {

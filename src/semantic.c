@@ -1,4 +1,5 @@
 #include "semantic.h"
+#include "vartable_stack.h"
 
 #include <stdlib.h>
 

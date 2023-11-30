@@ -7,6 +7,7 @@ void init_vartable_stack(VarTableStack* stack) {
         exit(99);
     } else {
         stack->size = -1;
+        stack->cap = STACK_SIZE;
         stack->vartables = malloc(sizeof(VarTable*) * STACK_SIZE);
         if (stack->vartables == NULL) {
             exit(99);
@@ -25,13 +26,17 @@ void clear_vartable_stack(VarTableStack* stack) {
 }
 
 void vartable_stack_push(VarTableStack* stack, VarTable* table) {
-    if (stack->size == stack->cap) { // max cap reached
+    if (stack->size == stack->cap) {  // max cap reached
         stack->cap *= 2;
         stack->vartables = realloc(stack->vartables, sizeof(VarTable*) * stack->cap);
         if (!stack->vartables) exit(99);
     }
-    
-    stack->size++;
+
+    if (stack->size == -1) {
+        stack->size = 1;
+    } else {
+        stack->size++;
+    }
     stack->vartables[stack->size - 1] = table;
 }
 
@@ -51,4 +56,16 @@ void vartable_stack_peek(VarTableStack* stack, VarTable* table) {
 bool vartable_stack_is_empty(VarTableStack* stack) {
     if (!stack) exit(99);
     return stack->size == 0;
+}
+
+Variable* var_table_stack_get_var(VarTableStack* stack, SymbolRecord* id) {
+    VarTable curr_;
+    VarTable* curr = &curr;
+    Variable* var = NULL;
+    size_t i = stack->size;
+    do {
+        curr = stack->vartables[i--];
+        var = var_table_get(curr, id);
+    } while (var == NULL && i > 0);
+    return NULL;
 }

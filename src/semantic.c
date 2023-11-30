@@ -1,5 +1,7 @@
 #include "semantic.h"
 
+#include <stdlib.h>
+
 // obecná sémantická chyba
 #define ERROR(msg) do { \
     fprintf(stderr, "Chyba: %s (%s:%d): %s\n", __func__, __FILE__, __LINE__, msg); \

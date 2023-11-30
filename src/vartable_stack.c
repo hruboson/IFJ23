@@ -61,10 +61,14 @@ bool vartable_stack_is_empty(VarTableStack* stack) {
 Variable* var_table_stack_get_var(VarTableStack* stack, SymbolRecord* id) {
     VarTable* curr;
     Variable* var = NULL;
-    size_t i = stack->size - 1;
-    do {
-        curr = stack->vartables[i--];
+    size_t i = stack->size;
+
+    // this is wacky af but it works
+    while (i > 0 && var == NULL) {
+        curr = stack->vartables[i - 1];
         var = var_table_get(curr, id);
-    } while (var == NULL && i >= 0);
+        i--;
+    }
+
     return var;
 }

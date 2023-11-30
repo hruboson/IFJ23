@@ -1,8 +1,8 @@
 #include "../include/vartable_stack.h"
 #include "stdlib.h"
 #include "symtable.h"
-#include "unity.h"
 #include "table.h"
+#include "unity.h"
 
 //! always needs to be defined
 void setUp() {}
@@ -51,10 +51,10 @@ void test_get_var_from_stack() {
 
     Variable* find = var_table_stack_get_var(stack, &id1);
     TEST_ASSERT_NOT_NULL(find);
-    //find = var_table_stack_get_var(stack, &id2);
-    //TEST_ASSERT_NOT_NULL(find);
-    //find = var_table_stack_get_var(stack, &id0);
-    //TEST_ASSERT_NULL(find);
+    find = var_table_stack_get_var(stack, &id2);
+    TEST_ASSERT_NOT_NULL(find);
+    find = var_table_stack_get_var(stack, &id0);
+    TEST_ASSERT_NULL(find);
 
     clear_var_table(table);
     free(stack->vartables);  // free the allocated memory

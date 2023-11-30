@@ -74,7 +74,7 @@ void var_table_insert(VarTable* table, Variable var) {
 Variable* var_table_get(VarTable* table, SymbolRecord* id) {
     Variable* var;
     if (!table) return NULL;
-    for (size_t i = 0; i < (table->vars_size + 1); i++) {
+    for (size_t i = 0; i < table->vars_size; i++) {
         var = &(table->vars[i]);
         if (var) {
             if (var->id->hash == id->hash) {

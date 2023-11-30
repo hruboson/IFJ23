@@ -4,19 +4,16 @@
 #include <stdlib.h>
 
 // obecná sémantická chyba
-#define ERROR(msg) do { \
-    fprintf(stderr, "Chyba: %s (%s:%d): %s\n", __func__, __FILE__, __LINE__, msg); \
-    exit(9);  \
+#define ERROR do { \
+    return 9;  \
 } while (0)
 
-#define SEMANTIC_ERROR_UNDEFINED_VARIABLE(id) do { \
-    fprintf(stderr, "Chyba: %s (%s:%d): Nedefinovaná proměnná '%s'\n", __func__, __FILE__, __LINE__, id); \
-    exit(5); \
+#define SEMANTIC_ERROR_UNDEFINED_VARIABLE do { \
+    return 5; \
 } while (0)
 
 #define SEMANTIC_ERROR_TYPE_MISMATCH do { \
-    fprintf(stderr, "Chyba: %s (%s:%d): Nesoulad typů mezi proměnnou a výrazem\n", __func__, __FILE__, __LINE__); \
-    exit(7); \
+    return 7; \
 } while (0)
 
 // Helper function
@@ -29,20 +26,23 @@ void insert_to_var_table(Statement *statement, VarTable *var_table){
 }
 
 // Var x = 5
-bool semantic_variable(VarTableStack *stack, FuncTable *table, Statement *statement) {
+int semantic_variable(VarTableStack *stack, FuncTable *table, Statement *statement) {
+    // pokud jsi ve funkci, přejmenuj proměnnou na func_name%var_name
+    // func_name = statement.func.id.string + "%" + var.id.string
+
     VarTable var_table_;
     VarTable *var_table = &var_table_;
     
+    if (!stack) {
+        ERROR;
+    }
+
     vartable_stack_peek(stack, var_table);
 
-    if (!stack) {
-        ERROR("Neplatný ukazatel na zásobník proměnných");
-    }
-
-    Variable *get_var = var_table_stack_get_var(stack, statement->var.exp->id);
-    if (!get_var) {
-        SEMANTIC_ERROR_UNDEFINED_VARIABLE(statement->var.exp->id);
-    }
+    // Variable *get_var = var_table_stack_get_var(stack, statement->var.exp->id);
+    // if (!get_var) {
+    //     SEMANTIC_ERROR_UNDEFINED_VARIABLE(statement->var.exp->id);
+    // }
 
     switch (statement->var.data_type) {
         case VARTYPE_INT:
@@ -83,22 +83,86 @@ bool semantic_variable(VarTableStack *stack, FuncTable *table, Statement *statem
             insert_to_var_table(statement, var_table);
                 
         default:
-            ERROR("Neznámý typ proměnné"); 
+            ERROR; 
     }
-    return true;
+    return 0;
+}
+
+int set_type(VarTableStack *stack, Expression *exp){
+    switch(exp->type){
+        case ET_ID:
+            //Variable *id_var = var_table_stack_get_var(stack, exp->id);
+            //TODO: dodělat implementaci pro stav ET_ID
+        case ET_ADD:
+            set_type(stack, exp->ops[0]);
+            set_type(stack, exp->ops[1]);
+            VarType d0 = exp->ops[0]->data_type.type;
+            VarType d1 = exp->ops[1]->data_type.type;
+            if(d0 == d1){
+                exp->data_type = exp->ops[0]->data_type;  
+                return 0;              
+            }
+            return 7;
+
+        case ET_SUB:
+        case ET_MULT:
+        case ET_DIV:
+            set_type(stack, exp->ops[0]);
+            set_type(stack, exp->ops[1]);
+            VarType d0 = exp->ops[0]->data_type.type;
+            VarType d1 = exp->ops[1]->data_type.type;
+            if((d0 == ET_INT || ET_DOUBLE) && d0 == d1)
+            {
+                exp->data_type = exp->ops[0]->data_type;  
+                return 0;              
+            }
+            return 7;
+
+        case ET_INT:
+            exp->data_type.type = VARTYPE_INT;
+            exp->data_type.nil_allowed = false;
+            break;
+            
+        case ET_STRING:
+            exp->data_type.type = VARTYPE_STRING;
+            exp->data_type.nil_allowed = false;
+            break;
+
+        case ET_DOUBLE:
+            exp->data_type.type = VARTYPE_DOUBLE;
+            exp->data_type.nil_allowed = false;
+            break;
+
+        case ET_NIL:
+            exp->data_type.type = VARTYPE_NIL;
+            exp->data_type.nil_allowed = true;
+            break;
+    }
 }
 
 // Assign x = y
-bool semantic_assignment(VarTableStack *stack, FuncTable *table, Statement *statement) {
-    Variable *assigned_var = var_table_stack_get_var(stack, statement->assign.id);
-    if (!assigned_var) {
-        fprintf(stderr, "Chyba: %s (%s:%d): Nedefinovaná proměnná '%s'\n", __func__, __FILE__, __LINE__, statement->assign.id);
-        exit(5);
+int semantic_assignment(VarTableStack *stack, FuncTable *table, Statement *statement) {
+    assert(statement->type == ST_ASSIGN);
+
+    Variable *get_var = var_table_stack_get_var(stack, statement->assign.id);
+    if (!get_var) {
+        SEMANTIC_ERROR_UNDEFINED_VARIABLE;
     }
 
-    //TODO: doplnit případné další sémantické kontroly
-    //TODO: doplnit, co se stane při přiřazení
-    return true;
+    int ret = set_type(stack, statement->assign.exp);
+    if(ret != 0){
+        return ret;
+    }
+
+    if(get_var->type.type == statement->assign.exp->data_type.type){
+        if(statement->assign.exp->data_type.nil_allowed){
+            if(get_var->type.nil_allowed == false){
+                SEMANTIC_ERROR_TYPE_MISMATCH;
+            }
+        }
+        return 0;
+    }
+    SEMANTIC_ERROR_TYPE_MISMATCH;    
 }
 
 // If (condition) { ... } else { ... }

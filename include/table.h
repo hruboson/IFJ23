@@ -9,6 +9,7 @@ typedef enum VarType {
     VARTYPE_STRING,
     VARTYPE_INT,
     VARTYPE_DOUBLE,
+    VARTYPE_NIL,
 } VarType;
 
 typedef struct DataType {

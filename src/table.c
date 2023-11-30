@@ -70,17 +70,18 @@ void var_table_insert(VarTable* table, Variable var) {
     table->vars[table->vars_size] = var;
     table->vars_size++;
 }
+
 Variable* var_table_get(VarTable* table, SymbolRecord* id) {
     Variable* var;
-    for (size_t i = 0; i < table->vars_size; i++) {
+    if (!table) return NULL;
+    for (size_t i = 0; i < (table->vars_size + 1); i++) {
         var = &(table->vars[i]);
         if (var) {
             if (var->id->hash == id->hash) {
                 return var;
             }
         }
-        i++;
     }
 
-    return NULL;
+    return NULL;  // variable not found in table
 }

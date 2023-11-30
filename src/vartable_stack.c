@@ -26,7 +26,7 @@ void clear_vartable_stack(VarTableStack* stack) {
 }
 
 void vartable_stack_push(VarTableStack* stack, VarTable* table) {
-    if (stack->size == stack->cap) {  // max cap reached
+    if (stack->size == stack->cap - 1) {  // max cap reached
         stack->cap *= 2;
         stack->vartables = realloc(stack->vartables, sizeof(VarTable*) * stack->cap);
         if (!stack->vartables) exit(99);
@@ -59,13 +59,12 @@ bool vartable_stack_is_empty(VarTableStack* stack) {
 }
 
 Variable* var_table_stack_get_var(VarTableStack* stack, SymbolRecord* id) {
-    VarTable curr_;
-    VarTable* curr = &curr;
+    VarTable* curr;
     Variable* var = NULL;
-    size_t i = stack->size;
+    size_t i = stack->size - 1;
     do {
         curr = stack->vartables[i--];
         var = var_table_get(curr, id);
-    } while (var == NULL && i > 0);
-    return NULL;
+    } while (var == NULL && i >= 0);
+    return var;
 }

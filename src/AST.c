@@ -4,6 +4,7 @@
 
 void init_ast(AST* ast) {
     ast->statement = NULL;
+    init_symboltable( &ast->symtab );
 }
 
 void clear_ast(AST* ast) {
@@ -16,6 +17,7 @@ void clear_ast(AST* ast) {
         }*/
 		ast->statement = NULL;
     }
+    clear_symboltable( &ast->symtab );
 }
 
 void ast_append(AST* ast, Statement* st) {

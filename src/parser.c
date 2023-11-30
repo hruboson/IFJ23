@@ -7,8 +7,6 @@
 #include "vartable_stack.h"
 
 int parse(Input* input, AST* ast) {
-	SymbolTable symtab;
-	init_symboltable(&symtab);
 
 	int ret = 0;
 
@@ -20,7 +18,10 @@ int parse(Input* input, AST* ast) {
 	FuncTable func_table;
 
 	while (ret == 0) {
-		ret = parse_statement(input, &symtab, &st, &var_table_stack, &func_table);
+		ret = parse_statement(input,
+			&ast->symtab, &st,
+			&var_table_stack, &func_table
+		);
 
 		if (ret)
 			break;

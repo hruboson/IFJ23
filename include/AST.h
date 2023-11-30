@@ -1,9 +1,11 @@
 #pragma once
 
 #include "statement.h"
+#include "symtable.h"
 
 typedef struct AST {
-    Statement* statement;
+	SymbolTable symtab;
+	Statement* statement;
 } AST;
 
 void init_ast(AST*);

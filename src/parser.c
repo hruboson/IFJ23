@@ -6,6 +6,14 @@
 #include "stdlib.h"
 #include "vartable_stack.h"
 
+// newline check
+// pars: Input* input, SymbolTable* symtab, Token* token
+#define PARSE_POTENTIAL_NEWLINE(input, symtab, token) do { \
+	if (token->type == TOKENTYPE_NEWLINE) { \
+		get_token(input, symtab, token); \
+	} \
+} while (0)
+
 int parse(Input* input, AST* ast) {
 	int ret = 0;
 
@@ -63,11 +71,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		bool is_let = false;
 		Expression exp;
 
-		// newline check
 		get_token(input, symtab, token);
-		if (token->type == TOKENTYPE_NEWLINE) {
-			get_token(input, symtab, token);
-		}
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		// zacatek scope
 		VarTable *vartable;
@@ -77,11 +82,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_LET) {
 			
-			// newline check
 			get_token(input, symtab, token);
-			if (token->type == TOKENTYPE_NEWLINE) {
-				get_token(input, symtab, token);
-			}
+			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 			if (token->type != TOKENTYPE_ID) {  // TODO: staci to takto?
 				return 2;                       // TODO: ma se vracet nejake cislo != 0 oznacujici chybu? jake?
@@ -92,22 +94,15 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		
 		// TODO parse exp
 
-
-		// newline check
 		get_token(input, symtab, token);
-		if (token->type == TOKENTYPE_NEWLINE) {
-			get_token(input, symtab, token);
-		}
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type != TOKENTYPE_BRACE_L) {
 			return 2;
 		}
 
-		// newline check
 		get_token(input, symtab, token);
-		if (token->type == TOKENTYPE_NEWLINE) {
-			get_token(input, symtab, token);
-		}
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		// parse if body
 		ret = parse_statement_list(token, input,
@@ -123,10 +118,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			get_token(input, symtab, token);
 		}
 
-		// newline check
-		if (token->type == TOKENTYPE_NEWLINE) {
-			get_token(input, symtab, token);
-		}
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type != TOKENTYPE_BRACE_R) {
 			return 2;
@@ -138,22 +130,16 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			return 2;
 		}
 
-		// newline check
 		get_token(input, symtab, token);
-		if (token->type == TOKENTYPE_NEWLINE) {
-			get_token(input, symtab, token);
-		}
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_BRACE_L) {
 			return 2;
 		}
 
-		// newline check
 		get_token(input, symtab, token);
-		if (token->type == TOKENTYPE_NEWLINE) {
-			get_token(input, symtab, token);
-		}
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		// parse else body
 		ret = parse_statement_list(token, input,
@@ -173,10 +159,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			get_token(input, symtab, token);
 		}
 
-		// newline check
-		if (token->type == TOKENTYPE_NEWLINE) {
-			get_token(input, symtab, token);
-		}
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type != TOKENTYPE_BRACE_R) {
 			return 2;
@@ -214,11 +197,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		init_var_table(&vartable);
 		vartable_stack_push(var_table_stack, &vartable);
 
-		// newline check
 		get_token(input, symtab, token);
-		if (token->type == TOKENTYPE_NEWLINE) {
-			get_token(input, symtab, token);
-		}
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
@@ -236,18 +216,13 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			get_token(input, symtab, token);
 		}
 
-		// newline check
 		get_token(input, symtab, token);
-		if (token->type == TOKENTYPE_NEWLINE) {
-			get_token(input, symtab, token);
-		}
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type == TOKENTYPE_BRACE_L) {
-			// newline check
+
 			get_token(input, symtab, token);
-			if (token->type == TOKENTYPE_NEWLINE) {
-				get_token(input, symtab, token);
-			}
+			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 			
 			ret = parse_statement_list( token, input,
 					symtab, (*statement)->while_.body,
@@ -265,13 +240,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 				get_token(input, symtab, token);
 			}
 
-			//TODO: napsat makro/funkci na newline check
-			// a oddelat else get_token, get_token pridat jako soucast toho makra
-
-			// newline check
-			if (token->type == TOKENTYPE_NEWLINE) {
-				get_token(input, symtab, token);
-			}
+			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 			
 			if (token->type == TOKENTYPE_BRACE_R) {
 				(*statement)->while_.exp = NULL;
@@ -374,7 +343,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		// TODO parse exp
 		(*statement)->type = ST_RETURN;
 
-		// newline check
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_NEWLINE) {
 			return 0;

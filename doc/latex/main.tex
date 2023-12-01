@@ -1,0 +1,73 @@
+\documentclass[12pt]{article}
+
+\usepackage{siunitx}
+\usepackage{enumerate}
+
+\usepackage{subfiles} % Best loaded last in the preamble
+
+\begin{document}
+
+\title{Implementace překladače imperativního jazyka IFJ23}
+\author{
+    Tým xhrubo01, varianta TRP-izp
+    \and
+    % abecedně
+    Dominik Borek (xborek12)
+	\and
+    Ondřej Hruboš (xhrubo01)
+	\and
+	Radek Jestřabík (xjestr04)
+	\and
+	Ondřej Šatinský (xsatin03)
+}
+%\affil{Vysoké učení technické v Brně - Fakulta informačních technologií}
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+	// todo
+\end{abstract}
+
+\section{Rozdělení práce}
+// todo
+
+%=============================================================================%
+% ZADÁNÍ
+%=============================================================================%
+%V dokumentaci popisujte návrh (části překladače a předávání informací mezi nimi),
+%implementaci (použité datové struktury, tabulku symbolů, generování kódu), vývojový cyk-
+%lus, způsob práce v týmu, speciální použité techniky a algoritmy a různé odchylky od před-
+%nášené látky či tradičních přístupů. Nezapomínejte také citovat literaturu a uvádět refe-
+%rence na čerpané zdroje včetně správné citace převzatých částí (obrázky, magické konstanty,
+%vzorce). Nepopisujte záležitosti obecně známé či přednášené na naší fakultě.
+%Dokumentace musí povinně obsahovat (povinné tabulky a diagramy se nezapočítá-
+%vají do doporučeného rozsahu):
+%• 1. strana: jména, příjmení a přihlašovací jména řešitelů (označení vedoucího) + údaje
+%o rozdělení bodů, identifikaci vaší varianty zadání ve tvaru “Tým login_vedoucího,
+%varianta 𝑋” a výčet identifikátorů implementovaných rozšíření.
+%• Rozdělení práce mezi členy týmu (uveďte kdo a jak se podílel na jednotlivých částech
+%projektu; povinně zdůvodněte odchylky od rovnoměrného rozdělení bodů).
+%• Diagram konečného automatu, který specifikuje lexikální analyzátor.
+%• LL-gramatiku, LL-tabulku a precedenční tabulku, podle kterých jste implementovali
+%váš syntaktický analyzátor.
+%• Stručný popis členění implementačního řešení včetně názvů souborů, kde jsou jed-
+%notlivé části včetně povinných implementovaných metod překladače k nalezení
+
+% ZATÍM POUŽITY PRACOVNÍ NÁZVY PRO SEKCE
+\section{Scanner}
+\subfile{sections/scanner.tex}
+
+\section{Parser}
+\subfile{sections/parser.tex}
+
+\section{Semantic}
+\subfile{sections/semantic.tex}
+
+\section{Vnitřní kód}
+\subfile{sections/ir.tex}
+
+\section{Generátor cílového kódu}
+\subfile{sections/code_generator.tex}
+
+\end{document}

@@ -12,6 +12,6 @@
 #include "table.h"
 
 int parse(Input*, AST*);
-int parse_statement(Input*, SymbolTable*, Statement**, VarTableStack*, FuncTable*);
+int parse_statement(Token*, Input*, SymbolTable*, Statement**, VarTableStack*, FuncTable*, bool);
 int parse_expression(Input*, SymbolTable*, Expression**, Token*, Token*, bool*);
-int parse_statement_list(Token *,Input*, SymbolTable*, Statement**, VarTableStack*, FuncTable*, Statement *, Token*, bool*);
+int parse_statement_list(Token *,Input*, SymbolTable*, Statement**, VarTableStack*, FuncTable*, Statement *, bool);

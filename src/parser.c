@@ -11,8 +11,10 @@
 #define PARSE_POTENTIAL_NEWLINE(input, symtab, token) do { \
 	if (token->type == TOKENTYPE_NEWLINE) { \
 		get_token(input, symtab, token); \
+	} else { \
+		break; \
 	} \
-} while (0)
+} while (1)
 
 int parse(Input* input, AST* ast) {
 	int ret = 0;
@@ -30,19 +32,20 @@ int parse(Input* input, AST* ast) {
 	ret = parse_statement_list(NULL, input,
 		&ast->symtab, &ast->statement,
 		&var_table_stack, &func_table, 
-		NULL,
-		&out_token, &out_token_returned
+		NULL, false
 	);
 
-	if (ret == -1)
+	if (ret == -1) {
 		ret = 0;
-	else
-		ret = 99;
+	}
+	else {
+		ret = 99; //TODO: nema tady byt 2?
+	}
 
 	return ret;
 }
 
-int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, VarTableStack* var_table_stack, FuncTable* func_table) {
+int parse_statement(Token* in_token, Input *input, SymbolTable* symtab, Statement** statement, VarTableStack* var_table_stack, FuncTable* func_table, bool in_function) {
 	Token _token;
 	Token* token = &_token;
 
@@ -59,13 +62,25 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 	(*statement)->next = NULL;
 
-	get_token(input, symtab, token);
-	if (token->type == TOKENTYPE_EOF) return -1;
+	if (in_token == NULL) {
+		get_token(input, symtab, token);
+	} else {
+		token = in_token;
+	}
+
+	if (token->type == TOKENTYPE_EOF) {
+		return -1;
+	}
+
+	else if (token->type == TOKENTYPE_BRACE_R) {
+		return -2; // -2 oznacuje "}"
+	}
+
 
 	// <statement> -> if let <id> { <statementList> } [else { <statementList> }]
 	// <statement> -> if <exp> { <statementList> } [else { <statementList> }]
 	// TODO check newlines
-	if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_IF) {
+	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_IF) {
 		(*statement)->type = ST_IF;
 
 		bool is_let = false;
@@ -108,8 +123,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		ret = parse_statement_list(token, input,
 			symtab, (*statement)->if_.body,
 			var_table_stack, func_table, 
-			NULL,
-			&out_token, &out_token_returned
+			*statement, in_function
 		);
 
 		if (out_token_returned) {
@@ -145,8 +159,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		ret = parse_statement_list(token, input,
 			symtab, (*statement)->if_.else_,
 			var_table_stack, func_table, 
-			NULL,
-			&out_token, &out_token_returned
+			*statement, in_function
 		);
 
 		if (ret != 0) {
@@ -216,18 +229,17 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			get_token(input, symtab, token);
 		}
 
-		get_token(input, symtab, token);
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type == TOKENTYPE_BRACE_L) {
 
 			get_token(input, symtab, token);
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
-			
+
 			ret = parse_statement_list( token, input,
 					symtab, (*statement)->while_.body,
 					var_table_stack, func_table,
-					statement, &out_token, &out_token_returned
+					*statement, in_function
 				);
 
 			if (ret != 0) {
@@ -447,6 +459,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 					}
 				}
 			}
+
 			if (token->type == TOKENTYPE_COMMA) {  // more params
 				// todo recursive call for parameters
 			} else if (token->type == TOKENTYPE_PAR_R) {
@@ -456,7 +469,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 					ret = parse_statement_list( NULL, input,
 							symtab, (*statement)->func.body,
 							var_table_stack, func_table,
-							statement, &out_token, &out_token_returned
+							*statement, true
 						);
 
 					if (ret != 0) {
@@ -488,25 +501,46 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 // pokud jsem ve funkci, nemuzu udelat definici funkce
 // current_scope == NULL => jsme v globalni
 // out_token => vraci prvni precteny token, ktery uz nepatri statement listu (napr. EOF, {, Int, Double, String,...)
-int parse_statement_list(Token* in_token, Input* input, SymbolTable* symtab, Statement** statement, VarTableStack* var_table_stack, FuncTable* func_table, Statement *current_function, Token* out_token, bool* out_token_returned) {
+int parse_statement_list(Token* in_token, Input* input, SymbolTable* symtab, Statement** statement, VarTableStack* var_table_stack, FuncTable* func_table, Statement *current_scope, bool in_function) {
 	int ret = 0;
 
 	Statement* st;
 	Statement** next_st = statement;
 
 	while (ret == 0) {
-		//TODO: in_token posilat sem
-		ret = parse_statement(input,
+		printf("TYPE: %d, %d\n", current_scope, __LINE__);
+
+		ret = parse_statement(in_token, input,
 			symtab, &st, 
 			var_table_stack, 
-			func_table
+			func_table, in_function
 		);
+
+		printf("TYPE AFTER: %d, %d\n", current_scope, __LINE__);
 
 		if (ret)
 			break;
 
+		if (st->type == ST_FUNC && current_scope != NULL) {
+			printf("RET 2 %d\n", __LINE__);
+			return 2;
+		} else if (st->type == ST_RETURN && !in_function) {
+			printf("RET 2 %d\n", __LINE__);
+			return 2;
+		} 
+
 		*next_st = st;
 		next_st = &st->next;
+	}
+
+	if (ret == -1 && current_scope != NULL) { // ret == -1 znamena EOF
+
+		printf("RET 2 %d\n", __LINE__);
+		return 2;
+
+	} else if (ret == -2 && current_scope == NULL) { // ret == -2 znamena '}'
+		printf("RET 2 %d\n", __LINE__);
+		return 2;
 	}
 
 	return ret;

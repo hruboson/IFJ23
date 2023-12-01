@@ -1,4 +1,4 @@
-#include "semantic.h"
+#include "parser.h"
 #include "ir_generator.h"
 #include "code_generator.h"
 
@@ -9,7 +9,7 @@ int process_file( Input* in, AST* ast, IR* ir, String* target_code ) {
 	int ret;
 
 	/* convert source code into an AST */
-	ret = semantic( in, ast );
+	ret = parse(in, ast);
 	if ( ret ) {
 		return ret;
 	}

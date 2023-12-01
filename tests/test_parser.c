@@ -568,7 +568,7 @@ void test_while_simple_int_exp(void) {
 
 	TEST_ASSERT_EQUAL_INT(0, ret);
 
-	//TODO: test na ast.statement->while_.body
+	TEST_ASSERT(ast.statement->while_.body == NULL);
 	TEST_ASSERT(ast.statement->while_.exp->type == ET_INT);
 	TEST_ASSERT_EQUAL_INT(1, ast.statement->while_.exp->int_);
 }
@@ -595,6 +595,42 @@ void test_while_newlines_simple_int_exp(void) {
 	TEST_ASSERT_EQUAL_INT(1, ast.statement->while_.exp->int_);
 
 }
+
+void test_while_simple_int_exp_with_body(void) {
+	const char* data = "while 1 { var a : Int = 3\n }";
+	Input in = {
+		.type = INT_STRING,
+		.string = {
+			.s = data,
+			.i = 0, .store = 0,
+		},
+	};
+
+	AST ast;
+	init_ast(&ast);
+
+	Statement *st;
+
+	int ret = parse(&in, &ast);
+
+	TEST_ASSERT_EQUAL_INT(0, ret);
+
+	TEST_ASSERT(ast.statement != NULL);
+	st = ast.statement;
+
+	TEST_ASSERT(st->while_.body != NULL);
+	TEST_ASSERT(st->while_.body->type == ST_VAR);
+	TEST_ASSERT(st->while_.body->var.modifiable == true);
+	TEST_ASSERT(st->while_.body->var.data_type == VARTYPE_INT);
+	TEST_ASSERT_EQUAL_INT(3, st->while_.body->var.exp->int_);
+	TEST_ASSERT_EQUAL_STRING("a", st->while_.body->var.id->symbol.data);
+
+	TEST_ASSERT(st->while_.exp != NULL);
+	TEST_ASSERT(st->while_.exp->type == ET_INT);
+	TEST_ASSERT_EQUAL_INT(1, st->while_.exp->int_);
+}
+
+//TODO: test na vnorene veci
 
 
 int main(void) {
@@ -623,6 +659,7 @@ int main(void) {
 
 	RUN_TEST(test_while_simple_int_exp);
 	RUN_TEST(test_while_newlines_simple_int_exp);
+	RUN_TEST(test_while_simple_int_exp_with_body);
 
     return UNITY_END();
 }

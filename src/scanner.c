@@ -74,6 +74,7 @@ typedef enum State {
 	STATE_STRING_3,
 	STATE_STRING_3_BODY,
 	STATE_STRING_3_BODY_NEWLINE,
+	STATE_STRING_3_BODY_NEWLINE_0,
 	STATE_STRING_3_BODY_QUOTE,
 	STATE_STRING_3_BODY_QUOTE2,
 	STATE_STRING_3_BODY_INV_QUOTE,
@@ -575,7 +576,7 @@ get_token( Input* in, SymbolTable* symtab, Token* token ) {
 		case STATE_STRING_3:
 			switch ( c ) {
 			case '\n':
-				state = STATE_STRING_3_BODY;
+				state = STATE_STRING_3_BODY_NEWLINE_0;
 				break;
 			default:
 				return 1;
@@ -615,7 +616,6 @@ get_token( Input* in, SymbolTable* symtab, Token* token ) {
 			}
 
 			state = STATE_STRING_3_BODY;
-
 			break;
 		case STATE_STRING_3_BODY_INV_QUOTE2:
 			if ( c == '"' ) {
@@ -632,9 +632,27 @@ get_token( Input* in, SymbolTable* symtab, Token* token ) {
 			}
 
 			state = STATE_STRING_3_BODY;
+			break;
+		case STATE_STRING_3_BODY_NEWLINE_0:
+			if ( c == EOF )
+				return 1;
 
+			if ( c == '"' ) {
+				state = STATE_STRING_3_BODY_QUOTE;
+				break;
+			}
+
+			if ( c == '\n' )
+				string_append_c( &string, '\n' );
+
+			c = in_ungetc( in, c );
+			if ( c == EOF )
+				return 99;
+
+			state = STATE_STRING_3_BODY;
 			break;
 		case STATE_STRING_3_BODY_NEWLINE:
+
 			if ( c == EOF )
 				return 1;
 
@@ -646,7 +664,6 @@ get_token( Input* in, SymbolTable* symtab, Token* token ) {
 			c = in_ungetc( in, c );
 			if ( c == EOF )
 				return 99;
-
 
 			state = STATE_STRING_3_BODY;
 			string_append_c( &string, '\n' );

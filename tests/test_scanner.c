@@ -198,9 +198,25 @@ void test_operators(void) {
 
 void test_strings(void) {
 	const char* data = ""
-		"\"\" "
-		"\" \\\" \" "
-		"\"Hello, World!\" ";
+		"\"\" " // ""
+
+		"\" \\\" \" " // " \" "
+
+		"\"Hello, World!\" " // "Hello, World!"
+
+		"\"\"\"\n"
+		"\"\"\" " // ""
+
+		"\"\"\"\n"
+		"\n"
+		"\"\"\" " // "\n"
+
+		"\"\"\"\n"
+		"a\n"
+		"b\n"
+		"c\n"
+		"\"\"\" " // "a\nb\nc
+		;
 	Input in = {
 		.type = INT_STRING,
 		.string = {
@@ -212,7 +228,10 @@ void test_strings(void) {
 	const char* s[] = {
 		"",
 		" \" ",
-		"Hello, World!"
+		"Hello, World!",
+		"",
+		"\n",
+		"a\nb\nc"
 	};
 	size_t s_i = 0;
 
@@ -225,18 +244,39 @@ void test_strings(void) {
 			fprintf( stderr, "error: get_token %i\n", ret );
 		}
 		TEST_ASSERT_FALSE( ret != 0 );
-		if ( token.type == TOKENTYPE_EOF )
+		if ( token.type == TOKENTYPE_EOF ) {
+			TEST_ASSERT_TRUE( s_i == arraysize( s ) );
 			break;
+		}
+		TEST_ASSERT_TRUE( s_i < arraysize( s ) );
 
 		TEST_ASSERT_TRUE( token.type == TOKENTYPE_STRING );
 		const char* ts = token.value.str_.data;
 
+#if 0
 		if ( strcmp( ts, s[ s_i ] ) != 0 ) {
-			fprintf( stderr, "error: strings[ %lu ] not equal: \"%s\" \"%s\"\n", s_i, s[ s_i ], ts );
-		}
+			fprintf( stderr, "error: strings[ %lu ] not equal: expected: \"", s_i );
+			for ( const char* c = s[ s_i ]; *c; c++ ) {
+				if ( *c > 31 )
+					fputc( *c, stderr );
+				else
+					fprintf( stderr, "\\{%x}", *c );
+			}
 
-		TEST_ASSERT_TRUE(
-			strcmp( token.value.str_.data, s[ s_i ] ) == 0
+			fprintf( stderr, "\" got: \"" );
+			for ( const char* c = ts; *c; c++ ) {
+				if ( *c > 31 )
+					fputc( *c, stderr );
+				else
+					fprintf( stderr, "\\{%x}", *c );
+			}
+			fprintf( stderr, "\"\n",s[ s_i ], ts );
+		}
+#endif
+
+		TEST_ASSERT_EQUAL_STRING(
+			s[ s_i ],
+			token.value.str_.data
 		);
 
 		clear_string( &token.value.str_ );

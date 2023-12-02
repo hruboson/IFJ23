@@ -23,6 +23,8 @@ typedef enum IR_Type {
 	IRT_lt, IRT_lte,
 	IRT_gt, IRT_gte,
 
+	IRT_defvar,
+
 	IRT_asgn,
 
 	IRT_asgn_int,

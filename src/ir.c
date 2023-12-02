@@ -297,18 +297,24 @@ convert_st( IR* ir, IR_Body* body, const Statement* st ) {
 	IR_Inst inst;
 	String s;
 	SymbolRecord *l_skip, *l_start, *t0, *l_else;
+	SymbolRecord *id;
 	IR_Func fn;
 	for ( const Statement* i = st; i; i = i->next ) {
 		switch ( i->type ) {
 		case ST_VAR:
+			s = string_copy( &i->var.id->symbol );
+			symboltable_insert( &ir->symtab, &s, &id );
+
+			inst.type = IRT_defvar;
+			inst.id = id;
+			ir_append( body, &inst );
+
 			// skip if no values is assigned
 			if ( i->var.exp == NULL )
 				continue;
 
 			inst.type = IRT_asgn;
-
-			s = string_copy( &i->var.id->symbol );
-			symboltable_insert( &ir->symtab, &s, inst.ops + 0 );
+			inst.ops[ 0 ] = id;
 
 			// exp
 			inst.ops[ 1 ] = convert_exp( ir, body, i->var.exp );

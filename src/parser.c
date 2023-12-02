@@ -60,6 +60,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	Token out_token;
 	bool out_token_returned;
 
+	Expression *exp;
+
 	int ret;
 
 	get_token(input, symtab, token);
@@ -112,8 +114,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			(*statement)->if_.check_nil = false;
 		}
 		
-		Expression *exp;
-
 		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
 		//TODO: ret = semantic_condition(VarTableStack, FunctionTable, Statement) return value = jestli prosla
@@ -278,8 +278,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			}
 
 			if (token->type == TOKENTYPE_EQUALS) {
-				Expression *exp;
-
 				ret = parse_expression(input, symtab, &exp, NULL, &out_token, &out_token_returned);
 
 				//TODO: ret = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
@@ -318,20 +316,36 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		return 2;
 	}
 
-	// TODO: <statement> -> <func>
-
 	// <statement> -> <id> = <exp> \n
 	else if (token->type == TOKENTYPE_ID) {
 		(*statement)->type = ST_ASSIGN;
 
+		(*statement)->assign.id = token->value.id;
+
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_EQUALS) {
-			// TODO parse exp
+			
+			ret = parse_expression(input, symtab, &exp, NULL, &out_token, &out_token_returned);
 
-			get_token(input, symtab, token);
+			//TODO: ret = semantic_assignment(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+
+			(*statement)->assign.exp = exp;
+
+			if (ret != 0) {
+				return ret;
+			}
+
+			if (out_token_returned) {
+				token = &out_token;
+			} else {
+				get_token(input, symtab, token);
+			}
+
 			if (token->type == TOKENTYPE_NEWLINE) {
 				return 0;
 			}
+
+			return 2;
 		}
 	}
 
@@ -339,13 +353,16 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_FUNC) {
 		(*statement)->type = ST_FUNC;
 		
-		// zacatek scope
-		VarTable vartable;
-		init_var_table(&vartable);
-		vartable_stack_push(var_table_stack, &vartable);
-		
 		get_token(input, symtab, token);
+
+		//TODO: <statement> -> <func> () volani funkce
+
 		if (token->type == TOKENTYPE_ID) {
+			// zacatek scope
+			VarTable vartable;
+			init_var_table(&vartable);
+			vartable_stack_push(var_table_stack, &vartable);
+
 			(*statement)->func.id = token->value.id;
 			
 			get_token(input, symtab, token);
@@ -421,6 +438,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 				return 0;
 			}
 		}
+		return 2;
 	}
 }
 
@@ -484,7 +502,6 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 	if (*exp == NULL) {
 		exit(99);
 	}
-
 
 	switch (token->type) {
 		case TOKENTYPE_DOUBLE:

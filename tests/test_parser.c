@@ -902,6 +902,34 @@ void test_func_return_type_void(void) {
 	TEST_ASSERT(st->func.parameters[0].type.nil_allowed == true);	
 }
 
+void test_assign_simple(void) {
+	const char* data = "a = 2.0 \n";
+	Input in = {
+		.type = INT_STRING,
+		.string = {
+			.s = data,
+			.i = 0, .store = 0,
+		},
+	};
+
+	AST ast;
+	init_ast(&ast);
+
+	Statement *st;
+
+	int ret = parse(&in, &ast);
+
+	TEST_ASSERT_EQUAL_INT(0, ret);
+
+	TEST_ASSERT(ast.statement != NULL);
+	st = ast.statement;
+
+	TEST_ASSERT(st->assign.id != NULL);
+	TEST_ASSERT_EQUAL_STRING("a", st->assign.id->symbol.data);
+	TEST_ASSERT(st->assign.exp != NULL);
+	TEST_ASSERT_EQUAL_INT(ET_DOUBLE, st->assign.exp->type);
+	TEST_ASSERT_EQUAL_DOUBLE(2.0, st->assign.exp->double_);
+}
 
 
 int main(void) {
@@ -941,6 +969,8 @@ int main(void) {
 	RUN_TEST(test_func_one_param);
 	RUN_TEST(test_func_two_params);
 	RUN_TEST(test_func_return_type_void);
+
+	RUN_TEST(test_assign_simple);
 
     return UNITY_END();
 }

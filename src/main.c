@@ -34,6 +34,7 @@ int process_file( Input* in, AST* ast, IR* ir, String* target_code ) {
 }
 
 int main(int argc, char const *argv[]) {
+	(void)argc; (void)argv;
 
 	Input in = {
 		.type = INT_FILE,

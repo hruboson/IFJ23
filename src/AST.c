@@ -51,7 +51,7 @@ void print_ast(AST* ast) {
             case ST_ASSIGN:
                 printf("assign {\n");
                 // todo print_exp(stm->assign.exp);
-                printf("id: %s\n", stm->assign.id->symbol.data);
+                printf("\tid: %s\n", stm->assign.id->symbol.data);
                 printf("}\n");
                 break;
             case ST_EXP:
@@ -61,11 +61,11 @@ void print_ast(AST* ast) {
                 break;
             case ST_FUNC:
                 printf("function {\n");
-                printf("id: %s\n", stm->func.id->symbol.data);
-                printf("used: %s\n", stm->func.used ? "true" : "false");
-                printf("param_count: %zu\n", stm->func.param_count);
+                printf("\tid: %s\n", stm->func.id->symbol.data);
+                printf("\tused: %s\n", stm->func.used ? "true" : "false");
+                printf("\tparam_count: %zu\n", stm->func.param_count);
                 // todo print_exp(stm->exp.exp);
-                printf("return_type: ");
+                printf("\treturn_type: ");
                 switch (stm->func.return_type.type) {
                     case VARTYPE_DOUBLE:
                         printf("double");
@@ -89,30 +89,33 @@ void print_ast(AST* ast) {
                 }
                 printf(", nil_allowed: %s\n", stm->func.return_type.nil_allowed ? "true" : "false");
                 Statement* stm_func = stm->func.body;
+                printf("\tbody {\n");
                 while (stm_func) {
-                    print_statement(stm_func, 1);
+                    print_statement(stm_func, 2);
                     stm_func = stm_func->next;
                 }
+                printf("\t}\n");
                 printf("}\n");
                 break;
             case ST_IF:
                 printf("if {\n");
                 // todo print_exp(stm->if_.exp)
-                printf("check_nil: %s\n", stm->if_.check_nil ? "true" : "false");
-                printf("body {\n");
+                printf("\tcheck_nil: %s\n", stm->if_.check_nil ? "true" : "false");
+                printf("\tbody {\n");
                 Statement* stm_if = stm->if_.body;
                 while (stm_if) {
-                    print_statement(stm_if, 1);
+                    print_statement(stm_if, 2);
                     stm_if = stm_if->next;
                 }
-                printf("}\n");
+                printf("\t}\n");
                 stm_if = stm->if_.else_;
-                printf("else {\n");
+                printf("\telse {\n");
                 while (stm_if) {
-                    print_statement(stm_if, 1);
+                    print_statement(stm_if, 2);
                     stm_if = stm_if->next;
                 }
-                printf("\n}");
+                printf("\t}\n");
+                printf("}\n");
                 break;
             case ST_RETURN:
                 printf("return {\n");
@@ -121,10 +124,10 @@ void print_ast(AST* ast) {
                 break;
             case ST_VAR:
                 printf("variable {\n");
-                printf("id: %s\n", stm->var.id->symbol.data);
+                printf("\tid: %s\n", stm->var.id->symbol.data);
                 // todo print_exp(stm->var.exp);
-                printf("modifiable: %s\n", stm->var.modifiable ? "true" : "false");
-                printf("data_type: ");
+                printf("\tmodifiable: %s\n", stm->var.modifiable ? "true" : "false");
+                printf("\tdata_type: ");
                 switch (stm->var.data_type) {
                     case VARTYPE_DOUBLE:
                         printf("double");
@@ -147,7 +150,7 @@ void print_ast(AST* ast) {
                         break;
                 }
                 printf(", nil_allowed: %s\n", stm->var.allow_nil ? "true" : "false");
-                printf("used: %s\n", stm->var.used ? "true" : "false");
+                printf("\tused: %s\n", stm->var.used ? "true" : "false");
                 printf("}\n");
                 break;
             case ST_WHILE:
@@ -178,8 +181,8 @@ void print_statement(Statement* stm, size_t tabs) {
     switch (stm->type) {
         case ST_ASSIGN:
             printf("%sassign {\n", tab.data);
-            // todo print_exp(stm->assign.exp);
-            printf("%sid: %s\n", tab.data, stm->assign.id->symbol.data);
+            // todo print_exp(stm->assign.exp, tabs);
+            printf("%s\tid: %s\n", tab.data, stm->assign.id->symbol.data);
             printf("%s}\n", tab.data);
             break;
         case ST_EXP:
@@ -189,11 +192,11 @@ void print_statement(Statement* stm, size_t tabs) {
             break;
         case ST_FUNC:
             printf("%sfunction {\n", tab.data);
-            printf("%sid: %s\n", tab.data, stm->func.id->symbol.data);
-            printf("%sused: %s\n", tab.data, stm->func.used ? "true" : "false");
-            printf("%sparam_count: %zu\n", tab.data, stm->func.param_count);
+            printf("%s\tid: %s\n", tab.data, stm->func.id->symbol.data);
+            printf("%s\tused: %s\n", tab.data, stm->func.used ? "true" : "false");
+            printf("%s\tparam_count: %zu\n", tab.data, stm->func.param_count);
             // todo print_exp(stm->exp.exp);
-            printf("%sreturn_type: ", tab.data);
+            printf("%s\treturn_type: ", tab.data);
             switch (stm->func.return_type.type) {
                 case VARTYPE_DOUBLE:
                     printf("double");
@@ -216,30 +219,33 @@ void print_statement(Statement* stm, size_t tabs) {
                     break;
             }
             printf(", nil_allowed: %s\n", stm->func.return_type.nil_allowed ? "true" : "false");
+            printf("%s\t body {\n", tab.data);
             Statement* stm_func = stm->func.body;
             while (stm_func) {
                 print_statement(stm_func, ++tabs);
                 stm_func = stm_func->next;
             }
-            printf("}\n");
+            printf("%s\t }\n", tab.data);
+            printf("%s}\n", tab.data);
             break;
         case ST_IF:
             printf("%sif {\n", tab.data);
             // todo print_exp(stm->if_.exp)
-            printf("%scheck_nil: %s\n", tab.data, stm->if_.check_nil ? "true" : "false");
-            printf("%sbody {\n", tab.data);
+            printf("%s\tcheck_nil: %s\n", tab.data, stm->if_.check_nil ? "true" : "false");
+            printf("%s\tbody {\n", tab.data);
             Statement* stm_if = stm->if_.body;
             while (stm_if) {
                 print_statement(stm_if, ++tabs);
                 stm_if = stm_if->next;
             }
-            printf("%s}\n", tab.data);
+            printf("%s\t}\n", tab.data);
             stm_if = stm->if_.else_;
-            printf("%selse {\n", tab.data);
+            printf("%s\telse {\n", tab.data);
             while (stm_if) {
                 print_statement(stm_if, ++tabs);
                 stm_if = stm_if->next;
             }
+            printf("%s\t}\n", tab.data);
             printf("%s}\n", tab.data);
             break;
         case ST_RETURN:
@@ -249,10 +255,10 @@ void print_statement(Statement* stm, size_t tabs) {
             break;
         case ST_VAR:
             printf("%svariable {\n", tab.data);
-            printf("%sid: %s\n", tab.data, stm->var.id->symbol.data);
+            printf("%s\tid: %s\n", tab.data, stm->var.id->symbol.data);
             // todo print_exp(stm->var.exp);
-            printf("%smodifiable: %s\n", tab.data, stm->var.modifiable ? "true" : "false");
-            printf("%sdata_type: ", tab.data);
+            printf("%s\tmodifiable: %s\n", tab.data, stm->var.modifiable ? "true" : "false");
+            printf("%s\tdata_type: ", tab.data);
             switch (stm->var.data_type) {
                 case VARTYPE_DOUBLE:
                     printf("double");
@@ -274,7 +280,7 @@ void print_statement(Statement* stm, size_t tabs) {
                     break;
             }
             printf(", nil_allowed: %s\n", stm->var.allow_nil ? "true" : "false");
-            printf("%sused: %s\n", tab.data, stm->var.used ? "true" : "false");
+            printf("%s\tused: %s\n", tab.data, stm->var.used ? "true" : "false");
             printf("%s}\n", tab.data);
             break;
         case ST_WHILE:
@@ -295,4 +301,5 @@ void print_statement(Statement* stm, size_t tabs) {
 }
 
 void print_exp(Expression* exp) {
+    // todo
 }

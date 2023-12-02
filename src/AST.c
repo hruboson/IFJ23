@@ -66,7 +66,7 @@ void print_ast(AST* ast) {
                 printf("\tparam_count: %zu\n", stm->func.param_count);
                 printf("\tparameters {\n");
                 for (size_t i = 0; i < stm->func.param_count; i++) {
-                    printf("\t\textern: %s, intern: %s, data_type: %s, ", stm->func.parameters[i].extern_id, stm->func.parameters[i].intern_id);
+                    printf("\t\textern: %s, intern: %s, data_type: %s, ", stm->func.parameters[i].extern_id->symbol.data, stm->func.parameters[i].intern_id->symbol.data);
                     switch (stm->func.parameters[i].type.type) {
                         case VARTYPE_DOUBLE:
                             printf("double");
@@ -224,7 +224,7 @@ void print_statement(Statement* stm, size_t tabs) {
             printf("%s\tparam_count: %zu\n", tab.data, stm->func.param_count);
             printf("%s\tparameters {\n", tab.data);
             for(size_t i = 0; i < stm->func.param_count; i++){
-                printf("%s\t\textern: %s, intern: %s, data_type: %s", tab.data, stm->func.parameters[i].extern_id, stm->func.parameters[i].intern_id);
+                printf("%s\t\textern: %s, intern: %s, data_type: %s", tab.data, stm->func.parameters[i].extern_id->symbol.data, stm->func.parameters[i].intern_id->symbol.data);
                 switch (stm->func.parameters[i].type.type) {
                     case VARTYPE_DOUBLE:
                         printf("double");

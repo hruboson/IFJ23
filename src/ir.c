@@ -297,6 +297,7 @@ convert_st( IR* ir, IR_Body* body, const Statement* st ) {
 	IR_Inst inst;
 	String s;
 	SymbolRecord *l_skip, *l_start, *t0, *l_else;
+	IR_Func fn;
 	for ( const Statement* i = st; i; i = i->next ) {
 		switch ( i->type ) {
 		case ST_VAR:
@@ -390,9 +391,7 @@ convert_st( IR* ir, IR_Body* body, const Statement* st ) {
 			break;
 
 		case ST_RETURN:
-			IR_Inst inst = {
-				.type = IRT_return,
-			};
+			inst.type = IRT_return;
 
 			// exp
 			inst.id = convert_exp( ir, &ir->main, i->return_.exp );
@@ -404,9 +403,6 @@ convert_st( IR* ir, IR_Body* body, const Statement* st ) {
 			convert_exp( ir, body, i->exp.exp );
 			break;
 		case ST_FUNC:
-
-			IR_Func fn;
-
 			s = string_copy( &i->func.id->symbol );
 			symboltable_insert( &ir->symtab, &s, &fn.id );
 

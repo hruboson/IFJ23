@@ -1,5 +1,6 @@
 CFLAGS = -std=c11 -Wall -Wextra -Werror=implicit-function-declaration -I$(UNITY) -I$(SRCDIR) -I. -g -DUNITY_INCLUDE_DOUBLE
 CC = gcc
+DEFINE = -DRELEASE
 
 # Source code paths
 SRCDIR := src
@@ -36,7 +37,7 @@ $(TARGET): $(OBJECTS) $(HEADERS)
 
 # Universal rule for source files
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
-	$(CC) -c $(CFLAGS) $< -o $@ -Iinclude
+	$(CC) -c $(CFLAGS) $< -o $@ -Iinclude $(DEFINE)
 
 # Make results
 $(RESULTSDIR)/%.txt: $(BUILD)/%.out
@@ -44,7 +45,7 @@ $(RESULTSDIR)/%.txt: $(BUILD)/%.out
 
 # Universal rule for test source files
 $(OBJDIR)/%.o: $(TESTSDIR)/%.c
-	$(CC) -c $(CFLAGS) $< -o $@ -Iinclude
+	$(CC) -c $(CFLAGS) $< -o $@ -Iinclude $(DEFINE)
 
 # Compile and link tests
 $(BUILD)/test_%.out: $(OBJDIR)/test_%.o $(OBJDIR)/%.o $(OBJDIR)/unity.o $(OBJECTS_WITHOUT_MAIN)
@@ -69,7 +70,7 @@ $(BUILD)/tokenizer: $(OBJDIR)/tokenizer.o $(OBJDIR)/symtable.o $(OBJDIR)/scanner
 	$(CC) -o $@ $^
 
 $(OBJDIR)/tokenizer.o: tools/tokenizer.c
-	$(CC) -c -o $@ $< -Iinclude
+	$(CC) -c -o $@ $< -Iinclude $(DEFINE)
 
 # Create directories
 $(OBJDIR):

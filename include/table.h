@@ -1,4 +1,5 @@
 #pragma once
+
 #include "symtable.h"
 
 #define FUNC_TABLE_INIT_SIZE 64

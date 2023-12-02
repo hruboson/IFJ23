@@ -1,5 +1,5 @@
 #include "parser.h"
-#include "ir_generator.h"
+#include "ir.h"
 #include "code_generator.h"
 
 #include <stdio.h>

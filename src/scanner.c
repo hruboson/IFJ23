@@ -18,13 +18,14 @@ in_getc( Input* i ) {
 			return o;
 		}
 
-		if ( i->string.s[ i->string.i ] == 0 )
+		char o = i->string.s[ i->string.i ];
+
+		if ( o == 0 )
 			return EOF;
 
-		size_t i_i = i->string.i;
 		i->string.i++;
 
-		return i->string.s[ i_i ];
+		return o;
 	}
 
 	fprintf( stderr, "scanner error: unexpected input type: %i\n", i->type );

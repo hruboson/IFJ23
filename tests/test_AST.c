@@ -138,6 +138,29 @@ void test_ast_if_else_print(void) {
     print_ast(&ast);
 }
 
+void test_ast_func_definition_print(void) {
+    const char* data = "func test() -> String { }";
+    Input in = {
+        .type = INT_STRING,
+        .string = {
+            .s = data,
+            .i = 0,
+            .store = 0,
+        },
+    };
+
+    SymbolTable symtab;
+
+    init_symboltable(&symtab);
+
+    AST ast;
+    init_ast(&ast);
+
+    int ret = parse(&in, &ast);
+
+    print_ast(&ast);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_ast_init);
@@ -149,6 +172,7 @@ int main(void) {
     RUN_TEST(test_ast_var_print);
     RUN_TEST(test_ast_while_print);
     RUN_TEST(test_ast_if_else_print);
+    RUN_TEST(test_ast_func_definition_print);
 
     return UNITY_END();
 }

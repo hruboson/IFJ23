@@ -64,6 +64,33 @@ void print_ast(AST* ast) {
                 printf("\tid: %s\n", stm->func.id->symbol.data);
                 printf("\tused: %s\n", stm->func.used ? "true" : "false");
                 printf("\tparam_count: %zu\n", stm->func.param_count);
+                printf("\tparameters {\n");
+                for (size_t i = 0; i < stm->func.param_count; i++) {
+                    printf("\t\textern: %s, intern: %s, data_type: %s, ", stm->func.parameters[i].extern_id, stm->func.parameters[i].intern_id);
+                    switch (stm->func.parameters[i].type.type) {
+                        case VARTYPE_DOUBLE:
+                            printf("double");
+                            break;
+                        case VARTYPE_INT:
+                            printf("int");
+                            break;
+                        case VARTYPE_STRING:
+                            printf("string");
+                            break;
+                        case VARTYPE_VOID:
+                            printf("void");
+                            break;
+                        //? can parameter type be nil
+                        case VARTYPE_NIL:
+                            printf("nil");
+                            break;
+
+                        default:
+                            break;
+                    }
+                    printf("nil_allowed: %s\n", stm->func.parameters[i].type.nil_allowed ? "true" : "false");
+                }
+                printf("\t} \n");
                 // todo print_exp(stm->exp.exp);
                 printf("\treturn_type: ");
                 switch (stm->func.return_type.type) {
@@ -195,6 +222,33 @@ void print_statement(Statement* stm, size_t tabs) {
             printf("%s\tid: %s\n", tab.data, stm->func.id->symbol.data);
             printf("%s\tused: %s\n", tab.data, stm->func.used ? "true" : "false");
             printf("%s\tparam_count: %zu\n", tab.data, stm->func.param_count);
+            printf("%s\tparameters {\n", tab.data);
+            for(size_t i = 0; i < stm->func.param_count; i++){
+                printf("%s\t\textern: %s, intern: %s, data_type: %s, ", tab.data, stm->func.parameters[i].extern_id, stm->func.parameters[i].intern_id);
+                switch (stm->func.parameters[i].type.type) {
+                    case VARTYPE_DOUBLE:
+                        printf("double");
+                        break;
+                    case VARTYPE_INT:
+                        printf("int");
+                        break;
+                    case VARTYPE_STRING:
+                        printf("string");
+                        break;
+                    case VARTYPE_VOID:
+                        printf("void");
+                        break;
+                    //? can parameter type be nil
+                    case VARTYPE_NIL:
+                        printf("nil");
+                        break;
+
+                    default:
+                        break;
+                }
+                printf("nil_allowed: %s\n", stm->func.parameters[i].type.nil_allowed ? "true" : "false");
+            }
+            printf("%s\t} \n");
             // todo print_exp(stm->exp.exp);
             printf("%s\treturn_type: ", tab.data);
             switch (stm->func.return_type.type) {

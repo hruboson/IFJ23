@@ -759,6 +759,35 @@ void test_if_let_else_simple_id(void) {
 	TEST_ASSERT_EQUAL_STRING("b", st->if_.exp->id->symbol.data);
 }
 
+void test_func_zero_params(void) {
+	const char* data = "func test() -> String { }";
+	Input in = {
+		.type = INT_STRING,
+		.string = {
+			.s = data,
+			.i = 0, .store = 0,
+		},
+	};
+
+	AST ast;
+	init_ast(&ast);
+
+	Statement *st;
+
+	int ret = parse(&in, &ast);
+
+	TEST_ASSERT_EQUAL_INT(0, ret);
+
+	TEST_ASSERT(ast.statement != NULL);
+	st = ast.statement;
+
+	TEST_ASSERT_EQUAL_INT(VARTYPE_STRING, st->func.return_type.type);
+	TEST_ASSERT(st->func.return_type.nil_allowed == false);
+	TEST_ASSERT(st->func.id != NULL);
+	TEST_ASSERT_EQUAL_STRING("test", st->func.id->symbol.data);
+	//TODO: param tests
+}
+
 
 int main(void) {
     UNITY_BEGIN();
@@ -792,6 +821,8 @@ int main(void) {
 	RUN_TEST(test_if_else_simple_id);
 	RUN_TEST(test_if_let_simple_id);
 	RUN_TEST(test_if_let_else_simple_id);
+
+	RUN_TEST(test_func_zero_params);
 
     return UNITY_END();
 }

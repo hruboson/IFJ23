@@ -16,10 +16,12 @@
 	} \
 } while (1)
 
+#define DEBUG //TODO: ODDELAT
+
 #ifdef DEBUG
 #define PRINT_LINE(line) printf("LINE: %d\n", line)
 #else
-#define PRINT_LINE(line) printf("")
+#define PRINT_LINE(line)
 #endif
 
 int parse(Input* input, AST* ast) {
@@ -82,7 +84,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 	// <statement> -> if let <id> { <statementList> } [else { <statementList> }]
 	// <statement> -> if <exp> { <statementList> } [else { <statementList> }]
-	// TODO check newlines
 	if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_IF) {		
 		(*statement)->type = ST_IF;
 
@@ -174,7 +175,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	}
 
 	// <statement> -> while [\n] <exp> [\n] { [\n] <statementList> [\n] }
-	// TODO check/handle newlines
 	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_WHILE) {
 		(*statement)->type = ST_WHILE;
 
@@ -228,10 +228,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	// <statement> -> var <id> : <type> [= <exp>] \n
 	else if (token->type == TOKENTYPE_KEYWORD && (token->value.keyword == KEYWORD_LET || token->value.keyword == KEYWORD_VAR)) {
 		(*statement)->type = ST_VAR;
-
-		// Data type is null if not specified
-		bool nil_allowed = false;
-
+		
 		(*statement)->var.modifiable = token->value.keyword == KEYWORD_VAR;
 
 		get_token(input, symtab, token);
@@ -342,7 +339,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_FUNC) {
 		(*statement)->type = ST_FUNC;
 
-		Function func;
+		//TODO: NEWLINES
 
 		// zacatek scope
 		VarTable vartable;
@@ -351,104 +348,77 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_ID) {
-			func.id = token->value.id;  //? correct ?
+			(*statement)->func.id = token->value.id;
 			
 			get_token(input, symtab, token);
-
-			// parsing params
-			Parameter par;
-			if (token->type == TOKENTYPE_UNDERSCORE) {  // func id = (_ intern)
-
-				get_token(input, symtab, token);
-				if (token->type != TOKENTYPE_ID) {
-					return 2;
-				}
-				//? correct ?
-				par.intern_id = token->value.id;
-				par.extern_id = par.intern_id;
-
-				DataType dt;
-
-				get_token(input, symtab, token);
-				if (token->type == TOKENTYPE_COLON) {
-
-					get_token(input, symtab, token);
-					if (token->type != TOKENTYPE_KEYWORD) {
-						return 2;
-					}
-
-					switch (token->value.keyword) {
-						case KEYWORD_DOUBLE:
-							dt.type = VARTYPE_DOUBLE;
-							break;
-						case KEYWORD_INT:
-							dt.type = VARTYPE_INT;
-							break;
-						case KEYWORD_STRING:
-							dt.type = VARTYPE_STRING;
-							break;
-						default:
-							return 2; //! check this
-					}
-					par.type = dt;
-				}
-			} else if (token->type == TOKENTYPE_ID) {  // func id = (extern intern)
-				par.intern_id = token->value.id;
-				get_token(input, symtab, token);
-				if (token->type == TOKENTYPE_ID) {
-					//? correct ?
-
-					par.extern_id = token->value.id;
-
-					DataType dt;
-
-					get_token(input, symtab, token);
-					if (token->type == TOKENTYPE_COLON) {
-						get_token(input, symtab, token);
-						switch (token->type) {
-							case KEYWORD_DOUBLE:
-								dt.type = VARTYPE_DOUBLE;
-								break;
-							case KEYWORD_INT:
-								dt.type = VARTYPE_INT;
-								break;
-							case KEYWORD_STRING:
-								dt.type = VARTYPE_STRING;
-								break;
-							default:
-								return 2;  //! check this
-						}
-					}
-				}
+			if (token->type != TOKENTYPE_PAR_L) {
+				return 2;
 			}
 
-			if (token->type == TOKENTYPE_COMMA) {  // more params
-				// todo recursive call for parameters
-			} else if (token->type == TOKENTYPE_PAR_R) {
+			//TODO: ret = parse_parameters
+			ret = -3; //TODO: oddelat - jenom na test
+
+			if (ret != -3) { // -3 == skoncilo ')'
+				return 2;
+			}
+
+			//TODO: jenom na test - oddelat - preskoceni "()"
+			get_token(input, symtab, token);
+			get_token(input, symtab, token);
+
+			//get_token(input, symtab, token);
+			if (token->type != TOKENTYPE_ARROW && token->type != TOKENTYPE_BRACE_L) {
+				return 2;
+			}
+
+			if (token->type == TOKENTYPE_ARROW) {
+
 				get_token(input, symtab, token);
-
-				if (token->type == TOKENTYPE_BRACE_L) {
-					ret = parse_statement_list( input,
-							symtab, &(*statement)->func.body,
-							var_table_stack, func_table,
-							*statement, true
-						);
-
-					if (ret != -2) {
-						return 2;
-					}
-
-					if (out_token_returned) {
-						token = &out_token;
-					} else {
-						get_token(input, symtab, token);
-					}
-
-					if (token->type == TOKENTYPE_BRACE_R) {
-						return 0;
-					}
+				if (token->type != TOKENTYPE_KEYWORD) {
 					return 2;
 				}
+
+				DataType dt = { .type = VARTYPE_VOID, .nil_allowed = false };
+
+				switch (token->value.keyword) {
+					case KEYWORD_DOUBLE:
+						dt.type = VARTYPE_DOUBLE;
+						break;
+					case KEYWORD_INT:
+						dt.type = VARTYPE_INT;
+						break;
+					case KEYWORD_STRING:
+						dt.type = VARTYPE_STRING;
+						break;
+					default:
+						return 2;
+				}
+
+				get_token(input, symtab, token);
+				if (token->type == TOKENTYPE_QUESTIONMARK) {
+					dt.nil_allowed = true;
+					get_token(input, symtab, token);
+				} else {
+					dt.nil_allowed = false;
+				}
+
+				(*statement)->func.return_type = dt;
+
+			}
+			
+			if (token->type == TOKENTYPE_BRACE_L) {
+
+				ret = parse_statement_list( input,
+						symtab, &(*statement)->func.body,
+						var_table_stack, func_table,
+						*statement, true
+					);
+
+				if (ret != -2) {
+					return 2;
+				}
+
+				return 0;
 			}
 		}
 	}
@@ -465,8 +435,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 // out_token => vraci prvni precteny token, ktery uz nepatri statement listu (napr. EOF, {, Int, Double, String,...)
 int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statement, VarTableStack* var_table_stack, FuncTable* func_table, Statement *current_scope, bool in_function) {
 	int ret = 0;
-
-	PRINT_LINE(__LINE__);
 
 	Statement* st;
 	Statement** next_st = statement;
@@ -560,4 +528,10 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 	*out_token_returned = false;
 
 	return 0;
+}
+
+// with param : String, 
+int parse_parameters(Input* input, SymbolTable* symtab, Statement** statement) {
+	//TODO: nejaky return pro pravou zavorku ')'
+
 }

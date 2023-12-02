@@ -360,6 +360,9 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			}
 			
 			get_token(input, symtab, token);
+
+			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+			
 			if (token->type != TOKENTYPE_ARROW && token->type != TOKENTYPE_BRACE_L) {
 				return 2;
 			}
@@ -384,6 +387,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 						dt.type = VARTYPE_STRING;
 						break;
 					default:
+						PRINT_LINE;
 						return 2;
 				}
 				
@@ -420,9 +424,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	}
 }
 
-//TODO: oznacovat ze jsem v bloku i ze jsem ve funkci v parametrech
-//TODO: staci to oznacit Statementem ne?
-//TODO: tady by se mel posilat i in_token ne? kdyz se to vola ve scopu, tak je predtim muze byt nacteny token
 // pokud jsem v bloku, nemuzu udelat return ani definici funkce
 // pokud jsem ve funkci, nemuzu udelat definici funkce
 // current_scope == NULL => jsme v globalni
@@ -600,6 +601,8 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 			if (token->type == TOKENTYPE_QUESTIONMARK) {
 				dt.nil_allowed = true;
 				get_token(input, symtab, token);
+			} else {
+				dt.nil_allowed = false;
 			}
 
 			param.type = dt;

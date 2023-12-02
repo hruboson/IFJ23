@@ -826,6 +826,83 @@ void test_func_one_param(void) {
 }
 
 
+void test_func_two_params(void) {
+	const char* data = "func test ( ext1 int1 : Int?, ext2 int2 : Double ) -> String \n { }";
+	Input in = {
+		.type = INT_STRING,
+		.string = {
+			.s = data,
+			.i = 0, .store = 0,
+		},
+	};
+
+	AST ast;
+	init_ast(&ast);
+
+	Statement *st;
+
+	int ret = parse(&in, &ast);
+
+	TEST_ASSERT_EQUAL_INT(0, ret);
+
+	TEST_ASSERT(ast.statement != NULL);
+	st = ast.statement;
+
+	TEST_ASSERT_EQUAL_INT(VARTYPE_STRING, st->func.return_type.type);
+	TEST_ASSERT(st->func.return_type.nil_allowed == false);
+	TEST_ASSERT(st->func.id != NULL);
+	TEST_ASSERT_EQUAL_STRING("test", st->func.id->symbol.data);
+	TEST_ASSERT(st->func.body == NULL);
+
+	TEST_ASSERT_EQUAL_INT(2, st->func.param_count);
+	TEST_ASSERT(st->func.parameters != NULL);
+	TEST_ASSERT_EQUAL_STRING("ext1", st->func.parameters[0].extern_id->symbol.data);
+	TEST_ASSERT_EQUAL_STRING("int1", st->func.parameters[0].intern_id->symbol.data);
+	TEST_ASSERT_EQUAL_INT(VARTYPE_INT, st->func.parameters[0].type.type);
+	TEST_ASSERT(st->func.parameters[0].type.nil_allowed == true);
+
+	TEST_ASSERT_EQUAL_STRING("ext2", st->func.parameters[1].extern_id->symbol.data);
+	TEST_ASSERT_EQUAL_STRING("int2", st->func.parameters[1].intern_id->symbol.data);
+	TEST_ASSERT_EQUAL_INT(VARTYPE_DOUBLE, st->func.parameters[1].type.type);
+	TEST_ASSERT(st->func.parameters[1].type.nil_allowed == false);
+}
+
+void test_func_return_type_void(void) {
+	const char* data = "func test ( extern intern : Int? ) \n { }";
+	Input in = {
+		.type = INT_STRING,
+		.string = {
+			.s = data,
+			.i = 0, .store = 0,
+		},
+	};
+
+	AST ast;
+	init_ast(&ast);
+
+	Statement *st;
+
+	int ret = parse(&in, &ast);
+
+	TEST_ASSERT_EQUAL_INT(0, ret);
+
+	TEST_ASSERT(ast.statement != NULL);
+	st = ast.statement;
+
+	TEST_ASSERT_EQUAL_INT(VARTYPE_VOID, st->func.return_type.type);
+	TEST_ASSERT(st->func.id != NULL);
+	TEST_ASSERT_EQUAL_STRING("test", st->func.id->symbol.data);
+	TEST_ASSERT(st->func.body == NULL);
+
+	TEST_ASSERT_EQUAL_INT(1, st->func.param_count);
+	TEST_ASSERT(st->func.parameters != NULL);
+	TEST_ASSERT_EQUAL_STRING("extern", st->func.parameters[0].extern_id->symbol.data);
+	TEST_ASSERT_EQUAL_STRING("intern", st->func.parameters[0].intern_id->symbol.data);
+	TEST_ASSERT_EQUAL_INT(VARTYPE_INT, st->func.parameters[0].type.type);
+	TEST_ASSERT(st->func.parameters[0].type.nil_allowed == true);	
+}
+
+
 
 int main(void) {
     UNITY_BEGIN();
@@ -862,6 +939,8 @@ int main(void) {
 
 	RUN_TEST(test_func_zero_params);
 	RUN_TEST(test_func_one_param);
+	RUN_TEST(test_func_two_params);
+	RUN_TEST(test_func_return_type_void);
 
     return UNITY_END();
 }

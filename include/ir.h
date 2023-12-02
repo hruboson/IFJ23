@@ -18,6 +18,8 @@ typedef enum IR_Type {
 	IRT_div,
 	IRT_idiv,
 
+	IRT_concat,
+
 	IRT_equal,
 	IRT_nequal,
 	IRT_lt, IRT_lte,

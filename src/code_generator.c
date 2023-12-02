@@ -287,6 +287,14 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		append_var( code, f, i->ops[ 1 ] );
 		string_append( code, "\n" );
 		break;
+	case IRT_concat:
+		i_defvar( code, f, i->ops[ 2 ] );
+		string_append( code, "CONCAT " );
+		append_var( code, f, i->ops[ 0 ] );
+		string_append( code, " " );
+		append_var( code, f, i->ops[ 1 ] );
+		string_append( code, "\n" );
+		break;
 	case IRT_equal:
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "EQ " );

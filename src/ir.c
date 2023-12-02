@@ -150,19 +150,60 @@ convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
 		ir_append( body, &i );
 		return i.id;
 	case ET_ADD:
-		if ( bi == false ) { i.type = IRT_add; bi = true; }
+		if ( bi == false ) {
+			assert( exp->ops[ 0 ] != NULL );
+			assert( exp->ops[ 1 ] != NULL );
+			VarType vt0 = exp->ops[ 0 ]->data_type.type;
+			VarType vt1 = exp->ops[ 1 ]->data_type.type;
+			if ( vt0 != vt1  ) {
+				exit( 99 );
+			}
+
+			if ( vt0 == VARTYPE_STRING )
+				i.type = IRT_concat;
+			else if ( vt0 == VARTYPE_INT || vt0 == VARTYPE_DOUBLE )
+				i.type = IRT_add;
+			else
+				exit( 99 );
+			i.type = IRT_add; bi = true;
+		}
 		FALLTHROUGH;
 	case ET_SUB:
-		if ( bi == false ) { i.type = IRT_sub; bi = true; }
+		if ( bi == false ) {
+			assert( exp->ops[ 0 ] != NULL );
+			assert( exp->ops[ 1 ] != NULL );
+			VarType vt0 = exp->ops[ 0 ]->data_type.type;
+			VarType vt1 = exp->ops[ 1 ]->data_type.type;
+			if ( vt0 != vt1  ) {
+				exit( 99 );
+			}
+
+			if ( vt0 != VARTYPE_INT && vt0 != VARTYPE_DOUBLE ) {
+				exit( 99 );
+			}
+			i.type = IRT_sub; bi = true;
+		}
 		FALLTHROUGH;
 	case ET_MULT:
-		if ( bi == false ) { i.type = IRT_mul; bi = true; }
+		if ( bi == false ) {
+			assert( exp->ops[ 0 ] != NULL );
+			assert( exp->ops[ 1 ] != NULL );
+			VarType vt0 = exp->ops[ 0 ]->data_type.type;
+			VarType vt1 = exp->ops[ 1 ]->data_type.type;
+			if ( vt0 != vt1  ) {
+				exit( 99 );
+			}
+
+			if ( vt0 != VARTYPE_INT && vt0 != VARTYPE_DOUBLE ) {
+				exit( 99 );
+			}
+			i.type = IRT_mul; bi = true;
+		}
 		FALLTHROUGH;
 	case ET_DIV:
-		assert( exp->ops[ 0 ] != NULL );
-		assert( exp->ops[ 1 ] != NULL );
-
 		if ( bi == false ) {
+			assert( exp->ops[ 0 ] != NULL );
+			assert( exp->ops[ 1 ] != NULL );
 			VarType vt0 = exp->ops[ 0 ]->data_type.type;
 			VarType vt1 = exp->ops[ 1 ]->data_type.type;
 			if ( vt0 != vt1 ) {

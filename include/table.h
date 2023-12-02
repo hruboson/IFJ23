@@ -11,6 +11,7 @@ typedef enum VarType {
     VARTYPE_INT,
     VARTYPE_DOUBLE,
     VARTYPE_NIL,
+    VARTYPE_BOOL,
 } VarType;
 
 typedef struct DataType {

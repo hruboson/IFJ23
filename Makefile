@@ -32,8 +32,8 @@ TESTOBJECTS := $(patsubst %.c, $(OBJDIR)/test_%.o, $(notdir $(TESTSOURCES)))
 TARGET = IFJ.out
 
 # Compile the program (without tests)
-$(TARGET): $(OBJECTS) $(HEADERS)
-	$(CC) $(CFLAGS) $^ -o $(BUILD)/$@
+$(BUILD)/$(TARGET): $(OBJECTS) $(HEADERS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $@
 
 # Universal rule for source files
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)

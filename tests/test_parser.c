@@ -931,6 +931,39 @@ void test_assign_simple(void) {
 	TEST_ASSERT_EQUAL_DOUBLE(2.0, st->assign.exp->double_);
 }
 
+void test_func_with_return_double_simple(void) {
+	const char* data = "func a() -> Double { return 2.0 \n }\n";
+	Input in = {
+		.type = INT_STRING,
+		.string = {
+			.s = data,
+			.i = 0, .store = 0,
+		},
+	};
+
+	AST ast;
+	init_ast(&ast);
+
+	Statement *st;
+
+	int ret = parse(&in, &ast);
+
+	TEST_ASSERT_EQUAL_INT(0, ret);
+
+	TEST_ASSERT(ast.statement != NULL);
+	st = ast.statement;
+
+	TEST_ASSERT_EQUAL_INT(VARTYPE_DOUBLE, st->func.return_type.type);
+	TEST_ASSERT(st->func.return_type.nil_allowed == false);
+	TEST_ASSERT(st->func.id != NULL);
+	TEST_ASSERT_EQUAL_STRING("a", st->func.id->symbol.data);
+
+	TEST_ASSERT(st->func.body != NULL);
+	TEST_ASSERT(st->func.body->return_.exp != NULL);
+	TEST_ASSERT_EQUAL_INT(ET_DOUBLE, st->func.body->return_.exp->type);
+	TEST_ASSERT_EQUAL_DOUBLE(2.0, st->func.body->return_.exp->double_);
+}
+
 
 int main(void) {
     UNITY_BEGIN();
@@ -969,6 +1002,7 @@ int main(void) {
 	RUN_TEST(test_func_one_param);
 	RUN_TEST(test_func_two_params);
 	RUN_TEST(test_func_return_type_void);
+	RUN_TEST(test_func_with_return_double_simple);
 
 	RUN_TEST(test_assign_simple);
 

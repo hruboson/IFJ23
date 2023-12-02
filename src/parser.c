@@ -89,8 +89,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_IF) {		
 		(*statement)->type = ST_IF;
 
-		bool is_let = false;
-
 		get_token(input, symtab, token);
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
@@ -305,10 +303,24 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 	// <statement> -> return <exp> \n
 	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_RETURN) {
-		// TODO parse exp
 		(*statement)->type = ST_RETURN;
 
-		get_token(input, symtab, token);
+		ret = parse_expression(input, symtab, &exp, NULL, &out_token, &out_token_returned);
+
+		//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+
+		(*statement)->return_.exp = exp;
+
+		if (ret != 0) {
+			return ret;
+		}
+
+		if (out_token_returned) {
+			token = &out_token;
+		} else {
+			get_token(input, symtab, token);
+		}
+
 		if (token->type == TOKENTYPE_NEWLINE) {
 			return 0;
 		}
@@ -440,6 +452,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		}
 		return 2;
 	}
+
+	return 2;
 }
 
 // pokud jsem v bloku, nemuzu udelat return ani definici funkce

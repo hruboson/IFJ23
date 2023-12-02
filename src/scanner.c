@@ -27,6 +27,7 @@ in_getc( Input* i ) {
 		return i->string.s[ i_i ];
 	}
 
+	fprintf( stderr, "scanner error: unexpected input type: %i\n", i->type );
 	exit( 99 );
 }
 
@@ -39,6 +40,7 @@ in_ungetc( Input* i, char c ) {
 		return c;
 	}
 
+	fprintf( stderr, "scanner error: unexpected input type: %i\n", i->type );
 	exit( 99 );
 }
 

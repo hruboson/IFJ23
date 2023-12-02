@@ -1,5 +1,6 @@
 #include "../include/AST.h"
 #include "unity.h"
+#include "parser.h"
 
 AST a_;
 AST* a = &a_;
@@ -68,11 +69,62 @@ void test_ast_multiple_append(void) {
     TEST_ASSERT_NOT_NULL(a->statement->next->next);
 }
 
+void test_ast_var_print(void) {
+    const char* data = "var num1 : Int = 5\n var num2 : Double = 5.0\n";
+    Input in = {
+        .type = INT_STRING,
+        .string = {
+            .s = data,
+            .i = 0,
+            .store = 0,
+        },
+    };
+
+    SymbolTable symtab;
+
+    init_symboltable(&symtab);
+
+    AST ast;
+    init_ast(&ast);
+
+    int ret = parse(&in, &ast);
+
+    print_ast(&ast);
+}
+
+void test_ast_while_print(void) {
+    const char* data = "while 1 { var a : Int = 3\n }";
+    Input in = {
+        .type = INT_STRING,
+        .string = {
+            .s = data,
+            .i = 0,
+            .store = 0,
+        },
+    };
+
+    SymbolTable symtab;
+
+    init_symboltable(&symtab);
+
+    AST ast;
+    init_ast(&ast);
+
+    int ret = parse(&in, &ast);
+
+    print_ast(&ast);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_ast_init);
     RUN_TEST(test_ast_clear);
     RUN_TEST(test_ast_single_append);
     RUN_TEST(test_ast_multiple_append);
+
+    // check these in ./build/results/test_AST.txt
+    RUN_TEST(test_ast_var_print);
+    RUN_TEST(test_ast_while_print);
+
     return UNITY_END();
 }

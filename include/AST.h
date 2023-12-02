@@ -16,3 +16,4 @@ void ast_get(AST*, Statement*);
 void ast_delete_last(AST*);
 
 void print_ast(AST*);
+void print_statement(Statement*, size_t);

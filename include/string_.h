@@ -18,3 +18,5 @@ void string_append_c( String*, char );
 
 bool string_eq( const String*, const String* );
 
+String string_copy( const String* );
+

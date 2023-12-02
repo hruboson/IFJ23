@@ -87,3 +87,13 @@ bool string_eq( const String* a, const String* b ) {
 
 	return strcmp( a->data, b->data ) == 0;
 }
+
+String
+string_copy( const String* s ) {
+	String o;
+	init_string( &o );
+
+	string_append( &o, s->data );
+
+	return o;
+}

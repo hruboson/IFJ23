@@ -415,6 +415,10 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 
 void
 append_ir_fn_init( String* c, const IR_Func* f ) {
+	// label fn_name
+	string_append( c, "LABEL " );
+	append_label( c, f->id );
+	string_append( c, "\n" );
 	// PUSHFRAME
 	string_append( c, "PUSHFRAME\n" );
 	// MOVE %p_n -> args
@@ -434,6 +438,8 @@ append_ir_fn_end( String* c, const IR_Func* f ) {
 	string_append( c, "%end\n" );
 	// POPFRAME
 	string_append( c, "POPFRAME\n" );
+	// RETURN
+	string_append( c, "RETURN\n" );
 }
 
 int
@@ -456,7 +462,7 @@ generate_code( const IR* ir, String* code ) {
 
 		// fn body
 		for ( size_t j = 0; j < f->body.count; j++ ) {
-			const IR_Inst* inst = f->body.inst + i;
+			const IR_Inst* inst = f->body.inst + j;
 			append_ir_inst( code, inst, f_l, f );
 		}
 

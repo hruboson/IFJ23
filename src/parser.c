@@ -19,9 +19,9 @@
 #define DEBUG //TODO: ODDELAT
 
 #ifdef DEBUG
-#define PRINT_LINE(line) printf("LINE: %d\n", line)
+#define PRINT_LINE printf("LINE: %d\n", __LINE__)
 #else
-#define PRINT_LINE(line)
+#define PRINT_LINE
 #endif
 
 int parse(Input* input, AST* ast) {
@@ -338,14 +338,12 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 	// <func> -> func <id> ( [<id> <id> : <type>] ) [-> <type>] { <statementList> }
 	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_FUNC) {
 		(*statement)->type = ST_FUNC;
-
-		//TODO: NEWLINES
-
+		
 		// zacatek scope
 		VarTable vartable;
 		init_var_table(&vartable);
 		vartable_stack_push(var_table_stack, &vartable);
-
+		
 		get_token(input, symtab, token);
 		if (token->type == TOKENTYPE_ID) {
 			(*statement)->func.id = token->value.id;
@@ -354,19 +352,14 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			if (token->type != TOKENTYPE_PAR_L) {
 				return 2;
 			}
-
-			//TODO: ret = parse_parameters
-			ret = -3; //TODO: oddelat - jenom na test
+			
+			ret = parse_parameters(input, symtab, *statement);
 
 			if (ret != -3) { // -3 == skoncilo ')'
 				return 2;
 			}
-
-			//TODO: jenom na test - oddelat - preskoceni "()"
+			
 			get_token(input, symtab, token);
-			get_token(input, symtab, token);
-
-			//get_token(input, symtab, token);
 			if (token->type != TOKENTYPE_ARROW && token->type != TOKENTYPE_BRACE_L) {
 				return 2;
 			}
@@ -393,7 +386,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 					default:
 						return 2;
 				}
-
+				
 				get_token(input, symtab, token);
 				if (token->type == TOKENTYPE_QUESTIONMARK) {
 					dt.nil_allowed = true;
@@ -401,6 +394,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 				} else {
 					dt.nil_allowed = false;
 				}
+
+				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 				(*statement)->func.return_type = dt;
 
@@ -414,6 +409,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 						*statement, true
 					);
 
+
 				if (ret != -2) {
 					return 2;
 				}
@@ -422,8 +418,6 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			}
 		}
 	}
-
-	return 2;
 }
 
 //TODO: oznacovat ze jsem v bloku i ze jsem ve funkci v parametrech
@@ -451,7 +445,7 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 			break;
 
 		if (st->type == ST_FUNC && current_scope != NULL) {
-			return 2;
+						return 2;
 		} else if (st->type == ST_RETURN && !in_function) {
 			return 2;
 		}
@@ -464,7 +458,6 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 		return 2;
 
 	} else if (ret == -2 && current_scope == NULL) { // ret == -2 znamena '}'
-
 		return 2;
 	}
 
@@ -530,8 +523,107 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 	return 0;
 }
 
-// with param : String, 
-int parse_parameters(Input* input, SymbolTable* symtab, Statement** statement) {
-	//TODO: nejaky return pro pravou zavorku ')'
+// return -3 : ukoncujici: ')'
+// return 2 : syntakticka chyba
+int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statement ) {
+	Token token_;
+	Token* token = &token_;
 
+	func_statement->func.param_count = 0;
+
+	size_t param_cap = 128;
+	
+	func_statement->func.parameters = (Parameter*)malloc(sizeof(Parameter) * param_cap );
+	if (func_statement->func.parameters == NULL) {
+		exit(99);
+	}
+
+	Parameter param;
+
+	
+	//TODO: free_params()
+
+	do {
+		get_token(input, symtab, token);
+
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
+		if (func_statement->func.param_count == 0 &&
+			token->type == TOKENTYPE_PAR_R) {
+				return -3;
+		}
+
+		// extern
+		if (token->type == TOKENTYPE_UNDERSCORE) {
+			param.extern_id = NULL;
+		} else if (token->type == TOKENTYPE_ID) {
+			param.extern_id = token->value.id;
+		} else {
+			printf("TOKEN: %d\n", token->type);
+			return 2;
+		}
+
+		get_token(input, symtab, token);
+		//intern
+		if (token->type == TOKENTYPE_ID) {
+			param.intern_id = token->value.id;
+		} else {
+			return 2;
+		}
+
+		get_token(input, symtab, token);
+		//colon
+		if (token->type != TOKENTYPE_COLON) {
+			return 2;
+		}
+
+		DataType dt;
+
+		get_token(input, symtab, token);
+		if (token->type == TOKENTYPE_KEYWORD) {
+			switch (token->value.keyword) {
+				case KEYWORD_DOUBLE:
+					dt.type = VARTYPE_DOUBLE;
+					break;
+				case KEYWORD_INT:
+					dt.type = VARTYPE_INT;
+					break;
+				case KEYWORD_STRING:
+					dt.type = VARTYPE_STRING;
+					break;
+				default:
+					return 2;
+			}
+
+			
+			get_token(input, symtab, token);
+			if (token->type == TOKENTYPE_QUESTIONMARK) {
+				dt.nil_allowed = true;
+				get_token(input, symtab, token);
+			}
+
+			param.type = dt;
+		}
+		
+		if (func_statement->func.param_count >= param_cap) {
+			param_cap *= 2;
+			func_statement->func.parameters = realloc(func_statement->func.parameters, param_cap);
+			
+			if (func_statement->func.parameters == NULL) {
+				exit(99);
+			}
+		}
+
+		func_statement->func.parameters[func_statement->func.param_count] = param;
+		func_statement->func.param_count++;
+
+		if (token->type == TOKENTYPE_PAR_R) {
+			return -3;
+		} else if (token->type == TOKENTYPE_COMMA) {
+			continue;
+		} else {
+						return 2;
+		}
+
+	} while (1);
 }

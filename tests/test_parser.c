@@ -760,7 +760,7 @@ void test_if_let_else_simple_id(void) {
 }
 
 void test_func_zero_params(void) {
-	const char* data = "func test() -> String { }";
+	const char* data = "func test() -> String? \n { }";
 	Input in = {
 		.type = INT_STRING,
 		.string = {
@@ -782,11 +782,49 @@ void test_func_zero_params(void) {
 	st = ast.statement;
 
 	TEST_ASSERT_EQUAL_INT(VARTYPE_STRING, st->func.return_type.type);
-	TEST_ASSERT(st->func.return_type.nil_allowed == false);
+	TEST_ASSERT(st->func.return_type.nil_allowed == true);
 	TEST_ASSERT(st->func.id != NULL);
 	TEST_ASSERT_EQUAL_STRING("test", st->func.id->symbol.data);
-	//TODO: param tests
+	
 }
+
+void test_func_one_param(void) {
+	const char* data = "func test ( extern intern : Int? ) -> String? \n { }";
+	Input in = {
+		.type = INT_STRING,
+		.string = {
+			.s = data,
+			.i = 0, .store = 0,
+		},
+	};
+
+	AST ast;
+	init_ast(&ast);
+
+	Statement *st;
+
+	int ret = parse(&in, &ast);
+
+	TEST_ASSERT_EQUAL_INT(0, ret);
+
+	TEST_ASSERT(ast.statement != NULL);
+	st = ast.statement;
+
+	TEST_ASSERT_EQUAL_INT(VARTYPE_STRING, st->func.return_type.type);
+	TEST_ASSERT(st->func.return_type.nil_allowed == true);
+	TEST_ASSERT(st->func.id != NULL);
+	TEST_ASSERT_EQUAL_STRING("test", st->func.id->symbol.data);
+	TEST_ASSERT(st->func.body == NULL);
+
+	TEST_ASSERT_EQUAL_INT(1, st->func.param_count);
+	TEST_ASSERT(st->func.parameters != NULL);
+	TEST_ASSERT_EQUAL_STRING("extern", st->func.parameters[0].extern_id->symbol.data);
+	TEST_ASSERT_EQUAL_STRING("intern", st->func.parameters[0].intern_id->symbol.data);
+	TEST_ASSERT_EQUAL_INT(VARTYPE_INT, st->func.parameters[0].type.type);
+	TEST_ASSERT(st->func.parameters[0].type.nil_allowed == true);
+	
+}
+
 
 
 int main(void) {
@@ -823,6 +861,7 @@ int main(void) {
 	RUN_TEST(test_if_let_else_simple_id);
 
 	RUN_TEST(test_func_zero_params);
+	RUN_TEST(test_func_one_param);
 
     return UNITY_END();
 }

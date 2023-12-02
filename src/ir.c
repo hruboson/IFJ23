@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#ifdef __GNUC__
+#define FALLTHROUGH __attribute__ ((fallthrough))
+#else
+#define FALLTHROUGH
+#endif
+
 void
 init_ir_body( IR_Body* b ) {
 	b->inst = NULL;
@@ -113,6 +119,8 @@ convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
 	IR_Inst i;
 	bool bi = false;
 	String s;
+	SymbolRecord *exp1, *res, *l1, *l2;
+	SymbolRecord* id_out = NULL;
 	switch ( exp->type ) {
 	case ET_INT:
 		i.type = IRT_asgn_int;
@@ -143,13 +151,13 @@ convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
 		return i.id;
 	case ET_ADD:
 		if ( bi == false ) { i.type = IRT_add; bi = true; }
-		__attribute__ ((fallthrough));
+		FALLTHROUGH;
 	case ET_SUB:
 		if ( bi == false ) { i.type = IRT_sub; bi = true; }
-		__attribute__ ((fallthrough));
+		FALLTHROUGH;
 	case ET_MULT:
 		if ( bi == false ) { i.type = IRT_mul; bi = true; }
-		__attribute__ ((fallthrough));
+		FALLTHROUGH;
 	case ET_DIV:
 		assert( exp->ops[ 0 ] != NULL );
 		assert( exp->ops[ 1 ] != NULL );
@@ -173,14 +181,12 @@ convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
 
 			bi = true;
 		}
-		// todo: check datatype
-		if ( bi == false ) { i.type = IRT_div; bi = true; }
-		if ( bi == false ) { i.type = IRT_idiv; bi = true; }
-		i.ops[0] = convert_exp( ir, body, exp->ops[ 0 ] );
-		i.ops[1] = convert_exp( ir, body, exp->ops[ 1 ] );
-		i.ops[2] = new_cv( ir, body );
+
+		i.ops[ 0 ] = convert_exp( ir, body, exp->ops[ 0 ] );
+		i.ops[ 1 ] = convert_exp( ir, body, exp->ops[ 1 ] );
+		i.ops[ 2 ] = new_cv( ir, body );
 		ir_append( body, &i );
-		return i.ops[2];
+		return i.ops[ 2 ];
 	case ET_EQUAL:
 		if ( bi == false ) { i.type = IRT_equal; bi = true; }
 		__attribute__ ((fallthrough));
@@ -228,7 +234,6 @@ convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
 			i.fn_call.args = NULL;
 
 		// save return value
-		SymbolRecord* id_out = NULL;
 		if ( exp->data_type.type != VARTYPE_VOID ) {
 			id_out = new_cv( ir, body );
 			i.fn_call.ret_id = id_out;
@@ -237,7 +242,7 @@ convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
 		ir_append( body, &i );
 		return id_out;
 	case ET_EXCLAMATION:
-		String s = string_copy( &exp->id->symbol );
+		s = string_copy( &exp->id->symbol );
 		symboltable_insert( &ir->symtab, &s, &i.id );
 		return i.id;
 	case ET_NIL_TEST:
@@ -256,7 +261,6 @@ convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
 		// %(n+1) = <exp2>
 		// .L(n+1):
 
-		SymbolRecord *exp1, *res, *l1, *l2;
 		exp1 = res = l1 = l2 = NULL;
 
 		i.type = IRT_branch_nil;
@@ -303,7 +307,6 @@ convert_st( IR* ir, IR_Body* body, const Statement* st ) {
 			inst.type = IRT_asgn;
 
 			s = string_copy( &i->var.id->symbol );
-
 			symboltable_insert( &ir->symtab, &s, inst.ops + 0 );
 
 			// exp

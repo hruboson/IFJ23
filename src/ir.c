@@ -116,6 +116,9 @@ insert_label( IR_Body* body, SymbolRecord* l ) {
 
 SymbolRecord*
 convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
+	if ( exp == NULL )
+		return NULL;
+
 	IR_Inst i;
 	bool bi = false;
 	String s;

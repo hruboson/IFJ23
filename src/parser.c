@@ -317,12 +317,17 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		return 2;
 	}
 
-	// <statement> -> return [\n] <exp> \n
+	// <statement> -> return [<exp>] \n
 	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_RETURN) {
 		(*statement)->type = ST_RETURN;
 
 		get_token(input, symtab, token);
-		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
+		if (token->type == TOKENTYPE_NEWLINE) {
+			(*statement)->return_.exp = NULL;
+			//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+			return 0;
+		}
 
 		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 

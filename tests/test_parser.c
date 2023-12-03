@@ -964,6 +964,75 @@ void test_func_with_return_double_simple(void) {
 	TEST_ASSERT_EQUAL_DOUBLE(2.0, st->func.body->return_.exp->double_);
 }
 
+void test_complex(void) {
+	const char* data = "func a() -> Double { \
+	 var b : Int = 3 \n \
+	 while 1 { b = 2 \n } \
+	 return 2.0 \n \
+	 }";
+
+	Input in = {
+		.type = INT_STRING,
+		.string = {
+			.s = data,
+			.i = 0, .store = 0,
+		},
+	};
+
+	AST ast;
+	init_ast(&ast);
+
+	Statement *st;
+
+	int ret = parse(&in, &ast);
+
+	TEST_ASSERT_EQUAL_INT(0, ret);
+
+	TEST_ASSERT(ast.statement != NULL);
+	st = ast.statement;
+
+	TEST_ASSERT_EQUAL_INT(VARTYPE_DOUBLE, st->func.return_type.type);
+	TEST_ASSERT(st->func.return_type.nil_allowed == false);
+	TEST_ASSERT(st->func.id != NULL);
+	TEST_ASSERT_EQUAL_STRING("a", st->func.id->symbol.data);
+
+
+	TEST_ASSERT(st->func.body != NULL);
+	st = st->func.body;
+
+	// var
+	TEST_ASSERT(st->var.exp != NULL);
+	TEST_ASSERT(st->var.allow_nil == false);
+	TEST_ASSERT(st->var.id != NULL);
+	TEST_ASSERT_EQUAL_STRING("b", st->var.id->symbol.data);
+	TEST_ASSERT_EQUAL_INT(ET_INT, st->var.exp->type);
+	TEST_ASSERT_EQUAL_INT(3, st->var.exp->int_);
+
+	st = st->next;
+
+	//while
+	TEST_ASSERT(st != NULL);
+	TEST_ASSERT(st->while_.exp != NULL);
+	TEST_ASSERT_EQUAL_INT(ET_INT, st->while_.exp->type);
+	TEST_ASSERT_EQUAL_INT(1, st->while_.exp->int_);
+
+	//asign
+	TEST_ASSERT(st->while_.body != NULL);
+	TEST_ASSERT(st->while_.body->assign.id != NULL);
+	TEST_ASSERT_EQUAL_STRING("b", st->while_.body->assign.id->symbol.data);
+	TEST_ASSERT(st->while_.body->assign.exp != NULL);
+	TEST_ASSERT_EQUAL_INT(ET_INT, st->while_.body->assign.exp->type);
+	TEST_ASSERT_EQUAL_INT(2, st->while_.body->assign.exp->int_);
+	
+	st = st->next;
+
+	//return
+	TEST_ASSERT(st != NULL);
+	TEST_ASSERT(st->return_.exp != NULL);
+	TEST_ASSERT_EQUAL_INT(ET_DOUBLE, st->return_.exp->type);
+	TEST_ASSERT_EQUAL_DOUBLE(2.0, st->return_.exp->double_);
+}
+
 
 int main(void) {
     UNITY_BEGIN();
@@ -1006,5 +1075,7 @@ int main(void) {
 
 	RUN_TEST(test_assign_simple);
 
-    return UNITY_END();
+	RUN_TEST(test_complex);
+    
+	return UNITY_END();
 }

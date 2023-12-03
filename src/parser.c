@@ -84,8 +84,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 	(*statement)->next = NULL;
 
-	// <statement> -> if let <id> { <statementList> } [else { <statementList> }]
-	// <statement> -> if <exp> { <statementList> } [else { <statementList> }]
+	// <statement> -> if [\n] let [\n] <id> [\n] { [\n] <statementList> [\n] } [\n] [else [\n] { [\n] <statementList> [\n] }]
+	// <statement> -> if [\n] <exp> [\n] { [\n] <statementList> [\n] } [\n] [else [\n] { [\n] <statementList> [\n] }]
 	if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_IF) {		
 		(*statement)->type = ST_IF;
 
@@ -128,6 +128,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			get_token(input, symtab, token);
 		}
 
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
 		if (token->type != TOKENTYPE_BRACE_L) {
 			return 2;
 		}
@@ -145,6 +147,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 		// rozsireni nepovinny else
 		get_token(input, symtab, token);
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+		
 		if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_ELSE) {
 
 			get_token(input, symtab, token);
@@ -221,22 +225,27 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		return 2;
 	}
 
-	// <statement> -> let <id> [: <type>] = <exp> \n
-	// <statement> -> var <id> [: <type>] = <exp> \n
-	// <statement> -> var <id> : <type> [= <exp>] \n
+	// <statement> -> let [\n] <id> [\n] [: <type>] [\n] = [\n] <exp> \n
+	// <statement> -> var [\n] <id> [\n] [: <type>] [\n]  = [\n] <exp> \n
+	// <statement> -> var [\n] <id> [\n] : <type> [\n] [= [\n] <exp>] \n
 	else if (token->type == TOKENTYPE_KEYWORD && (token->value.keyword == KEYWORD_LET || token->value.keyword == KEYWORD_VAR)) {
 		(*statement)->type = ST_VAR;
 		
 		(*statement)->var.modifiable = token->value.keyword == KEYWORD_VAR;
 
 		get_token(input, symtab, token);
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
 		if (token->type == TOKENTYPE_ID) {
 
 			(*statement)->var.id = token->value.id;
 
 			get_token(input, symtab, token);
+			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
 			if (token->type == TOKENTYPE_COLON) {
 				get_token(input, symtab, token);
+				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 				
 				if (token->type == TOKENTYPE_KEYWORD) {
 
@@ -255,9 +264,13 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 					}
 
 					get_token(input, symtab, token);
+					
 					if (token->type == TOKENTYPE_QUESTIONMARK) {
+						//TODO: Double \n ? byt nemuze ne?
 						(*statement)->var.allow_nil = true;
 						get_token(input, symtab, token);
+					} else {
+						(*statement)->var.allow_nil = false;
 					}
 
 					// var a : Int \n => correct
@@ -276,7 +289,10 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			}
 
 			if (token->type == TOKENTYPE_EQUALS) {
-				ret = parse_expression(input, symtab, &exp, NULL, &out_token, &out_token_returned);
+				get_token(input, symtab, token);
+				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
+				ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
 				//TODO: ret = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
 
@@ -301,11 +317,14 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		return 2;
 	}
 
-	// <statement> -> return <exp> \n
+	// <statement> -> return [\n] <exp> \n
 	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_RETURN) {
 		(*statement)->type = ST_RETURN;
 
-		ret = parse_expression(input, symtab, &exp, NULL, &out_token, &out_token_returned);
+		get_token(input, symtab, token);
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
+		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
 		//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
 
@@ -328,16 +347,21 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		return 2;
 	}
 
-	// <statement> -> <id> = <exp> \n
+	// <statement> -> <id> [\n] = [\n] <exp> \n
 	else if (token->type == TOKENTYPE_ID) {
 		(*statement)->type = ST_ASSIGN;
 
 		(*statement)->assign.id = token->value.id;
 
 		get_token(input, symtab, token);
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
 		if (token->type == TOKENTYPE_EQUALS) {
+
+			get_token(input, symtab, token);
+			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 			
-			ret = parse_expression(input, symtab, &exp, NULL, &out_token, &out_token_returned);
+			ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
 			//TODO: ret = semantic_assignment(VarTableStack, FunctionTable, Statement) return value = jestli prosla
 
@@ -368,6 +392,9 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		get_token(input, symtab, token);
 
 		//TODO: <statement> -> <func> () volani funkce
+		//TODO: muze byt <func> \n () ??
+
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type == TOKENTYPE_ID) {
 			// zacatek scope
@@ -378,6 +405,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			(*statement)->func.id = token->value.id;
 			
 			get_token(input, symtab, token);
+			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
 			if (token->type != TOKENTYPE_PAR_L) {
 				return 2;
 			}
@@ -399,6 +428,8 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			if (token->type == TOKENTYPE_ARROW) {
 
 				get_token(input, symtab, token);
+				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+				
 				if (token->type != TOKENTYPE_KEYWORD) {
 					return 2;
 				}
@@ -497,7 +528,7 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 	return ret;
 }
 
-// vraci bool jestli je ten exp validni
+// vraci int 0 pokud je ten exp validni
 // vraci expression pointer
 // vraci ukazatel na to kde skoncila
 // in_token Token, ktery muze dostat od parse_statement 
@@ -596,6 +627,8 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 		}
 
 		get_token(input, symtab, token);
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
 		//intern
 		if (token->type == TOKENTYPE_ID) {
 			param.intern_id = token->value.id;
@@ -604,6 +637,8 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 		}
 
 		get_token(input, symtab, token);
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
 		//colon
 		if (token->type != TOKENTYPE_COLON) {
 			return 2;
@@ -612,6 +647,8 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 		DataType dt;
 
 		get_token(input, symtab, token);
+		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
+
 		if (token->type == TOKENTYPE_KEYWORD) {
 			switch (token->value.keyword) {
 				case KEYWORD_DOUBLE:
@@ -629,10 +666,13 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 
 			
 			get_token(input, symtab, token);
+
 			if (token->type == TOKENTYPE_QUESTIONMARK) {
+				//TODO: Double \n ? nemuze byt ne?
 				dt.nil_allowed = true;
 				get_token(input, symtab, token);
 			} else {
+				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 				dt.nil_allowed = false;
 			}
 

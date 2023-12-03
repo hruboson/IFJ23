@@ -444,7 +444,7 @@ convert_st( IR* ir, IR_Body* body, const Statement* st ) {
 			inst.type = IRT_return;
 
 			// exp
-			inst.id = convert_exp( ir, &ir->main, i->return_.exp );
+			inst.id = convert_exp( ir, body, i->return_.exp );
 
 			ir_append( body, &inst );
 			break;

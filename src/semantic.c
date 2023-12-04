@@ -34,7 +34,7 @@
 } while (0)
 
 // Helper function
-void insert_to_v;ar_table(Statement *statement, VarTable *var_table){
+void insert_to_var_table(Statement *statement, VarTable *var_table){
     // pridani do vartable
     //ternary op je tam kvuli tomu kdyby se allow_nil rovnalo NULL aby se do .nil_allowed nepriradilo null ale false
     DataType dt = { .type = statement->var.data_type, .nil_allowed = statement->var.allow_nil == true ? true : false}; 

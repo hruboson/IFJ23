@@ -33,7 +33,7 @@ void exp_stack_push(ExpStack* stack, Expression*exp) {
     stack->exps[stack->size - 1] =exp;
 }
 void exp_stack_pop(ExpStack* stack, Expression*exp) {
-    if (!token_stack_is_empty(stack)) {
+    if (!exp_stack_is_empty(stack)) {
        exp = stack->exps[stack->size - 1];
         stack->size--;
     }

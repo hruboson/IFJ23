@@ -3,11 +3,13 @@
 #include "expression.h"
 #include "rule_stack.h"
 
-typedef struct RuleNode {
+typedef struct RuleNode RuleNode;
+
+struct RuleNode {
     RuleNode* left;
     RuleNode* right;
     Expression* exp;
-} RuleNode;
+};
 
 void init_rule_tree(RuleNode* tree);
 void dispose_rule_tree(RuleNode* tree);

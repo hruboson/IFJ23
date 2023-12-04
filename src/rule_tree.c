@@ -2,6 +2,7 @@
 
 #include "rule_stack.h"
 #include "rules.h"
+#include "stdlib.h"
 
 void init_rule_tree(RuleNode* tree) {
     tree->exp = NULL;

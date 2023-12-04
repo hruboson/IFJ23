@@ -36,6 +36,7 @@ typedef struct Function {
     size_t param_count;
     Parameter* parameters;
     DataType return_type;
+    bool is_defined;
 } Function;
 
 typedef struct VarTable {

@@ -42,13 +42,33 @@ ________________________________________________________________________________
 8. <exp3'>	-> {*, /} <exp3>
 9. <exp4>	-> <exp5> <exp4'>
 10. <exp4'>	-> !
-11. <exp5>	-> (<exp>), t_int, t_string, t_double		id[([[id:]<exp>[,[id:]<exp>]*])]
+//11. <exp5>	-> (<exp>), t_int, t_string, t_double		id[([[id:]<exp>[,[id:]<exp>]*])]
+11. <exp5>	-> (<exp>), t_int, t_string, t_double		id <args>
+
+12. <args> -> ( <args_list> )
+13. <args> -> eps
+14. <arg_list> -> <e_id> <exp> <arg_list_n>
+15. <arg_list> -> eps
+16. <e_id> -> id <exp_id>
+17. <e_id> -> eps
+18. <arg_list_n> -> , <arg_list>
+19. <arg_list_n> -> eps
+20. <exp_id> -> <exp'>
+21. <exp_id> -> <exp6'> //CHECK: exp6' ?
+22. <exp_id> -> <exp'>
+23. <exp_id> -> ( <arg_list> )
+24. <exp_id> -> eps
 
 first(x):
-	<exp'>	??
-	<exp1'>	==, !=, <, >, <=, >=
-	<exp2'> +, -
-	<exp3'> *, \
-	<exp4'> !
-	<exp5> (, t_int, t_string, t_double, id
+	2. 			<exp'>		  	??
+	4. 			<exp1'>		  	==, !=, <, >, <=, >=
+	6. 			<exp2'> 	  	+, -
+	8. 			<exp3'> 	  	*, \
+	10. 		<exp4'> 	  	!
+	11. 		<exp5> 		  	(, t_int, t_string, t_double, id
+	12., 13. 	<args> 		  	(, eps
+	15. 		<arg_list> 		eps
+	16., 17. 	<e_id> 		  	id, eps
+	18., 19. 	<arg_list_n>	',', eps
+	23., 24. 	<exp_id> 		(, eps 
 

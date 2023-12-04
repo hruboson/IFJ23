@@ -30,10 +30,10 @@ print_keyword( Keyword k ) {
 }
 
 void
-print_formatted_string( FILE* f, const char* s ) {
+print_formatted_string( FILE* f, const String* s ) {
 
-	for ( const char* i = s; *i; i++ ) {
-		char c = *i;
+	for ( size_t i = 0; i < s->length; i++ ) {
+		char c = s->data[ i ];
 		if ( c == '\"' ) {
 			fputs( "\\\"", f );
 		} else if ( c > 31 ) {
@@ -96,7 +96,7 @@ print_token( Token* t ) {
 		break;
 	case TOKENTYPE_STRING:
 		fprintf( stderr, "\"" );
-		print_formatted_string( stderr, t->value.str_.data );
+		print_formatted_string( stderr, &t->value.str_ );
 		fprintf( stderr, "\"" );
 		break;
 	case TOKENTYPE_INT:

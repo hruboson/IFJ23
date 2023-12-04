@@ -15,7 +15,8 @@
 void setUp() {}
 void tearDown() {}
 
-void test_keywords(void) {
+void
+test_keywords( void ) {
 	const char* data = "Double else func if Int let nil return String var while";
 	Input in = {
 		.type = INT_STRING,
@@ -52,7 +53,8 @@ void test_keywords(void) {
 	}
 }
 
-void test_identifiers(void) {
+void
+test_identifiers( void ) {
 	const char* data = "a b c _asd string_ asd";
 	Input in = {
 		.type = INT_STRING,
@@ -90,7 +92,8 @@ void test_identifiers(void) {
 	clear_symboltable( &s );
 }
 
-void test_numbers(void) {
+void
+test_numbers( void ) {
 	const char* data = "0 1 01 0.0 1.0 3.14 314e-2";
 	Input in = {
 		.type = INT_STRING,
@@ -158,7 +161,8 @@ void test_numbers(void) {
 
 }
 
-void test_operators(void) {
+void
+test_operators( void ) {
 	const char* data = "! * / + - == != < > <= >= ??";
 	Input in = {
 		.type = INT_STRING,
@@ -196,7 +200,8 @@ void test_operators(void) {
 	}
 }
 
-void test_strings(void) {
+void
+test_strings( void ) {
 	const char* data = ""
 		"\"\" " // ""
 
@@ -216,6 +221,9 @@ void test_strings(void) {
 		"b\n"
 		"c\n"
 		"\"\"\" " // "a\nb\nc
+
+		"\" \\\\ \\t \\n \\r \\\" \\' \\u{a} \\u{00000a} \" "
+		// " \\ \t \n \r \" \' \n \n "
 		;
 	Input in = {
 		.type = INT_STRING,
@@ -231,7 +239,8 @@ void test_strings(void) {
 		"Hello, World!",
 		"",
 		"\n",
-		"a\nb\nc"
+		"a\nb\nc",
+		" \\ \t \n \r \" ' \n \n "
 	};
 	size_t s_i = 0;
 
@@ -284,7 +293,8 @@ void test_strings(void) {
 	}
 }
 
-void test_misc(void) {
+void
+test_misc( void ) {
 	const char* data = "\n ? = -> : ( ) { } , _";
 	Input in = {
 		.type = INT_STRING,
@@ -323,11 +333,13 @@ void test_misc(void) {
 	}
 }
 
-void test_expressions(void) {
+void
+test_expressions( void ) {
 	const char* data = "a + b * c";
 }
 
-void test_simple_program_0(void) {
+void
+test_simple_program_0( void ) {
 	const char* data = ""
 		"write(\"Hello, World!\")\n"
 		"let a : Int? = readInt()\n"

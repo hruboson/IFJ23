@@ -479,32 +479,40 @@ get_token( Input* in, SymbolTable* symtab, Token* token ) {
 				state = STATE_STRING_BODY_SLASH;
 				break;
 			} else if ( c > 31 ) {
-				string_append_c( &string, ( char )c);
+				string_append_c( &string, ( char )c );
 			} else {
 				return 1;
 			}
 			break;
 		case STATE_STRING_BODY_SLASH:
 			switch ( c ) {
+			case '0':
+				state = STATE_STRING_BODY;
+				string_append_c( &string, 0 );
+				break;
 			case '\\':
 				state = STATE_STRING_BODY;
 				string_append_c( &string, '\\' );
-				break;
-			case '"':
-				state = STATE_STRING_BODY;
-				string_append_c( &string, '"' );
-				break;
-			case 'n':
-				state = STATE_STRING_BODY;
-				string_append_c( &string, '\n' );
 				break;
 			case 't':
 				state = STATE_STRING_BODY;
 				string_append_c( &string, '\t' );
 				break;
+			case 'n':
+				state = STATE_STRING_BODY;
+				string_append_c( &string, '\n' );
+				break;
 			case 'r':
 				state = STATE_STRING_BODY;
 				string_append_c( &string, '\r' );
+				break;
+			case '"':
+				state = STATE_STRING_BODY;
+				string_append_c( &string, '"' );
+				break;
+			case '\'':
+				state = STATE_STRING_BODY;
+				string_append_c( &string, '\'' );
 				break;
 			case 'u':
 				state = STATE_STRING_BODY_U;
@@ -517,6 +525,7 @@ get_token( Input* in, SymbolTable* symtab, Token* token ) {
 			if ( c == '{' ) {
 				state = STATE_STRING_BODY_U_B;
 				hex_count = 0;
+				whole = 0;
 				break;
 			}
 			return 1;
@@ -545,7 +554,7 @@ get_token( Input* in, SymbolTable* symtab, Token* token ) {
 					return 1;
 
 				/* add hex value to string */
-				while ( hex_count > 0 ) {
+				if ( hex_count > 0 ) {
 					string_append_c( &string, whole & 0xff );
 					whole >>= 8;
 					hex_count -= 2;

@@ -1,0 +1,21 @@
+1. Naplnit pole tokenů, které patří do expressionu (načítáš tokeny do
+     tokenu, který nemůže být v expressionu)
+2. Máš nějaký stack terminálů a neterminálů, na spodu je "$" nad tím je <exp>
+3. Tvoříš strom, pomocí pomocí pravidel zjištěných z tabulky (2D pole) - Enumy na řádky a na sloupce
+    4. Matchnutí s Epsilonem:
+        - Při použití pravidla se 2 neterminály se přidá nalevo ten víc vlevo v pravidle,
+    na stacku se ten vlevo přidá jako druhý
+    Matchnutí s terminálnem z pole:
+        - Při rozbalení na terminál se z uzlu vyvede jenom pravá strana a taky se vloží na stack pravidel
+        - Zvýšíš index v poli tokenů
+    Nematchnutí (chyba):
+        - return 2;
+5. Uděláme postorder postupně se ukládá na stack Expressionů
+    - když se narazí na ET_TYPE_MUL, ADD, SUB,??,... (např. +, ??, !) vytáhne se ten symbol ze stacku a 1 nebo 2 další Expressiony
+    - nakonci na stacku zůstane celkový výsledek to se uloží do Expression.
+
+
+=========Co je potřeba=========
+ - Rule stack
+ - Rule tree (Btrees)
+ - Expression stack

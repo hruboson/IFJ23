@@ -1,1 +1,4 @@
-indent_style=tab
+root = true
+
+[*]
+indent_style = tab

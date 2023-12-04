@@ -113,7 +113,7 @@ i_asgn_string( String* c, enum frame f, SymbolRecord* id, const String* v ) {
 
 	string_append( c, " string@" );
 	for ( size_t i = 0; i < v->length; i++ ) {
-		char c_ = v->data[ i ];
+		unsigned char c_ = v->data[ i ];
 
 		if ( c_ <= 32 || c_ == 35 || c_ == 92 ) {
 			string_append_c( c, '\\' );
@@ -442,6 +442,132 @@ append_ir_fn_end( String* c, const IR_Func* f ) {
 	string_append( c, "RETURN\n" );
 }
 
+void
+append_builtin_functions( String* c ) {
+
+	// readString
+	string_append( c,
+		"LABEL readString\n"
+		"DEFVAR TF@ret\n"
+		"READ TF@ret string\n"
+		"RETURN\n"
+	);
+
+	// readInt
+	string_append( c,
+		"LABEL readInt\n"
+		"DEFVAR TF@ret\n"
+		"READ TF@ret int\n"
+		"RETURN\n"
+	);
+
+	// readDouble
+	string_append( c,
+		"LABEL readDouble\n"
+		"DEFVAR TF@ret\n"
+		"READ TF@ret float\n"
+		"RETURN\n"
+	);
+
+	// write
+	// $write
+	string_append( c,
+		"LABEL $write\n"
+		"WRITE TF@%p0\n"
+		"RETURN\n"
+	);
+
+	// Int2Double
+	string_append( c,
+		"LABEL Int2Double\n"
+		"DEFVAR TF@ret\n"
+		"INT2FLOAT TF@%ret TF@%p0\n"
+		"RETURN\n"
+	);
+	// Double2Int
+	string_append( c,
+		"LABEL Double2Int\n"
+		"DEFVAR TF@ret\n"
+		"FLOAT2INT TF@%ret TF@%p0\n"
+		"RETURN\n"
+	);
+
+	// length
+	string_append( c,
+		"LABEL length\n"
+		"DEFVAR TF@ret\n"
+		"STRLEN TF@%ret TF@%p0\n"
+		"RETURN\n"
+	);
+	// substring
+	string_append( c,
+		"LABEL substring\n" // s i j
+		"DEFVAR TF@ret\n"
+		"CREATEFRAME\n"
+		// i < 0
+		"DEFVAR LF@i_lt\n"
+		"LT LF@i_lt LF@%p1 int@0\n"
+		"JUMPIFEQ substring%nil bool@true LF@i_lt\n"
+		// j < 0
+		"DEFVAR LF@j_lt\n"
+		"LT LF@j_lt LF@%p2 int@0\n"
+		"JUMPIFEQ substring%nil bool@true LF@j_lt\n"
+		// i > j
+		"DEFVAR LF@i_gt_j\n"
+		"GT LF@i_gt_j LF@%p1 LF@%p2\n"
+		"JUMPIFEQ substring%nil bool@true LF@i_gt_j\n"
+
+		// length(s)
+		"DEFVAR LF@s_len\n"
+		"STRLEN LF@s_len LF@%p0\n"
+
+		// i >= length(s)
+		"DEFVAR LF@i_gte_s_len\n"
+		"GT LF@i_gte_s_len LF@%p1 LF@%s_len\n"
+		"JUMPIFEQ substring%nil bool@true LF@i_gt_s_len\n"
+		"EQ LF@i_gte_s_len LF@%p1 LF@%s_len\n"
+		"JUMPIFEQ substring%nil bool@true LF@i_gt_s_len\n"
+		// j > length(s)
+		"DEFVAR LF@j_gt_s_len\n"
+		"GT LF@j_gt_s_len LF@%p2 LF@%s_len\n"
+		"JUMPIFEQ substring%nil bool@true LF@j_gt_s_len\n"
+
+		// substring
+		"DEFVAR LF@tmp\n"
+		"MOVE LF@ret string@\n"
+
+		"LABEL substring%cond\n"
+		"GETCHAR LF@tmp LF@%p0 LF@%p1\n"
+		"CONCAT LF@ret LF@ret LF@tmp\n"
+		"ADD LF@%p1 LF@%p1 int@1\n"
+
+		// if i == j: goto end
+		"JUMPIFEQ substring%end LF@%p1 LF@%p2\n"
+
+		"JUMP substring%cond\n"
+
+		"LABEL substring%nil\n"
+		"MOVE TF@ret nil@nil\n"
+		"LABEL substring%end\n"
+		"POPFRAME\n"
+		"RETURN\n"
+	);
+	// ord
+	string_append( c,
+		"LABEL ord\n"
+		"DEFVAR TF@ret\n"
+		"STRI2INT TF@%ret TF@%p0 int@0\n"
+		"RETURN\n"
+	);
+	// chr
+	string_append( c,
+		"LABEL chr\n"
+		"DEFVAR TF@ret\n"
+		"INT2CHAR TF@%ret TF@%p0\n"
+		"RETURN\n"
+	);
+}
+
 int
 generate_code( const IR* ir, String* code ) {
 
@@ -457,6 +583,7 @@ generate_code( const IR* ir, String* code ) {
 	string_append( code, "JUMP END\n" );
 
 	// user defined functions
+	string_append( code, "# user functions\n" );
 	for ( size_t i = 0; i < ir->func_count; i++ ) {
 		const IR_Func* f = ir->funcs + i;
 
@@ -474,9 +601,11 @@ generate_code( const IR* ir, String* code ) {
 	}
 
 	// built-in functions
-	// TODO
+	string_append( code, "# built-in functions\n" );
+	append_builtin_functions( code );
 
 	// end of program
+	string_append( code, "# end of program\n" );
 	string_append( code, "LABEL END\n" );
 
 	return 0;

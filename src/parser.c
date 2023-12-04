@@ -570,7 +570,7 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 			break;
 
 		case TOKENTYPE_KEYWORD:
-			if (token->type != KEYWORD_NIL) {
+			if (token->value.keyword != KEYWORD_NIL) {
 				return 2;
 			}
 			(*exp)->type = ET_NIL;

@@ -11,8 +11,8 @@ struct RuleNode {
     Expression* exp;
 };
 
-void init_rule_tree(RuleNode* tree);
+void init_rule_tree(RuleNode** tree);
 void dispose_rule_tree(RuleNode* tree);
-void rule_tree_insert_left(RuleNode* root, RuleNode* rule);
-void rule_tree_insert_right(RuleNode* root, RuleNode* rule);
+void rule_tree_insert_left(RuleNode* root, Expression* exp);
+void rule_tree_insert_right(RuleNode* root, Expression* exp);
 void rule_tree_postorder(RuleNode* tree, RuleStack* stack);

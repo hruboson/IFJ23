@@ -24,7 +24,10 @@
 #define PRINT_LINE
 #endif
 
+bool do_semantic_analysis = true;
+
 int parse(Input* input, AST* ast) {
+	printf("DO SEM: %d\n", do_semantic_analysis);
 	int ret = 0;
 
 	VarTableStack var_table_stack;
@@ -36,7 +39,7 @@ int parse(Input* input, AST* ast) {
 	ret = parse_statement_list(input,
 		&ast->symtab, &ast->statement,
 		&var_table_stack, &func_table, 
-		NULL, false
+		NULL, NULL, 0
 	);
 
 	if (ret == -1) {
@@ -47,13 +50,20 @@ int parse(Input* input, AST* ast) {
 		return 2;
 	}
 
-	// TODO: ret = semantic_check_if_called_functions_were_declared()
-	// TODO: if (ret != 0) return ret;
+	if (do_semantic_analysis) {
+		// TODO: ret = semantic_check_if_called_functions_were_declared()
+		// TODO: if (ret != 0) return ret;	
+	}
 
 	return ret;
 }
 
-int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, VarTableStack* var_table_stack, FuncTable* func_table, bool in_function) {
+int parse_statement(
+	Input *input, SymbolTable* symtab, Statement** statement,
+	VarTableStack* var_table_stack, FuncTable* func_table,
+	Statement* current_function, size_t block_counter
+	) {
+
 	Token _token;
 	Token* token = &_token;
 
@@ -114,7 +124,9 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		
 		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
-		//TODO: ret = semantic_condition(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+		if (do_semantic_analysis) {
+			//TODO: ret = semantic_condition(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+		}
 
 		(*statement)->if_.exp = exp;
 
@@ -138,7 +150,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 		ret = parse_statement_list(input,
 			symtab, &(*statement)->if_.body,
 			var_table_stack, func_table, 
-			*statement, in_function
+			*statement, current_function, block_counter++
 		);
 
 		if (ret != -2) { // -2 == skoncilo s '}' to je spravne
@@ -162,7 +174,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			ret = parse_statement_list(input,
 				symtab, &(*statement)->if_.else_,
 				var_table_stack, func_table, 
-				*statement, in_function
+				*statement, current_function, block_counter++
 			);
 
 			if (ret != -2) {
@@ -192,7 +204,9 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
-		//TODO: ret = semantic_condition(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+		if (do_semantic_analysis) {
+			//TODO: ret = semantic_condition(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+		}
 
 		(*statement)->while_.exp = exp;
 
@@ -212,7 +226,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			ret = parse_statement_list( input,
 					symtab, &(*statement)->while_.body,
 					var_table_stack, func_table,
-					*statement, in_function
+					*statement, current_function, block_counter++
 				);
 
 			if (ret != -2) {
@@ -294,8 +308,9 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 				ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
-				//TODO: ret = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
-
+				if (do_semantic_analysis) {
+					//TODO: ret = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+				}
 				(*statement)->var.exp = exp;
 
 				if (ret != 0) {
@@ -325,14 +340,17 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 
 		if (token->type == TOKENTYPE_NEWLINE) {
 			(*statement)->return_.exp = NULL;
-			//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+			if (do_semantic_analysis) {
+				//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+			}
 			return 0;
 		}
 
 		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
-		//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
-
+		if (do_semantic_analysis) {
+			//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+		}
 		(*statement)->return_.exp = exp;
 
 		if (ret != 0) {
@@ -368,7 +386,9 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 			
 			ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
-			//TODO: ret = semantic_assignment(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+			if (do_semantic_analysis) {
+				//TODO: ret = semantic_assignment(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+			}
 
 			(*statement)->assign.exp = exp;
 
@@ -475,7 +495,7 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 				ret = parse_statement_list( input,
 						symtab, &(*statement)->func.body,
 						var_table_stack, func_table,
-						*statement, true
+						*statement, *statement, block_counter++
 					);
 
 
@@ -496,7 +516,10 @@ int parse_statement(Input *input, SymbolTable* symtab, Statement** statement, Va
 // pokud jsem ve funkci, nemuzu udelat definici funkce
 // current_scope == NULL => jsme v globalni
 // out_token => vraci prvni precteny token, ktery uz nepatri statement listu (napr. EOF, {, Int, Double, String,...)
-int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statement, VarTableStack* var_table_stack, FuncTable* func_table, Statement *current_scope, bool in_function) {
+int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statement,
+	VarTableStack* var_table_stack, FuncTable* func_table,
+	Statement *current_scope, Statement* current_function, size_t block_counter
+	) {
 	int ret = 0;
 
 	Statement* st;
@@ -506,16 +529,27 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 		st = NULL;
 		ret = parse_statement(input,
 			symtab, &st, 
-			var_table_stack, 
-			func_table, in_function
+			var_table_stack,
+			func_table, 
+			current_function, block_counter
 		);
 
 		if (ret)
 			break;
 
+		// pridani hodnoty zanoreni a nazvu funkce do var.id_prefix
+		if (st->type == ST_VAR) {
+			st->var.id_prefix.block_counter = block_counter;
+			if (current_function == NULL) {
+				st->var.id_prefix.func_id = NULL;
+			} else {
+				st->var.id_prefix.func_id = current_function->func.id;
+			}
+		}
+
 		if (st->type == ST_FUNC && current_scope != NULL) {
 						return 2;
-		} else if (st->type == ST_RETURN && !in_function) {
+		} else if (st->type == ST_RETURN && !current_function) {
 			return 2;
 		}
 

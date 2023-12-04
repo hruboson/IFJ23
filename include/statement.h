@@ -14,6 +14,11 @@ typedef enum StatementType {
 	ST_FUNC
 } StatementType;
 
+typedef struct IdPrefix {
+	SymbolRecord* func_id;
+	size_t block_counter;
+} IdPrefix;
+
 typedef struct Statement {
 	StatementType type;
 	union {
@@ -24,6 +29,7 @@ typedef struct Statement {
 			VarType data_type;  // if VARTYPE_VOID -> not set
 			bool allow_nil;
 			bool used;
+			IdPrefix id_prefix;
 		} var;
 		struct {
 			SymbolRecord* id;

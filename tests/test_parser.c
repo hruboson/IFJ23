@@ -1291,6 +1291,8 @@ void test_complex(void) {
 
 
 int main(void) {
+	do_semantic_analysis = false;
+
     UNITY_BEGIN();
 
     RUN_TEST(test_var_int_simple);

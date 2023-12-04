@@ -11,8 +11,10 @@
 #include "token_stack.h"
 #include "table.h"
 
+extern bool do_semantic_analysis;
+
 int parse(Input*, AST*);
-int parse_statement(Input*, SymbolTable*, Statement**, VarTableStack*, FuncTable*, bool);
+int parse_statement(Input*, SymbolTable*, Statement**, VarTableStack*, FuncTable*, Statement*, size_t);
 int parse_expression(Input*, SymbolTable*, Expression**, Token*, Token*, bool*);
-int parse_statement_list(Input*, SymbolTable*, Statement**, VarTableStack*, FuncTable*, Statement *, bool);
+int parse_statement_list(Input*, SymbolTable*, Statement**, VarTableStack*, FuncTable*, Statement*, Statement*, size_t);
 int parse_parameters(Input*, SymbolTable*, Statement*);

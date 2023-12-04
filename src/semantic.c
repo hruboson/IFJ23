@@ -47,15 +47,31 @@ int semantic_variable(VarTableStack *stack, Statement *statement) {
     // pokud jsi ve funkci, přejmenuj proměnnou na func_name%var_name
     // func_name = statement.func.id.string + "%" + var.id.string
     //"$"+statement.func.id.string+"%"+var.id.string
+    
+    String *string;
+    init_string(string);
+    string_append(string, "$");
+    if(statement->var.id_prefix.func_id != NULL){
+        string_append(string, statement->var.id_prefix.func_id);
+    }
+    string_append(string, "%");
+    string_append(string, statement->var.id_prefix.block_counter);
+    string_append(string, "%");
+    string_append(string, statement->var.id->symbol.data);
 
-    VarTable var_table_;
-    VarTable *var_table = &var_table_;
+    statement->var.unique_id = string;
+    
+    
+    VarTable *var_table;
     
     if (!stack) {
         ERROR;
     }
 
-    vartable_stack_peek(stack, var_table);
+    vartable_stack_peek(stack, &var_table);
+    if(var_table == NULL){
+        ERROR;
+    }
 
     switch (statement->var.data_type) {
         case VARTYPE_INT:
@@ -94,6 +110,7 @@ int semantic_variable(VarTableStack *stack, Statement *statement) {
                     SEMANTIC_ERROR_TYPE_MISMATCH;
             }
             insert_to_var_table(statement, var_table);
+            break;
                 
         default:
             ERROR; 
@@ -201,11 +218,12 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
 
                 for (size_t i = 0; i < exp->fn_call.arg_count; ++i) {
                     Parameter *param_in = new_func.parameters + i;
-                    const Parameter *param_out = exp->fn_call.args->id + i;
+                    const Argument *param_out = exp->fn_call.args + i;
 
-                    param_in->extern_id = param_out->extern_id;
+                    param_in->extern_id = param_out->id;
                     param_in->intern_id = NULL;
-                    param_in->type = param_out->type;
+                    param_in->type.type = param_out->exp->data_type.type;
+                    param_in->type.nil_allowed = param_out->exp->data_type.nil_allowed;
                 }
 
                 new_func.return_type.type = VARTYPE_VOID;
@@ -225,7 +243,7 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
                             func->parameters[i].type.type = exp->fn_call.args[i].exp->data_type.type;
                         }
                         
-                        if (func->parameters[i].type.nil_allowed == NULL) {
+                        if (func->parameters[i].type.nil_allowed == false) {
                             if (exp->fn_call.args[i].exp->data_type.nil_allowed) {
                                 func->parameters[i].type.nil_allowed = true;
                             } else {
@@ -416,8 +434,12 @@ int semantic_function(VarTableStack *stack, FuncTable *table, Statement *stateme
         }
     }
 
-    //TODO: vartable_stack_peek + insert_to_var_table
-    // vartable_stack_peek(stack, )
-    // insert_to_var_table(statement, )
+    VarTable *var_table;
+    vartable_stack_peek(stack, &var_table);
+    for(size_t i = 0; i < statement->func.param_count; i++){
+        DataType dt = {.type = statement->func.parameters[i].type.type, .nil_allowed = statement->func.parameters[i].type.nil_allowed };
+        Variable var = {.id = statement->func.parameters[i].intern_id, .initialized = true, .type = dt};
+        var_table_insert(var_table, var);
+    }
     return 0;
 }

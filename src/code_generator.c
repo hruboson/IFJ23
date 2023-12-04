@@ -408,7 +408,7 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		break;
 	case IRT_asgn_nil:
 		i_defvar( code, f, i->id );
-		i_asgn_nil( code, f, i->a_i.id );
+		i_asgn_nil( code, f, i->id );
 		break;
 	}
 }
@@ -447,13 +447,16 @@ generate_code( const IR* ir, String* code ) {
 
 	string_append( code, ".IFJcode23\n" );
 
+	// main body
 	for ( size_t i = 0; i < ir->main.count; i++ ) {
 		const IR_Inst* inst = ir->main.inst + i;
 		append_ir_inst( code, inst, f_g, NULL );
 	}
 
+	// skip over functions
 	string_append( code, "JUMP END\n" );
 
+	// user defined functions
 	for ( size_t i = 0; i < ir->func_count; i++ ) {
 		const IR_Func* f = ir->funcs + i;
 
@@ -470,9 +473,11 @@ generate_code( const IR* ir, String* code ) {
 		append_ir_fn_end( code, f );
 	}
 
+	// built-in functions
+	// TODO
 
+	// end of program
 	string_append( code, "LABEL END\n" );
-
 
 	return 0;
 }

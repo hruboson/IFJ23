@@ -1,29 +1,41 @@
 \documentclass[12pt]{article}
 
-\usepackage{siunitx}
-\usepackage{enumerate}
+\usepackage[utf8]{inputenc}
+\usepackage[left=2cm, top=3cm, text={17cm, 24cm}]{geometry}
+\usepackage{times}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage{graphicx} % vkládání obrázků
 
-\usepackage{subfiles} % Best loaded last in the preamble
+
 
 \begin{document}
 
-\title{Implementace překladače imperativního jazyka IFJ23}
-\author{
-    Tým xhrubo01, varianta TRP-izp
-    \and
-    % abecedně
-    Dominik Borek (xborek12)
-	\and
-    Ondřej Hruboš (xhrubo01)
-	\and
-	Radek Jestřabík (xjestr04)
-	\and
-	Ondřej Šatinský (xsatin03)
-}
-%\affil{Vysoké učení technické v Brně - Fakulta informačních technologií}
-\date{\today}
-
-\maketitle
+    \begin{titlepage}
+        \begin{center}
+            \includegraphics[width=0.77\linewidth]{img/fit_logo.png} \\
+            \vspace{\stretch{0.4}}        
+            \Huge{Projektová dokumentace} \\
+            \Large{\textbf{Implementace překladače imperativního jazyka IFJ23}} \\
+            \Large{Tým xhrubo01, varianta TRP-izp} \\ 
+            \vspace{\stretch{0.6}}
+        \end{center}
+        \begin{minipage}{0.4 \textwidth}
+			{\Large \today}
+		\end{minipage}
+		\hfill
+		\begin{minipage}[r]{0.6 \textwidth}
+			\normalsize
+            \begin{flushright}
+                \begin{tabular}{l l l}
+    				Dominik Borek & (xborek12)\\
+    				\textbf{Ondřej Hruboš} & \textbf{(xhrubo01)} \\
+    				Radek Jestřabík & (xjestr04)  \\
+    				Ondřej Šatinský & (xsatin03)  \\
+    			\end{tabular}
+            \end{flushright}
+		\end{minipage}
+    \end{titlepage}
 
 \begin{abstract}
 	// todo

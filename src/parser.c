@@ -150,7 +150,7 @@ int parse_statement(
 		ret = parse_statement_list(input,
 			symtab, &(*statement)->if_.body,
 			var_table_stack, func_table, 
-			*statement, current_function, block_counter++
+			*statement, current_function, ++block_counter
 		);
 
 		if (ret != -2) { // -2 == skoncilo s '}' to je spravne
@@ -174,7 +174,7 @@ int parse_statement(
 			ret = parse_statement_list(input,
 				symtab, &(*statement)->if_.else_,
 				var_table_stack, func_table, 
-				*statement, current_function, block_counter++
+				*statement, current_function, ++block_counter
 			);
 
 			if (ret != -2) {
@@ -226,7 +226,7 @@ int parse_statement(
 			ret = parse_statement_list( input,
 					symtab, &(*statement)->while_.body,
 					var_table_stack, func_table,
-					*statement, current_function, block_counter++
+					*statement, current_function, ++block_counter
 				);
 
 			if (ret != -2) {
@@ -495,7 +495,7 @@ int parse_statement(
 				ret = parse_statement_list( input,
 						symtab, &(*statement)->func.body,
 						var_table_stack, func_table,
-						*statement, *statement, block_counter++
+						*statement, *statement, ++block_counter
 					);
 
 

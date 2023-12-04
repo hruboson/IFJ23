@@ -80,7 +80,6 @@ void print_ast(AST* ast) {
                         case VARTYPE_VOID:
                             printf("void");
                             break;
-                        //? can parameter type be nil
                         case VARTYPE_NIL:
                             printf("nil");
                             break;
@@ -106,7 +105,6 @@ void print_ast(AST* ast) {
                     case VARTYPE_VOID:
                         printf("void");
                         break;
-                    //? can return type be nil
                     case VARTYPE_NIL:
                         printf("nil");
                         break;
@@ -152,6 +150,11 @@ void print_ast(AST* ast) {
             case ST_VAR:
                 printf("variable {\n");
                 printf("\tid: %s\n", stm->var.id->symbol.data);
+                if (stm->var.id_prefix.func_id) {
+                    printf("\tprefix_id. $%s%%%zu%%%s\n", stm->var.id_prefix.func_id->symbol.data, stm->var.id_prefix.block_counter, stm->var.id->symbol.data);
+                } else {
+                    printf("\tprefix_id. $_%%%zu%%%s\n", stm->var.id_prefix.block_counter, stm->var.id->symbol.data);
+                }
                 // todo print_exp(stm->var.exp);
                 printf("\tmodifiable: %s\n", stm->var.modifiable ? "true" : "false");
                 printf("\tdata_type: ");
@@ -223,7 +226,7 @@ void print_statement(Statement* stm, size_t tabs) {
             printf("%s\tused: %s\n", tab.data, stm->func.used ? "true" : "false");
             printf("%s\tparam_count: %zu\n", tab.data, stm->func.param_count);
             printf("%s\tparameters {\n", tab.data);
-            for(size_t i = 0; i < stm->func.param_count; i++){
+            for (size_t i = 0; i < stm->func.param_count; i++) {
                 printf("%s\t\textern: %s, intern: %s, data_type: %s", tab.data, stm->func.parameters[i].extern_id->symbol.data, stm->func.parameters[i].intern_id->symbol.data);
                 switch (stm->func.parameters[i].type.type) {
                     case VARTYPE_DOUBLE:
@@ -310,6 +313,12 @@ void print_statement(Statement* stm, size_t tabs) {
         case ST_VAR:
             printf("%svariable {\n", tab.data);
             printf("%s\tid: %s\n", tab.data, stm->var.id->symbol.data);
+            if (stm->var.id_prefix.func_id) {
+                printf("%s\tprefix_id. $%s%%%zu%%%s\n", tab.data, stm->var.id_prefix.func_id->symbol.data, stm->var.id_prefix.block_counter, stm->var.id->symbol.data);
+            } else {
+                printf("%s\tprefix_id. $_%%%zu%%%s\n", tab.data, stm->var.id_prefix.block_counter, stm->var.id->symbol.data);
+            }
+
             // todo print_exp(stm->var.exp);
             printf("%s\tmodifiable: %s\n", tab.data, stm->var.modifiable ? "true" : "false");
             printf("%s\tdata_type: ", tab.data);

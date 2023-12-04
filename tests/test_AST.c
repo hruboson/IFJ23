@@ -87,7 +87,7 @@ void test_ast_var_print(void) {
     AST ast;
     init_ast(&ast);
 
-    int ret = parse(&in, &ast);
+    parse(&in, &ast);
 
     print_ast(&ast);
 }
@@ -110,13 +110,13 @@ void test_ast_while_print(void) {
     AST ast;
     init_ast(&ast);
 
-    int ret = parse(&in, &ast);
+    parse(&in, &ast);
 
     print_ast(&ast);
 }
 
 void test_ast_if_else_print(void) {
-    const char* data = "if let b { var a: Int = 3 \n } else { var b: Int = 4\n }";
+    const char* data = "let c: Int = 5 \nif let b { var a: Int = 3 \n } else { var b: Int = 4\n }";
     Input in = {
         .type = INT_STRING,
         .string = {
@@ -133,7 +133,7 @@ void test_ast_if_else_print(void) {
     AST ast;
     init_ast(&ast);
 
-    int ret = parse(&in, &ast);
+    parse(&in, &ast);
 
     print_ast(&ast);
 }
@@ -156,7 +156,30 @@ void test_ast_func_definition_print(void) {
     AST ast;
     init_ast(&ast);
 
-    int ret = parse(&in, &ast);
+    parse(&in, &ast);
+
+    print_ast(&ast);
+}
+
+void test_ast_func_definition_return_nil_print(void) {
+    const char* data = "func test() -> Int? { return nil \n }";
+    Input in = {
+        .type = INT_STRING,
+        .string = {
+            .s = data,
+            .i = 0,
+            .store = 0,
+        },
+    };
+
+    SymbolTable symtab;
+
+    init_symboltable(&symtab);
+
+    AST ast;
+    init_ast(&ast);
+
+    parse(&in, &ast);
 
     print_ast(&ast);
 }
@@ -173,6 +196,7 @@ int main(void) {
     RUN_TEST(test_ast_while_print);
     RUN_TEST(test_ast_if_else_print);
     RUN_TEST(test_ast_func_definition_print);
+    RUN_TEST(test_ast_func_definition_return_nil_print);
 
     return UNITY_END();
 }

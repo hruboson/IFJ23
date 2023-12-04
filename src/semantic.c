@@ -43,23 +43,25 @@ void insert_to_var_table(Statement *statement, VarTable *var_table){
 }
 
 // Var x = 5
-int semantic_variable(VarTableStack *stack, Statement *statement) {
-    // pokud jsi ve funkci, přejmenuj proměnnou na func_name%var_name
-    // func_name = statement.func.id.string + "%" + var.id.string
-    //"$"+statement.func.id.string+"%"+var.id.string
+int semantic_variable(VarTableStack *stack, Statement *statement, SymbolTable *symTable) {
+    // unique_id = "$" + statement->var.id_prefix.func_id->symbol.data + "%" + statement->var.id_prefix.block_counter + "%" + statement->var.id->symbol.data
     
-    String *string;
-    init_string(string);
-    string_append(string, "$");
-    if(statement->var.id_prefix.func_id != NULL){
-        string_append(string, statement->var.id_prefix.func_id);
+    if(symTable == NULL){
+        ERROR;
     }
-    string_append(string, "%");
-    string_append(string, statement->var.id_prefix.block_counter);
-    string_append(string, "%");
-    string_append(string, statement->var.id->symbol.data);
 
-    statement->var.unique_id = string;
+    String string;
+    init_string(&string);
+    string_append(&string, "$");
+    if(statement->var.id_prefix.func_id != NULL){
+        string_append(&string, statement->var.id_prefix.func_id->symbol.data);
+    }
+    string_append(&string, "%");
+    string_append(&string, statement->var.id_prefix.block_counter);
+    string_append(&string, "%");
+    string_append(&string, statement->var.id->symbol.data);
+
+    symboltable_insert(&symTable ,&string, &statement->var.unique_id);
     
     
     VarTable *var_table;

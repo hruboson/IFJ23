@@ -6,7 +6,7 @@
 
 // int semantic( Input*, AST* );
 
-int semantic_variable(VarTableStack* stack, Statement* statement);
+int semantic_variable(VarTableStack* stack, Statement* statement, SymbolTable *table);
 int semantic_assignment(VarTableStack *stack, FuncTable *table, Statement *statement);
 int semantic_if(VarTableStack *stack, FuncTable *table, Statement *statement);
 int semantic_while(VarTableStack *stack, FuncTable *table, Statement *statement);

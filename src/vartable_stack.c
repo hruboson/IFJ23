@@ -40,16 +40,16 @@ void vartable_stack_push(VarTableStack* stack, VarTable* table) {
     stack->vartables[stack->size - 1] = table;
 }
 
-void vartable_stack_pop(VarTableStack* stack, VarTable* table) {
+void vartable_stack_pop(VarTableStack* stack, VarTable** table) {
     if (!vartable_stack_is_empty(stack)) {
-        table = stack->vartables[stack->size - 1];
+        *table = stack->vartables[stack->size - 1];
         stack->size--;
     }
 }
 
-void vartable_stack_peek(VarTableStack* stack, VarTable* table) {
+void vartable_stack_peek(VarTableStack* stack, VarTable** table) {
     if (!vartable_stack_is_empty(stack)) {
-        table = stack->vartables[stack->size - 1];
+        *table = stack->vartables[stack->size - 1];
     }
 }
 

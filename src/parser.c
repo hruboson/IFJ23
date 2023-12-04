@@ -27,7 +27,6 @@
 bool do_semantic_analysis = true;
 
 int parse(Input* input, AST* ast) {
-	printf("DO SEM: %d\n", do_semantic_analysis);
 	int ret = 0;
 
 	VarTableStack var_table_stack;

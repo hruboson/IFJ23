@@ -26,8 +26,7 @@ typedef struct Statement {
 			bool modifiable;
 			SymbolRecord* id;
 			Expression* exp;
-			VarType data_type;  // if VARTYPE_VOID -> not set
-			bool allow_nil;
+			DataType data_type;  // if VARTYPE_VOID -> not set
 			bool used;
 			IdPrefix id_prefix;
 			SymbolRecord* unique_id;

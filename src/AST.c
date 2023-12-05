@@ -150,9 +150,6 @@ void print_ast(AST* ast) {
                         case VARTYPE_VOID:
                             printf("void");
                             break;
-                        case VARTYPE_NIL:
-                            printf("nil");
-                            break;
 
                         default:
                             break;
@@ -174,9 +171,6 @@ void print_ast(AST* ast) {
                         break;
                     case VARTYPE_VOID:
                         printf("void");
-                        break;
-                    case VARTYPE_NIL:
-                        printf("nil");
                         break;
 
                     default:
@@ -228,7 +222,7 @@ void print_ast(AST* ast) {
                 // todo print_exp(stm->var.exp);
                 printf("\tmodifiable: %s\n", stm->var.modifiable ? "true" : "false");
                 printf("\tdata_type: ");
-                switch (stm->var.data_type) {
+                switch (stm->var.data_type.type) {
                     case VARTYPE_DOUBLE:
                         printf("double");
                         break;
@@ -241,15 +235,11 @@ void print_ast(AST* ast) {
                     case VARTYPE_VOID:
                         printf("void");
                         break;
-                    //? can return type be nil
-                    case VARTYPE_NIL:
-                        printf("nil");
-                        break;
 
                     default:
                         break;
                 }
-                printf(", nil_allowed: %s\n", stm->var.allow_nil ? "true" : "false");
+                printf(", nil_allowed: %s\n", stm->var.data_type.nil_allowed ? "true" : "false");
                 printf("\tused: %s\n", stm->var.used ? "true" : "false");
                 printf("}\n");
                 break;
@@ -311,11 +301,6 @@ void print_statement(Statement* stm, size_t tabs) {
                     case VARTYPE_VOID:
                         printf("void");
                         break;
-                    //? can parameter type be nil
-                    case VARTYPE_NIL:
-                        printf("nil");
-                        break;
-
                     default:
                         break;
                 }
@@ -336,10 +321,6 @@ void print_statement(Statement* stm, size_t tabs) {
                     break;
                 case VARTYPE_VOID:
                     printf("void");
-                    break;
-                //? can return type be nil
-                case VARTYPE_NIL:
-                    printf("nil");
                     break;
 
                 default:
@@ -392,7 +373,7 @@ void print_statement(Statement* stm, size_t tabs) {
             // todo print_exp(stm->var.exp);
             printf("%s\tmodifiable: %s\n", tab.data, stm->var.modifiable ? "true" : "false");
             printf("%s\tdata_type: ", tab.data);
-            switch (stm->var.data_type) {
+            switch (stm->var.data_type.type) {
                 case VARTYPE_DOUBLE:
                     printf("double");
                     break;
@@ -405,14 +386,10 @@ void print_statement(Statement* stm, size_t tabs) {
                 case VARTYPE_VOID:
                     printf("void");
                     break;
-                //? can return type be nil
-                case VARTYPE_NIL:
-                    printf("nil");
-                    break;
                 default:
                     break;
             }
-            printf(", nil_allowed: %s\n", stm->var.allow_nil ? "true" : "false");
+            printf(", nil_allowed: %s\n", stm->var.data_type.nil_allowed ? "true" : "false");
             printf("%s\tused: %s\n", tab.data, stm->var.used ? "true" : "false");
             printf("%s}\n", tab.data);
             break;

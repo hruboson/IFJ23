@@ -6,10 +6,11 @@
 
 // int semantic( Input*, AST* );
 
-int semantic_variable(VarTableStack* stack, Statement* statement, SymbolTable *table);
-int semantic_assignment(VarTableStack *stack, FuncTable *table, Statement *statement);
-int semantic_if(VarTableStack *stack, FuncTable *table, Statement *statement);
-int semantic_while(VarTableStack *stack, FuncTable *table, Statement *statement);
-int semantic_return(VarTableStack *stack, FuncTable *table, Statement *statement, SymbolRecord *funcId);
-int semantic_expression(VarTableStack *stack, FuncTable *table, Statement *statement);
-int semantic_function(VarTableStack *stack, FuncTable *table, Statement *statement);
+int semantic_variable(VarTableStack* , Statement* , SymbolTable*, FuncTable* );
+int semantic_assignment(VarTableStack* , FuncTable*, Statement* );
+int semantic_if(VarTableStack*, FuncTable*, Statement* );
+int semantic_while(VarTableStack*, FuncTable*, Statement* );
+int semantic_return(VarTableStack*, FuncTable*, Statement*, SymbolRecord *funcId);
+int semantic_expression(VarTableStack*, FuncTable*, Statement*);
+int semantic_function(VarTableStack*, FuncTable*, Statement* );
+int semantic_type_match(DataType* L, DataType* R);

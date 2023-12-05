@@ -10,7 +10,6 @@ typedef enum VarType {
     VARTYPE_STRING,
     VARTYPE_INT,
     VARTYPE_DOUBLE,
-    VARTYPE_NIL,
     VARTYPE_BOOL,
 } VarType;
 
@@ -27,6 +26,7 @@ typedef struct Parameter {
 
 typedef struct Variable {
     SymbolRecord* id;
+    SymbolRecord* unique_id;
     DataType type;
     bool initialized;
 } Variable;

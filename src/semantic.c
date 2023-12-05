@@ -33,94 +33,10 @@
     return 7; \
 } while (0)
 
-// Helper function
-void insert_to_var_table(Statement *statement, VarTable *var_table){
-    // pridani do vartable
-    //ternary op je tam kvuli tomu kdyby se allow_nil rovnalo NULL aby se do .nil_allowed nepriradilo null ale false
-    DataType dt = { .type = statement->var.data_type, .nil_allowed = statement->var.allow_nil == true ? true : false}; 
-    Variable var = { .id = statement->var.id, .type = dt, .initialized = !(statement->var.exp == NULL) };
-    var_table_insert(var_table, var);
-}
-
-// Var x = 5
-int semantic_variable(VarTableStack *stack, Statement *statement, SymbolTable *symTable) {
-    // unique_id = "$" + statement->var.id_prefix.func_id->symbol.data + "%" + statement->var.id_prefix.block_counter + "%" + statement->var.id->symbol.data
-    
-    if(symTable == NULL){
-        ERROR;
-    }
-
-    String string;
-    init_string(&string);
-    string_append(&string, "$");
-    if(statement->var.id_prefix.func_id != NULL){
-        string_append(&string, statement->var.id_prefix.func_id->symbol.data);
-    }
-    string_append(&string, "%");
-    string_append(&string, statement->var.id_prefix.block_counter);
-    string_append(&string, "%");
-    string_append(&string, statement->var.id->symbol.data);
-
-    symboltable_insert(symTable ,&string, &statement->var.unique_id);
-    
-    
-    VarTable *var_table;
-    
-    if (!stack) {
-        ERROR;
-    }
-
-    vartable_stack_peek(stack, &var_table);
-    if(var_table == NULL){
-        ERROR;
-    }
-
-    switch (statement->var.data_type) {
-        case VARTYPE_INT:
-            if (statement->var.exp->type != ET_INT) {
-                SEMANTIC_ERROR_TYPE_MISMATCH;
-            } else {
-                insert_to_var_table(statement, var_table);
-            }
-            break;
-        case VARTYPE_DOUBLE:
-            if (statement->var.exp->type != ET_DOUBLE) {
-                SEMANTIC_ERROR_TYPE_MISMATCH;
-            } else {
-                insert_to_var_table(statement, var_table);
-            }
-            break;
-        case VARTYPE_STRING:
-            if (statement->var.exp->type != ET_STRING) {
-                SEMANTIC_ERROR_TYPE_MISMATCH;
-            } else {
-                insert_to_var_table(statement, var_table);
-            }
-            break;
-        case VARTYPE_VOID:
-            switch(statement->var.exp->type){
-                case ET_STRING:
-                    statement->var.data_type = VARTYPE_STRING;
-                    break;
-                case ET_INT:
-                    statement->var.data_type = VARTYPE_INT;
-                    break;
-                case ET_DOUBLE:
-                    statement->var.data_type = VARTYPE_DOUBLE;
-                    break; 
-                default:
-                    SEMANTIC_ERROR_TYPE_MISMATCH;
-            }
-            insert_to_var_table(statement, var_table);
-            break;
-                
-        default:
-            ERROR; 
-    }
-    return 0;
-}
 
 int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
+    DataType d0, d1;
+
     Function *func = NULL;
     switch(exp->type){
         case ET_ADD:
@@ -139,9 +55,9 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
         case ET_DIV:
             set_type(stack, table, exp->ops[0]);
             set_type(stack, table, exp->ops[1]);
-            VarType d0 = exp->ops[0]->data_type.type;
-            VarType d1 = exp->ops[1]->data_type.type;
-            if((d0 == VARTYPE_INT || VARTYPE_DOUBLE) && d0 == d1)
+            VarType d0_div = exp->ops[0]->data_type.type;
+            VarType d1_div = exp->ops[1]->data_type.type;
+            if((d0_div == VARTYPE_INT || VARTYPE_DOUBLE) && d0_div == d1_div)
             {
                 exp->data_type = exp->ops[0]->data_type;  
                 return 0;              
@@ -153,8 +69,8 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
             if(id_var == NULL){
                 SEMANTIC_ERROR_UNDEFINED_VARIABLE;
             }
-            exp->data_type.type = id_var->type.type;
-            exp->data_type.nil_allowed = false;
+            exp->data_type = id_var->type;
+            exp->id = id_var->unique_id;
 
             break;
 
@@ -176,7 +92,7 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
             break;
 
         case ET_NIL:
-            exp->data_type.type = VARTYPE_NIL;
+            exp->data_type.type = VARTYPE_VOID;
             exp->data_type.nil_allowed = true;
             break;
     
@@ -185,11 +101,16 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
             exp->data_type.type = VARTYPE_BOOL;
             set_type(stack, table, exp->ops[0]);
             set_type(stack, table, exp->ops[1]);
-            VarType d0_equal = exp->ops[0]->data_type.type;
-            VarType d1_equal = exp->ops[1]->data_type.type;
-            if((d0_equal == VARTYPE_INT || VARTYPE_DOUBLE || VARTYPE_STRING || VARTYPE_BOOL) && d0_equal == d1_equal)
-            {
-                return 0;              
+            d0 = exp->ops[0]->data_type;
+            d1 = exp->ops[1]->data_type;
+            if( d0.nil_allowed == false && d1.nil_allowed == false &&
+                d0.type == d1.type 
+            ) {
+                if((d0.type == VARTYPE_INT || d0.type == VARTYPE_DOUBLE ||
+                 d0.type == VARTYPE_STRING) && d0.type == d1.type)
+                {
+                    return 0;   
+                }
             }
             return 7;
 
@@ -200,10 +121,13 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
             exp->data_type.type = VARTYPE_BOOL;
             set_type(stack, table, exp->ops[0]);
             set_type(stack, table, exp->ops[1]);
-            VarType d0_lt = exp->ops[0]->data_type.type;
-            VarType d1_lt = exp->ops[1]->data_type.type;
-            if(d0_lt != VARTYPE_NIL && d1_lt != VARTYPE_NIL){
-                if((d0_lt == VARTYPE_INT || d0_lt == VARTYPE_DOUBLE || d0_lt == VARTYPE_STRING) && d0_lt == d1_lt)
+            d0 = exp->ops[0]->data_type;
+            d1 = exp->ops[1]->data_type;
+            if( d0.nil_allowed == false && d1.nil_allowed == false &&
+                d0.type == d1.type 
+            ) {
+                if((d0.type == VARTYPE_INT || d0.type == VARTYPE_DOUBLE ||
+                 d0.type == VARTYPE_STRING) && d0.type == d1.type)
                 {
                     return 0;   
                 }
@@ -276,6 +200,105 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
     return 0;
 }
 
+
+// Helper function
+void insert_to_var_table(Statement *statement, VarTable *var_table){
+    // pridani do vartable
+    //ternary op je tam kvuli tomu kdyby se allow_nil rovnalo NULL aby se do .nil_allowed nepriradilo null ale false
+    DataType dt = { .type = statement->var.data_type.type, .nil_allowed = statement->var.data_type.nil_allowed == true ? true : false}; 
+    Variable var = { .id = statement->var.id, .type = dt, .initialized = !(statement->var.exp == NULL) };
+    var_table_insert(var_table, var);
+}
+
+// Var x = 5
+
+int semantic_type_match(DataType* L, DataType* R) {
+    if (L->type == VARTYPE_VOID) {
+        if (R->type == VARTYPE_VOID) {
+            return 5; //TODO
+        }
+        *L = *R;
+        return 0;
+    } else {
+        if (L->nil_allowed == false) {
+            if (L->type != R->type || R->nil_allowed) {
+                return 5; //TODO
+            }
+            return 0;
+        } else {
+            if (L->type != R->type) {
+                if (R->type == VARTYPE_VOID && R->nil_allowed) {
+                    return 0;
+                } else {
+                    return 5; //TODO
+                }
+            } else {
+                if (R->nil_allowed) {
+                    return 5; //TODO
+                }
+            } 
+            return 0;
+        }
+    }
+    return 0;
+}
+
+int semantic_variable(VarTableStack *stack, Statement *statement, SymbolTable *symtab, FuncTable* func_table) {
+    // unique_id = "$" + statement->var.id_prefix.func_id->symbol.data + "%" + statement->var.id_prefix.block_counter + "%" + statement->var.id->symbol.data
+    
+    if(symtab == NULL){
+        ERROR;
+    }
+
+    //untested
+    String string;
+    init_string(&string);
+    string_append(&string, "$");
+    if(statement->var.id_prefix.func_id != NULL){
+        string_append(&string, statement->var.id_prefix.func_id->symbol.data);
+    }
+    string_append(&string, "%");
+
+    char f[64];
+    snprintf(f, 64, "%lu", statement->var.id_prefix.block_counter);
+    string_append(&string, f);
+    string_append(&string, "%");
+    string_append(&string, statement->var.id->symbol.data);
+
+    symboltable_insert(symtab ,&string, &statement->var.unique_id);
+    
+        int ret = set_type(stack, func_table, statement->var.exp);
+    if (ret != 0) return ret;
+
+    DataType *L = &statement->var.data_type;
+    DataType *R = &statement->var.exp->data_type;
+
+    ret = semantic_type_match(L, R);
+    if ( ret != 0){
+        return ret;
+    }
+
+    VarTable *var_table;
+    
+    if (!stack) {
+        ERROR;
+    }
+
+    vartable_stack_peek(stack, &var_table);
+    
+    if(var_table == NULL){
+        ERROR;
+    }
+    Variable var;
+    
+    var.id = statement->var.id;
+    var.unique_id = statement->var.unique_id;
+    var.type = statement->var.data_type;
+    var.initialized = statement->var.exp != NULL;
+
+    var_table_insert(var_table, var);
+    return 0;
+}
 
 // Assign x = y
 int semantic_assignment(VarTableStack *stack, FuncTable *table, Statement *statement) {

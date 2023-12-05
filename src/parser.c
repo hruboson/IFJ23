@@ -590,13 +590,13 @@ int parse_statement(
 
 					switch (token->value.keyword) {
 					case KEYWORD_DOUBLE:
-						(*statement)->var.data_type = VARTYPE_DOUBLE;
+						(*statement)->var.data_type.type = VARTYPE_DOUBLE;
 						break;
 					case KEYWORD_INT:
-						(*statement)->var.data_type = VARTYPE_INT;
+						(*statement)->var.data_type.type = VARTYPE_INT;
 						break;
 					case KEYWORD_STRING:
-						(*statement)->var.data_type = VARTYPE_STRING;
+						(*statement)->var.data_type.type = VARTYPE_STRING;
 						break;
 					default:
 						return 2;
@@ -606,11 +606,11 @@ int parse_statement(
 
 					if (token->type == TOKENTYPE_QUESTIONMARK) {
 						//TODO: Double \n ? byt nemuze ne?
-						(*statement)->var.allow_nil = true;
+						(*statement)->var.data_type.nil_allowed = true;
 						get_token(input, symtab, token);
 					}
 					else {
-						(*statement)->var.allow_nil = false;
+						(*statement)->var.data_type.nil_allowed = false;
 					}
 
 					// var a : Int \n => correct
@@ -628,7 +628,7 @@ int parse_statement(
 				}
 			}
 			else {
-				(*statement)->var.data_type = VARTYPE_VOID;
+				(*statement)->var.data_type.type = VARTYPE_VOID;
 			}
 
 			if (token->type == TOKENTYPE_EQUALS) {
@@ -637,15 +637,19 @@ int parse_statement(
 
 				ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
 
-				if (do_semantic_analysis) {
-					//TODO: ret = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
-				}
-				(*statement)->var.exp = exp;
-
 				if (ret != 0) {
 					return ret;
 				}
 
+				(*statement)->var.exp = exp;
+
+				if (do_semantic_analysis) {
+					ret = semantic_variable(var_table_stack, *statement, symtab, func_table); //return value = jestli prosla
+
+					if (ret != 0)
+						return ret;
+				}
+				
 				if (out_token_returned) {
 					token = &out_token;
 				}
@@ -1009,7 +1013,6 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 			param.extern_id = token->value.id;
 		}
 		else {
-			printf("TOKEN: %d\n", token->type);
 			return 2;
 		}
 

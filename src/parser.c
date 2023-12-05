@@ -139,7 +139,7 @@ void insert_builtin_functions(FuncTable* func_table, SymbolTable* symtab) {
 	string_append(&str_param_int_to_double, "Int2Double");
 	
 	SymbolRecord *sr_param_int_to_double;
-	symboltable_insert(symtab, &str_int_to_double, &sr_int_to_double);
+	symboltable_insert(symtab, &str_int_to_double, &sr_param_int_to_double);
 
 	DataType dt_param_int_to_double = { .nil_allowed = false, .type = VARTYPE_INT };
 
@@ -172,7 +172,7 @@ void insert_builtin_functions(FuncTable* func_table, SymbolTable* symtab) {
 	string_append(&str_param_double_to_int, "term");
 	
 	SymbolRecord *sr_param_double_to_int;
-	symboltable_insert(symtab, &str_double_to_int, &sr_double_to_int);
+	symboltable_insert(symtab, &str_double_to_int, &sr_param_double_to_int);
 
 	DataType dt_param_double_to_int = { .nil_allowed = false, .type = VARTYPE_DOUBLE };
 
@@ -205,7 +205,7 @@ void insert_builtin_functions(FuncTable* func_table, SymbolTable* symtab) {
 	string_append(&str_param_length, "s");
 	
 	SymbolRecord *sr_param_length;
-	symboltable_insert(symtab, &str_length, &sr_length);
+	symboltable_insert(symtab, &str_length, &sr_param_length);
 
 	DataType dt_param_length = { .nil_allowed = false, .type = VARTYPE_STRING };
 
@@ -318,7 +318,7 @@ void insert_builtin_functions(FuncTable* func_table, SymbolTable* symtab) {
 	string_append(&str_param_ord, "c");
 	
 	SymbolRecord *sr_param_ord;
-	symboltable_insert(symtab, &str_ord, &sr_ord);
+	symboltable_insert(symtab, &str_ord, &sr_param_ord);
 
 	DataType dt_param_ord = { .nil_allowed = false, .type = VARTYPE_STRING };
 
@@ -351,7 +351,7 @@ void insert_builtin_functions(FuncTable* func_table, SymbolTable* symtab) {
 	string_append(&str_param_chr, "i");
 	
 	SymbolRecord *sr_param_chr;
-	symboltable_insert(symtab, &str_chr, &sr_chr);
+	symboltable_insert(symtab, &str_chr, &sr_param_chr);
 
 	DataType dt_param_chr = { .nil_allowed = false, .type = VARTYPE_STRING };
 

@@ -63,12 +63,15 @@ $(DEPDIR)/%.d: $(TESTSDIR)/%.c
 
 # Create tools
 .PHONY: tools
-tools: $(BUILD)/tokenizer $(BUILD)/ir_gen
+tools: $(BUILD)/tokenizer $(BUILD)/ir_gen $(BUILD)/ast_gen
 
 $(BUILD)/tokenizer: $(OBJDIR_TOOLS)/tokenizer.o $(OBJECTS_WITHOUT_MAIN)
 	$(CC) -o $@ $^
 
 $(BUILD)/ir_gen: $(OBJDIR_TOOLS)/ir_gen.o $(OBJECTS_WITHOUT_MAIN)
+	$(CC) -o $@ $^
+
+$(BUILD)/ast_gen: $(OBJDIR_TOOLS)/ast_gen.o $(OBJECTS_WITHOUT_MAIN)
 	$(CC) -o $@ $^
 
 $(OBJDIR_TOOLS)/%.o: tools/%.c

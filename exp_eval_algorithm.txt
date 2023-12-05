@@ -16,6 +16,11 @@
 
 
 =========Co je potřeba=========
+ - Stack terminálů a neterminálů
  - Rule stack
  - Rule tree (Btrees)
  - Expression stack
+ 
+UPDATE 5.12. 11:50
+Procházíš celý strom postorderově
+Na stack se pushne val synů, kteří jsou Token (zleva doprava) (kontroluju při postorderu na otci)

@@ -241,6 +241,7 @@ void print_ast(AST* ast) {
                 }
                 printf(", nil_allowed: %s\n", stm->var.data_type.nil_allowed ? "true" : "false");
                 printf("\tused: %s\n", stm->var.used ? "true" : "false");
+                printf("\tvalue: "); print_exp(stm->var.exp); printf( "\n" );
                 printf("}\n");
                 break;
             case ST_WHILE:

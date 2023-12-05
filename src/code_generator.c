@@ -5,9 +5,9 @@
 /* output:
  *
  * <main>
- * goto end
+ * goto $end
  * <functions>
- * end:
+ * $end:
  */
 
 enum frame {
@@ -31,6 +31,15 @@ append_frame( String* c, enum frame f ) {
 	default:
 		exit( 99 );
 	}
+}
+
+enum frame
+get_frame( const SymbolRecord* id ) {
+	const char* i = id->symbol.data;
+	/* use variables start with '$', globals continue with '%' */
+	if ( i[ 0 ] == '$' && i[ 1 ] == '%' )
+		return f_g;
+	return f_l;
 }
 
 void
@@ -422,7 +431,7 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		i_defvar( code, f, i->id );
 		break;
 	case IRT_asgn:
-		i_move( code, f, i->ops[ 0 ], f, i->ops[ 1 ] );
+		i_move( code, get_frame( i->ops[ 0 ] ), i->ops[ 0 ], get_frame( i->ops[ 0 ] ), i->ops[ 1 ] );
 		break;
 	case IRT_asgn_int:
 		i_defvar( code, f, i->a_i.id );

@@ -367,7 +367,7 @@ convert_st( IR* ir, IR_Body* body, const Statement* st ) {
 	for ( const Statement* i = st; i; i = i->next ) {
 		switch ( i->type ) {
 		case ST_VAR:
-			s = string_copy( &i->var.id->symbol );
+			s = string_copy( &i->var.unique_id->symbol );
 			symboltable_insert( &ir->symtab, &s, &id );
 
 			inst.type = IRT_defvar;

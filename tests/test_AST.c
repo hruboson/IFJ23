@@ -184,6 +184,55 @@ void test_ast_func_definition_return_nil_print(void) {
     print_ast(&ast);
 }
 
+void test_ast_func_define_var_in_function(void) {
+    const char* data = "var i: Int = 10\n func test() -> Int? { var i: Int = 7 \n }";
+    Input in = {
+        .type = INT_STRING,
+        .string = {
+            .s = data,
+            .i = 0,
+            .store = 0,
+        },
+    };
+
+    SymbolTable symtab;
+
+    init_symboltable(&symtab);
+
+    AST ast;
+    init_ast(&ast);
+
+    parse(&in, &ast);
+
+    print_ast(&ast);
+}
+
+void test_ast_func_define_multiple_function(void) {
+    const char* data = "var i: Int = 1\n \
+     func test1() -> Int? \
+    { var i: Int = 7 \n } \n \
+    func test2() -> Int? { var i: Int = 7 \n }";
+    Input in = {
+        .type = INT_STRING,
+        .string = {
+            .s = data,
+            .i = 0,
+            .store = 0,
+        },
+    };
+
+    SymbolTable symtab;
+
+    init_symboltable(&symtab);
+
+    AST ast;
+    init_ast(&ast);
+
+    parse(&in, &ast);
+
+    print_ast(&ast);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_ast_init);
@@ -197,6 +246,8 @@ int main(void) {
     RUN_TEST(test_ast_if_else_print);
     RUN_TEST(test_ast_func_definition_print);
     RUN_TEST(test_ast_func_definition_return_nil_print);
+    RUN_TEST(test_ast_func_define_var_in_function);
+    RUN_TEST(test_ast_func_define_multiple_function);
 
     return UNITY_END();
 }

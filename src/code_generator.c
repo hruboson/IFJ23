@@ -219,6 +219,7 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 
 		// save result
 		if ( i->fn_call.ret_id != NULL ) {
+			i_defvar( code, f, i->fn_call.ret_id );
 			string_append( code, "MOVE " );
 			// dest
 			append_var( code, f, i->fn_call.ret_id );
@@ -530,8 +531,8 @@ append_builtin_functions( String* c ) {
 	// substring
 	string_append( c,
 		"LABEL substring\n" // s i j
-		"DEFVAR TF@ret\n"
-		"CREATEFRAME\n"
+		"PUSHFRAME\n"
+		"DEFVAR LF@%ret\n"
 		// i < 0
 		"DEFVAR LF@i_lt\n"
 		"LT LF@i_lt LF@%p1 int@0\n"
@@ -551,22 +552,22 @@ append_builtin_functions( String* c ) {
 
 		// i >= length(s)
 		"DEFVAR LF@i_gte_s_len\n"
-		"GT LF@i_gte_s_len LF@%p1 LF@%s_len\n"
-		"JUMPIFEQ substring%nil bool@true LF@i_gt_s_len\n"
-		"EQ LF@i_gte_s_len LF@%p1 LF@%s_len\n"
-		"JUMPIFEQ substring%nil bool@true LF@i_gt_s_len\n"
+		"GT LF@i_gte_s_len LF@%p1 LF@s_len\n"
+		"JUMPIFEQ substring%nil bool@true LF@i_gte_s_len\n"
+		"EQ LF@i_gte_s_len LF@%p1 LF@s_len\n"
+		"JUMPIFEQ substring%nil bool@true LF@i_gte_s_len\n"
 		// j > length(s)
 		"DEFVAR LF@j_gt_s_len\n"
-		"GT LF@j_gt_s_len LF@%p2 LF@%s_len\n"
+		"GT LF@j_gt_s_len LF@%p2 LF@s_len\n"
 		"JUMPIFEQ substring%nil bool@true LF@j_gt_s_len\n"
 
 		// substring
 		"DEFVAR LF@tmp\n"
-		"MOVE LF@ret string@\n"
+		"MOVE LF@%ret string@\n"
 
 		"LABEL substring%cond\n"
 		"GETCHAR LF@tmp LF@%p0 LF@%p1\n"
-		"CONCAT LF@ret LF@ret LF@tmp\n"
+		"CONCAT LF@%ret LF@%ret LF@tmp\n"
 		"ADD LF@%p1 LF@%p1 int@1\n"
 
 		// if i == j: goto end
@@ -575,7 +576,7 @@ append_builtin_functions( String* c ) {
 		"JUMP substring%cond\n"
 
 		"LABEL substring%nil\n"
-		"MOVE TF@ret nil@nil\n"
+		"MOVE TF@%ret nil@nil\n"
 		"LABEL substring%end\n"
 		"POPFRAME\n"
 		"RETURN\n"
@@ -608,7 +609,7 @@ generate_code( const IR* ir, String* code ) {
 	}
 
 	// skip over functions
-	string_append( code, "JUMP END\n" );
+	string_append( code, "JUMP $END\n" );
 
 	// user defined functions
 	string_append( code, "# user functions\n" );
@@ -634,7 +635,7 @@ generate_code( const IR* ir, String* code ) {
 
 	// end of program
 	string_append( code, "# end of program\n" );
-	string_append( code, "LABEL END\n" );
+	string_append( code, "LABEL $END\n" );
 
 	return 0;
 }

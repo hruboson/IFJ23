@@ -5,7 +5,7 @@
 #define STACK_SIZE 64
 
 typedef struct TokenStack {
-    TokenType** tokens;
+    Token** tokens;
     int size;
     int cap;
 } TokenStack;

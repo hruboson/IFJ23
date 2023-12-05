@@ -33,6 +33,7 @@ typedef struct Variable {
 
 typedef struct Function {
     SymbolRecord* id;
+    bool is_write;
     size_t param_count;
     Parameter* parameters;
     DataType return_type;

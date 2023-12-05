@@ -432,7 +432,3 @@ void print_statement(Statement* stm, size_t tabs) {
 
     clear_string(&tab);
 }
-
-void print_exp(Expression* exp) {
-    // todo
-}

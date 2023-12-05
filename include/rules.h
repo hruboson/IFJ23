@@ -51,7 +51,7 @@ typedef struct ExpandTo {
 // (0, jakekoliv) == chyba syntaktické analýzy
 typedef struct Rule {
     bool valid;
-    ExpandTo* expand_to;
+    ExpandTo** expand_to; // array pointerů na pravidla
 } Rule;
 
 // TODO: 2D pole pravidel

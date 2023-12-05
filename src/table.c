@@ -1,6 +1,7 @@
 #include "table.h"
 
-#include "stdlib.h"
+#include <stdlib.h>
+#include <assert.h>
 
 void init_func_table(FuncTable* table) {
     table->funcs_cap = 0;
@@ -72,16 +73,17 @@ void var_table_insert(VarTable* table, Variable var) {
 }
 
 Variable* var_table_get(VarTable* table, SymbolRecord* id) {
-    Variable* var;
-    if (!table) return NULL;
-    for (size_t i = 0; i < table->vars_size; i++) {
-        var = &(table->vars[i]);
-        if (var) {
-            if (var->id->hash == id->hash) {
-                return var;
-            }
-        }
-    }
+	if (!table) return NULL;
+	for (size_t i = 0; i < table->vars_size; i++) {
+		const Variable* v = table->vars + i;
+		assert( v->id );
+		if (
+			v->id->hash == id->hash &&
+			string_eq( &id->symbol, &v->id->symbol )
+		) {
+			return v;
+		}
+	}
 
-    return NULL;  // variable not found in table
+	return NULL;  // variable not found in table
 }

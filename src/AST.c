@@ -21,6 +21,76 @@ void clear_ast(AST* ast) {
     clear_symboltable(&ast->symtab);
 }
 
+void
+print_exp( const Expression* e ) {
+	if ( e == NULL )
+		return;
+
+	switch ( e->type ) {
+	case ET_ID:
+		printf( "%s", e->id->symbol.data );
+		break;
+	case ET_INT:
+		printf( "%i", e->int_ );
+		break;
+	case ET_DOUBLE:
+		printf( "%f", e->double_ );
+		break;
+	case ET_STRING:
+		printf( "\"" );
+		for ( size_t i = 0; i < e->str_.length; i++ ) {
+			char c = e->str_.data[ i ];
+
+			if ( c <= 31 )
+				printf( "\\u{%x}", c );
+			else
+				printf( "%c", c );
+		}
+		printf( "\"" );
+		break;
+	case ET_ADD:
+		print_exp( e->ops[ 0 ] );
+		printf( " + " );
+		print_exp( e->ops[ 1 ] );
+		break;
+	case ET_SUB:
+		print_exp( e->ops[ 0 ] );
+		printf( " - " );
+		print_exp( e->ops[ 1 ] );
+		break;
+	case ET_MULT:
+		print_exp( e->ops[ 0 ] );
+		printf( " * " );
+		print_exp( e->ops[ 1 ] );
+		break;
+	case ET_DIV:
+		print_exp( e->ops[ 0 ] );
+		printf( " / " );
+		print_exp( e->ops[ 1 ] );
+		break;
+	case ET_FUNC:
+                printf("%s(", e->fn_call.id->symbol.data );
+		for ( size_t i = 0; i < e->fn_call.arg_count; i++ ) {
+			printf( " " );
+			const Argument* a = e->fn_call.args + i;
+
+			if ( a->id != NULL )
+				printf( "%s: ", a->id->symbol.data );
+
+			print_exp( a->exp );
+
+			if ( i != e->fn_call.arg_count - 1 )
+				printf( "," );
+			else
+				printf( " " );
+		}
+		printf( ")" );
+		break;
+	}
+
+
+}
+
 void ast_append(AST* ast, Statement* st) {
     if (!(ast->statement)) {  // adding first statement
         ast->statement = st;
@@ -50,14 +120,14 @@ void print_ast(AST* ast) {
         switch (stm->type) {
             case ST_ASSIGN:
                 printf("assign {\n");
-                // todo print_exp(stm->assign.exp);
                 printf("\tid: %s\n", stm->assign.id->symbol.data);
+                print_exp(stm->assign.exp);
                 printf("}\n");
                 break;
             case ST_EXP:
-                printf("expression {\n");
-                // todo print_exp(stm->exp.exp);
-                printf("}\n");
+                printf("expression {\n\t");
+                print_exp(stm->exp.exp);
+                printf("\n}\n");
                 break;
             case ST_FUNC:
                 printf("function {\n");
@@ -145,7 +215,7 @@ void print_ast(AST* ast) {
             case ST_RETURN:
                 printf("return {\n");
                 // todo print_exp(stm->return_.exp);
-                printf("}\n");
+                printf("\n}\n");
                 break;
             case ST_VAR:
                 printf("variable {\n");

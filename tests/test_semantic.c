@@ -22,16 +22,16 @@ void test_type_match(void) {
 		DataType L, R;
 		int ret;
 	} tests[] = {
-		{ {VARTYPE_VOID, false}, {VARTYPE_VOID, false}, 5},
+		{ {VARTYPE_VOID, false}, {VARTYPE_VOID, false}, 7},
 		{ {VARTYPE_INT, false}, {VARTYPE_INT, false}, 0},
 		{ {VARTYPE_INT, true}, {VARTYPE_INT, false}, 0},
 		{ {VARTYPE_INT, true}, {VARTYPE_VOID, true}, 0},
-		{ {VARTYPE_INT, false}, {VARTYPE_STRING, false}, 5},
-		{ {VARTYPE_INT, false}, {VARTYPE_VOID, true}, 5},
+		{ {VARTYPE_INT, false}, {VARTYPE_STRING, false}, 7},
+		{ {VARTYPE_INT, false}, {VARTYPE_VOID, true}, 7},
 		{ {VARTYPE_VOID, false}, {VARTYPE_INT, false}, 0},
-		{ {VARTYPE_INT, true}, {VARTYPE_STRING, false}, 5},
+		{ {VARTYPE_INT, true}, {VARTYPE_STRING, false}, 7},
 		{ {VARTYPE_VOID, false}, {VARTYPE_INT, true}, 0},
-		{ {VARTYPE_INT, false}, {VARTYPE_INT, true}, 5},
+		{ {VARTYPE_INT, false}, {VARTYPE_INT, true}, 7},
 	};
 
 	for (size_t i = 0; i < arraysize(tests); i++) {
@@ -51,15 +51,15 @@ void test_type_match_2(void) {
 		DataType dt;
 		int ret;
 	} tests[] = {
-		{ "let a : Int = nil\n", {}, 5},
-		{ "let a = nil\n", {}, 5},
+		{ "let a : Int = nil\n", {}, 7},
+		{ "let a = nil\n", {}, 7},
 		{ "let a : Int = 1\n", {VARTYPE_INT, false}, 0},
 		{ "let a : Int? = 1\n", {VARTYPE_INT, true}, 0},
 		{ "let a : Int? = nil\n", {VARTYPE_INT, true}, 0},
-		{ "let a : Int = \"a\"\n", {}, 5},
-		{ "let a : Int = nil\n", {}, 5},
+		{ "let a : Int = \"a\"\n", {}, 7},
+		{ "let a : Int = nil\n", {}, 7},
 		{ "let a = 1\n", {VARTYPE_INT, false}, 0},
-		{ "let a : Int? = \"a\"\n", {}, 5}
+		{ "let a : Int? = \"a\"\n", {}, 7}
 	};
 
 	for (size_t i = 0; i < arraysize(tests); i++) {

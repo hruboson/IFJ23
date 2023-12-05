@@ -42,27 +42,27 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
         case ET_ADD:
             set_type(stack, table, exp->ops[0]);
             set_type(stack, table, exp->ops[1]);
-            VarType d0_add = exp->ops[0]->data_type.type;
-            VarType d1_add = exp->ops[1]->data_type.type;
-            if(d0_add == d1_add){
+            DataType d0_add = exp->ops[0]->data_type;
+            DataType d1_add = exp->ops[1]->data_type;
+            if(d0_add.type == d1_add.type){
                 exp->data_type = exp->ops[0]->data_type; 
                 return 0;              
             }
-            return 7;
+            SEMANTIC_ERROR_TYPE_MISMATCH;
 
         case ET_SUB:
         case ET_MULT:
         case ET_DIV:
             set_type(stack, table, exp->ops[0]);
             set_type(stack, table, exp->ops[1]);
-            VarType d0_div = exp->ops[0]->data_type.type;
-            VarType d1_div = exp->ops[1]->data_type.type;
-            if((d0_div == VARTYPE_INT || VARTYPE_DOUBLE) && d0_div == d1_div)
+            DataType d0_div = exp->ops[0]->data_type;
+            DataType d1_div = exp->ops[1]->data_type;
+            if((d0_div.type == VARTYPE_INT || VARTYPE_DOUBLE) && d0_div.type == d1_div.type)
             {
                 exp->data_type = exp->ops[0]->data_type;  
                 return 0;              
             }
-            return 7;
+           SEMANTIC_ERROR_TYPE_MISMATCH;
 
         case ET_ID: {
             Variable *id_var = var_table_stack_get_var(stack, exp->id);
@@ -112,7 +112,7 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
                     return 0;   
                 }
             }
-            return 7;
+            SEMANTIC_ERROR_TYPE_MISMATCH;
 
         case ET_LT:
         case ET_GT:
@@ -132,7 +132,7 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
                     return 0;   
                 }
             }
-            return 7;
+            SEMANTIC_ERROR_TYPE_MISMATCH;
 
         case ET_FUNC:
             func = func_table_get(table, exp->fn_call.id);
@@ -215,14 +215,14 @@ void insert_to_var_table(Statement *statement, VarTable *var_table){
 int semantic_type_match(DataType* L, DataType* R) {
     if (L->type == VARTYPE_VOID) {
         if (R->type == VARTYPE_VOID) {
-            return 5; //TODO
+            SEMANTIC_ERROR_TYPE_MISMATCH;     
         }
         *L = *R;
         return 0;
     } else {
         if (L->nil_allowed == false) {
             if (L->type != R->type || R->nil_allowed) {
-                return 5; //TODO
+                SEMANTIC_ERROR_TYPE_MISMATCH;
             }
             return 0;
         } else {
@@ -230,11 +230,11 @@ int semantic_type_match(DataType* L, DataType* R) {
                 if (R->type == VARTYPE_VOID && R->nil_allowed) {
                     return 0;
                 } else {
-                    return 5; //TODO
+                    SEMANTIC_ERROR_TYPE_MISMATCH;
                 }
             } else {
                 if (R->nil_allowed) {
-                    return 5; //TODO
+                    SEMANTIC_ERROR_TYPE_MISMATCH;
                 }
             } 
             return 0;
@@ -267,7 +267,7 @@ int semantic_variable(VarTableStack *stack, Statement *statement, SymbolTable *s
 
     symboltable_insert(symtab ,&string, &statement->var.unique_id);
     
-        int ret = set_type(stack, func_table, statement->var.exp);
+    int ret = set_type(stack, func_table, statement->var.exp);
     if (ret != 0) return ret;
 
     DataType *L = &statement->var.data_type;

@@ -1,6 +1,6 @@
 #include "AST.h"
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include "string_.h"
 
 void init_ast(AST* ast) {

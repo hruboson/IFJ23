@@ -9,12 +9,13 @@ TESTSDIR := tests
 # Build paths
 BUILD := build
 OBJDIR := build/objects
+OBJDIR_TOOLS := build/objects/tools
 DEPDIR := build/dependencies
 RESULTSDIR := build/results
 RESULTS := $(patsubst $(TESTSDIR)/test_%.c,$(RESULTSDIR)/test_%.txt,$(wildcard $(TESTSDIR)/test_*.c))
 HEADERS := $(wildcard include/*.h)
 
-BUILDPATHS := $(BUILD) $(OBJDIR) $(RESULTSDIR) $(DEPDIR) $(HEADERS)
+BUILDPATHS := $(BUILD) $(OBJDIR) $(RESULTSDIR) $(DEPDIR) $(HEADERS) $(OBJDIR_TOOLS)
 
 # Unity testing library
 UNITY := unity/src
@@ -25,8 +26,6 @@ OBJECTS := $(patsubst %.c, $(OBJDIR)/%.o, $(notdir $(SOURCES)))
 OBJECTS_WITHOUT_MAIN := $(filter-out $(OBJDIR)/main.o,$(OBJECTS))
 TESTSOURCES := $(wildcard *.c) $(wildcard $(TESTSDIR)/*.c)
 TESTOBJECTS := $(patsubst %.c, $(OBJDIR)/test_%.o, $(notdir $(TESTSOURCES)))
-
-### TODO RELEASE BUILD with -g
 
 # Name of the program
 TARGET = IFJ.out
@@ -57,24 +56,29 @@ $(BUILD)/test_scanner.out: $(OBJDIR)/test_scanner.o $(OBJDIR)/scanner.o $(OBJDIR
 # Compile Unity
 $(OBJDIR)/%.o: $(UNITY)/%.c $(UNITY)/%.h
 	$(CC) -c $(CFLAGS) $< -o $@
-	
+
 # Create dependencies
 $(DEPDIR)/%.d: $(TESTSDIR)/%.c
 	$(CC) -MM -MG -MF $@ $<
 
 # Create tools
 .PHONY: tools
-tools: $(BUILD)/tokenizer
+tools: $(BUILD)/tokenizer $(BUILD)/ir_gen
 
-$(BUILD)/tokenizer: $(OBJDIR)/tokenizer.o $(OBJDIR)/symtable.o $(OBJDIR)/scanner.o $(OBJDIR)/string.o
+$(BUILD)/tokenizer: $(OBJDIR_TOOLS)/tokenizer.o $(OBJECTS_WITHOUT_MAIN)
 	$(CC) -o $@ $^
 
-$(OBJDIR)/tokenizer.o: tools/tokenizer.c
+$(BUILD)/ir_gen: $(OBJDIR_TOOLS)/ir_gen.o $(OBJECTS_WITHOUT_MAIN)
+	$(CC) -o $@ $^
+
+$(OBJDIR_TOOLS)/%.o: tools/%.c
 	$(CC) -c -o $@ $< -Iinclude $(DEFINE)
 
 # Create directories
 $(OBJDIR):
 	@mkdir $(OBJDIR)
+$(OBJDIR_TOOLS):
+	@mkdir $(OBJDIR_TOOLS)
 $(BUILD):
 	@mkdir $(BUILD)
 $(DEPDIR):

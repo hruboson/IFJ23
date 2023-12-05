@@ -97,3 +97,5 @@ void init_ir( IR* );
 void clear_ir( IR* );
 
 int convert_to_ir( const AST*, IR* );
+
+void print_ir( FILE*, const IR* );

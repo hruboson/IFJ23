@@ -61,7 +61,7 @@ int semantic_variable(VarTableStack *stack, Statement *statement, SymbolTable *s
     string_append(&string, "%");
     string_append(&string, statement->var.id->symbol.data);
 
-    symboltable_insert(&symTable ,&string, &statement->var.unique_id);
+    symboltable_insert(symTable ,&string, &statement->var.unique_id);
     
     
     VarTable *var_table;
@@ -123,14 +123,13 @@ int semantic_variable(VarTableStack *stack, Statement *statement, SymbolTable *s
 int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
     Function *func = NULL;
     switch(exp->type){
-        
         case ET_ADD:
             set_type(stack, table, exp->ops[0]);
             set_type(stack, table, exp->ops[1]);
             VarType d0_add = exp->ops[0]->data_type.type;
             VarType d1_add = exp->ops[1]->data_type.type;
             if(d0_add == d1_add){
-                exp->data_type = exp->ops[0]->data_type;  
+                exp->data_type = exp->ops[0]->data_type; 
                 return 0;              
             }
             return 7;
@@ -151,9 +150,14 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
 
         case ET_ID: {
             Variable *id_var = var_table_stack_get_var(stack, exp->id);
+            if(id_var == NULL){
+                SEMANTIC_ERROR_UNDEFINED_VARIABLE;
+            }
             exp->data_type.type = id_var->type.type;
             exp->data_type.nil_allowed = false;
+
             break;
+
         }
             
         case ET_INT:
@@ -266,6 +270,7 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
             return 0;
 
         default:
+            printf("default error\n");
             ERROR;
     }
     return 0;

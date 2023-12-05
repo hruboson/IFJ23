@@ -1,7 +1,7 @@
 #include "parser.h"
 
 #include "AST.h"
-
+#include "semantic.h"
 #include "token_stack.h"
 #include "stdlib.h"
 #include "vartable_stack.h"
@@ -50,7 +50,9 @@ int parse(Input* input, AST* ast) {
 	}
 	else {
 		// TODO: clear structs
-		return 2;
+		// TODO: dodělat řešení, jestli se ti vrátila sémantická chyba, nebo ne
+		// TODO: předělat, aby nevracelo vždy 2 (například, pokud je if a semantic vrátí error 9, pak se vypíše v testech, že se vrací 2)
+		return ret;
 	}
 
 	if (do_semantic_analysis) {
@@ -428,14 +430,17 @@ int parse_statement(
 		
 		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
-		if (do_semantic_analysis) {
-			//TODO: ret = semantic_condition(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+		if (ret != 0) {
+			return ret;
 		}
 
 		(*statement)->if_.exp = exp;
 
-		if (ret != 0) {
-			return ret;
+		if (do_semantic_analysis) {
+			ret = semantic_if(var_table_stack, func_table, *statement);// return value = jestli prosla
+			if(ret != 0){
+				return ret;
+			}
 		}
 
 		if (out_token_returned) {

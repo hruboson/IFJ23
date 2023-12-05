@@ -30,6 +30,7 @@ typedef struct Statement {
 			bool allow_nil;
 			bool used;
 			IdPrefix id_prefix;
+			SymbolRecord* unique_id;
 		} var;
 		struct {
 			SymbolRecord* id;

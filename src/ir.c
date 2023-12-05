@@ -168,7 +168,7 @@ convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
 				i.type = IRT_add;
 			else
 				exit( 99 );
-			i.type = IRT_add; bi = true;
+			bi = true;
 		}
 		FALLTHROUGH;
 	case ET_SUB:
@@ -262,7 +262,10 @@ convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
 		if ( strcmp( "write", exp->fn_call.id->symbol.data ) == 0 ) {
 			for ( size_t j = 0; j < exp->fn_call.arg_count; j++ ) {
 				i.type = IRT_call;
+				s = string_copy( &exp->fn_call.id->symbol );
+				symboltable_insert( &ir->symtab, &s, &i.fn_call.fn_id );
 				i.fn_call.ret_id = NULL;
+				i.fn_call.arg_count = 1;
 				i.fn_call.args = malloc( sizeof( i.fn_call.args[ 0 ] ) );
 				if ( i.fn_call.args == NULL )
 					exit( 99 );

@@ -210,7 +210,6 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 			// src
 			append_var( code, f, i->fn_call.args[ a_i ] );
 			string_append( code, "\n" );
-
 		}
 
 		// call
@@ -250,6 +249,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 	case IRT_add:
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "ADD " );
+		append_var( code, f, i->ops[ 2 ] );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -258,6 +259,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 	case IRT_sub:
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "SUB " );
+		append_var( code, f, i->ops[ 2 ] );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -266,6 +269,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 	case IRT_mul:
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "MUL " );
+		append_var( code, f, i->ops[ 2 ] );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -273,7 +278,9 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		break;
 	case IRT_div:
 		i_defvar( code, f, i->ops[ 2 ] );
-		string_append( code, "DIR " );
+		string_append( code, "DIV " );
+		append_var( code, f, i->ops[ 2 ] );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -282,6 +289,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 	case IRT_idiv:
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "IDIV " );
+		append_var( code, f, i->ops[ 2 ] );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -290,6 +299,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 	case IRT_concat:
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "CONCAT " );
+		append_var( code, f, i->ops[ 2 ] );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -298,6 +309,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 	case IRT_equal:
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "EQ " );
+		append_var( code, f, i->ops[ 2 ] );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -307,6 +320,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		snprintf( b0, sizeof( b0 ), "%s_n", i->ops[ 2 ]->symbol.data );
 		i_defvar_cstr( code, f, b0 );
 		string_append( code, "EQ " );
+		append_var_str( code, f, b0 );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -314,6 +329,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "NOT " );
+		append_var_str( code, f, b0 );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 2 ] );
 		string_append( code, " " );
 		append_var_cstr( code, f, b0 );
@@ -322,6 +339,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 	case IRT_lt:
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "LT " );
+		append_var( code, f, i->ops[ 2 ] );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -331,6 +350,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		snprintf( b0, sizeof( b0 ), "%s_lt", i->ops[ 2 ]->symbol.data );
 		i_defvar_cstr( code, f, b0 );
 		string_append( code, "LT " );
+		append_var_str( code, f, b0 );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -339,6 +360,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		snprintf( b1, sizeof( b1 ), "%s_eq", i->ops[ 2 ]->symbol.data );
 		i_defvar_cstr( code, f, b1 );
 		string_append( code, "EQ " );
+		append_var_str( code, f, b1 );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -356,6 +379,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 	case IRT_gt:
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "GT " );
+		append_var( code, f, i->ops[ 2 ] );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -365,6 +390,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		snprintf( b0, sizeof( b0 ), "%s_gt", i->ops[ 2 ]->symbol.data );
 		i_defvar_cstr( code, f, b0 );
 		string_append( code, "GT " );
+		append_var_str( code, f, b0 );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );
@@ -373,6 +400,8 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		snprintf( b1, sizeof( b1 ), "%s_eq", i->ops[ 2 ]->symbol.data );
 		i_defvar_cstr( code, f, b1 );
 		string_append( code, "EQ " );
+		append_var_str( code, f, b1 );
+		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 1 ] );

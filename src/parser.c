@@ -416,8 +416,6 @@ int parse_statement(
 		get_token(input, symtab, token);
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
-		// zacatek scope
-
 		if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_LET) {
 
 			get_token(input, symtab, token);
@@ -434,7 +432,7 @@ int parse_statement(
 			(*statement)->if_.check_nil = false;
 		}
 
-		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
+		ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
 
 		if (ret != 0) {
 			return ret;
@@ -486,6 +484,7 @@ int parse_statement(
 				return 2;
 			}
 
+			// zacatek scope
 			VarTable var_table;
 			init_var_table( &var_table );
 			vartable_stack_push( &var_table_stack, &var_table );
@@ -517,11 +516,10 @@ int parse_statement(
 
 		Expression* exp;
 
-
 		get_token(input, symtab, token);
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
-		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
+		ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
 
 		if (do_semantic_analysis) {
 			//TODO: ret = semantic_condition(VarTableStack, FunctionTable, Statement) return value = jestli prosla
@@ -637,7 +635,7 @@ int parse_statement(
 				get_token(input, symtab, token);
 				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
-				ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
+				ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
 
 				if (do_semantic_analysis) {
 					//TODO: ret = semantic_variable(VarTableStack, FunctionTable, Statement) return value = jestli prosla
@@ -678,7 +676,7 @@ int parse_statement(
 			return 0;
 		}
 
-		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
+		ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
 
 		if (do_semantic_analysis) {
 			//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
@@ -709,15 +707,30 @@ int parse_statement(
 
 		(*statement)->assign.id = token->value.id;
 
+		Token *token_1 = token;
+
 		get_token(input, symtab, token);
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
-		if (token->type == TOKENTYPE_EQUALS) {
+		if (token->type == TOKENTYPE_PAR_L) {
+
+			ret = parse_expression(input, symtab, &exp, token_1, token, &out_token, &out_token_returned);
+
+			(*statement)->assign.exp = exp;
+
+			if (ret != 0) {
+				return ret;
+			}
+
+			return 0;
+		}
+
+		else if (token->type == TOKENTYPE_EQUALS) {
 
 			get_token(input, symtab, token);
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
-			ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
+			ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
 
 			if (do_semantic_analysis) {
 				//TODO: ret = semantic_assignment(VarTableStack, FunctionTable, Statement) return value = jestli prosla
@@ -742,6 +755,7 @@ int parse_statement(
 
 			return 2;
 		}
+		return 2;
 	}
 
 	// <func> -> func <id> ( [<id> <id> : <type>] ) [-> <type>] { <statementList> }
@@ -750,8 +764,10 @@ int parse_statement(
 
 		get_token(input, symtab, token);
 
-		//TODO: <statement> -> <func> () volani funkce
-		//TODO: muze byt <func> \n () ??
+		// zacatek scope
+		VarTable vartable;
+		init_var_table(&vartable);
+		vartable_stack_push(var_table_stack, &vartable);
 
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
@@ -822,10 +838,6 @@ int parse_statement(
 			}
 
 			if (token->type == TOKENTYPE_BRACE_L) {
-				// zacatek scope
-				VarTable vartable;
-				init_var_table(&vartable);
-				vartable_stack_push(var_table_stack, &vartable);
 
 				ret = parse_statement_list(input,
 					symtab, &(*statement)->func.body,
@@ -912,14 +924,18 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 // vraci ukazatel na to kde skoncila
 // in_token Token, ktery muze dostat od parse_statement 
 // out_token Token, ktery muze vratit parse_statementu
-int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token* in_token, Token* out_token, bool* out_token_returned) {
+int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token* in_token, Token* in_token_2, Token* out_token, bool* out_token_returned) {
 	Token _token;
 	Token* token = &_token;
+
 	if (in_token != NULL) {
 		token = in_token;
 	} else {
 		get_token(input, symtab, token);
 	}
+
+	//TODO: pokud prijdou in_token a in_token_2 prvni je dat do listu tokenu a pak teprve nacitat
+
 	*exp = (Expression*)malloc(sizeof(Expression));
 	if (*exp == NULL) {
 		exit(99);

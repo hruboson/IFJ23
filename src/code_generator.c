@@ -321,7 +321,7 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		snprintf( b0, sizeof( b0 ), "%s_n", i->ops[ 2 ]->symbol.data );
 		i_defvar_cstr( code, f, b0 );
 		string_append( code, "EQ " );
-		append_var_str( code, f, b0 );
+		append_var_cstr( code, f, b0 );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
@@ -330,7 +330,7 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 
 		i_defvar( code, f, i->ops[ 2 ] );
 		string_append( code, "NOT " );
-		append_var_str( code, f, b0 );
+		append_var_cstr( code, f, b0 );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 2 ] );
 		string_append( code, " " );
@@ -351,7 +351,7 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		snprintf( b0, sizeof( b0 ), "%s_lt", i->ops[ 2 ]->symbol.data );
 		i_defvar_cstr( code, f, b0 );
 		string_append( code, "LT " );
-		append_var_str( code, f, b0 );
+		append_var_cstr( code, f, b0 );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
@@ -361,7 +361,7 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		snprintf( b1, sizeof( b1 ), "%s_eq", i->ops[ 2 ]->symbol.data );
 		i_defvar_cstr( code, f, b1 );
 		string_append( code, "EQ " );
-		append_var_str( code, f, b1 );
+		append_var_cstr( code, f, b1 );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
@@ -391,7 +391,7 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		snprintf( b0, sizeof( b0 ), "%s_gt", i->ops[ 2 ]->symbol.data );
 		i_defvar_cstr( code, f, b0 );
 		string_append( code, "GT " );
-		append_var_str( code, f, b0 );
+		append_var_cstr( code, f, b0 );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );
@@ -401,7 +401,7 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		snprintf( b1, sizeof( b1 ), "%s_eq", i->ops[ 2 ]->symbol.data );
 		i_defvar_cstr( code, f, b1 );
 		string_append( code, "EQ " );
-		append_var_str( code, f, b1 );
+		append_var_cstr( code, f, b1 );
 		string_append( code, " " );
 		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, " " );

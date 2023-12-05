@@ -1,3 +1,4 @@
+#include "rules.h"
 #include "tnt_stack.h"
 
 #include "stdlib.h"

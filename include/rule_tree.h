@@ -1,18 +1,24 @@
 #pragma once
 
 #include "expression.h"
+#include "exp_stack.h"
 #include "rule_stack.h"
 
-typedef struct RuleNode RuleNode;
+#include "stdbool.h"
+#include "scanner.h"
 
-struct RuleNode {
-    RuleNode* left;
-    RuleNode* right;
-    Expression* exp;
+typedef struct Node Node;
+
+struct Node {
+	Node* node_list[3];
+	bool isTerminal;
+	union {
+		Token* val;
+		NonTerminal nt;
+	};
 };
 
-void init_rule_tree(RuleNode** tree);
-void dispose_rule_tree(RuleNode* tree);
-void rule_tree_insert_left(RuleNode* root, Expression* exp);
-void rule_tree_insert_right(RuleNode* root, Expression* exp);
-void rule_tree_postorder(RuleNode* tree, RuleStack* stack);
+void init_rule_tree(Node** tree);
+void dispose_rule_tree(Node* tree);
+void rule_tree_insert(Node* root, size_t index, Token* val);
+void rule_tree_postorder(Node* tree, ExpStack* stack);

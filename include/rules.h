@@ -37,13 +37,13 @@ typedef enum Terminal {
     T_END
 } Terminal;
 
-typedef struct ExpandTo {
+typedef struct TNT { // Terminal / Non Terminal
     bool is_terminal;
     union {
         Terminal terminal;
         NonTerminal non_terminal;
     };
-} ExpandTo;
+} TNT;
 
 // (valid, expand_to) =>
 // (1, neprazdne) == standardni pravidlo
@@ -51,7 +51,7 @@ typedef struct ExpandTo {
 // (0, jakekoliv) == chyba syntaktické analýzy
 typedef struct Rule {
     bool valid;
-    ExpandTo** expand_to; // array pointerů na pravidla
+    TNT** expand_to; // array pointerů na pravidla
 } Rule;
 
 // TODO: 2D pole pravidel

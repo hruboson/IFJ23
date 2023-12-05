@@ -1,42 +1,40 @@
 #include "rule_tree.h"
 
-#include "rule_stack.h"
+#include "exp_stack.h"
 #include "rules.h"
 #include "stdlib.h"
 
-void init_rule_tree(RuleNode** tree) {
-    (*tree) = (RuleNode*) malloc(sizeof(RuleNode));
-    (*tree)->exp = NULL;
-    (*tree)->left = NULL;
-    (*tree)->right = NULL;
+void init_rule_tree(Node** tree) {
+    (*tree) = (Node*) malloc(sizeof(Node));
+    (*tree)->val = NULL;
+    //(*tree)->node_list = NULL;
 }
-void dispose_rule_tree(RuleNode* tree) {
-	//! fix last clear doesnt free the node (should probably be RuleNode** tree)
+void dispose_rule_tree(Node* tree) {
+	//! fix last clear doesnt free the node (should probably be Node** tree)
     if (!tree) return;
-    dispose_rule_tree(tree->left);
-    dispose_rule_tree(tree->right);
+	for(size_t i = 0; i < 3; i++){
+		dispose_rule_tree((tree->node_list)[i]);
+	}
     free(tree);
 }
-void rule_tree_insert_left(RuleNode* root, Expression* exp) {
-    RuleNode* rule = malloc(sizeof(RuleNode));
+void rule_tree_insert(Node* root, size_t node_index, Token* val) {
+    Node* rule = malloc(sizeof(Node));
     if (!rule) exit(99);
-    rule->exp = exp;
-    rule->left = NULL;
-    rule->right = NULL;
-    root->left = rule;
+    
+	//todo naplnit rule
+
+	if(node_index >= 0 && node_index < 3){
+		rule->node_list[node_index] = rule;
+	}
 }
-void rule_tree_insert_right(RuleNode* root, Expression* exp) {
-    RuleNode* rule = malloc(sizeof(RuleNode));
-    if (!rule) exit(99);
-    rule->exp = exp;
-    rule->left = NULL;
-    rule->right = NULL;
-    root->right = rule;
-}
-void rule_tree_postorder(RuleNode* tree, RuleStack* stack) {
+
+void rule_tree_postorder(Node* tree, ExpStack* stack) {
     if (!tree) return;
 
-    rule_tree_postorder(tree->left, stack);
-    rule_tree_postorder(tree->right, stack);
-    rule_stack_push(stack, tree);
+	for(size_t i = 0; i < 3; i++){
+		rule_tree_postorder(&(tree->node_list)[i], stack);
+	}
+
+	// todo kdy pushovat
+    exp_stack_push(stack, tree);
 }

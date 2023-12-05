@@ -22,12 +22,16 @@
 	} \
 } while (1)
 
-#define DEBUG //TODO: ODDELAT
+// #define DEBUG //TODO: ODDELAT
 
 #ifdef DEBUG
 #define PRINT_LINE printf("LINE: %d\n", __LINE__)
+#define PRINT_TEXT(text) printf("LINE: %s, \n", __LINE__, text)
+#define PRINT_ERROR(expected, found) fprintf( stderr, "PARSER ERROR: EXPECTED '%i' FOUND '%i'\n\t%s:%i\n", expected, found, __FILE__, __LINE__ )
 #else
 #define PRINT_LINE
+#define PRINT_TEXT
+#define PRINT_ERROR
 #endif
 
 bool do_semantic_analysis = true;
@@ -424,6 +428,7 @@ int parse_statement(
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 			if (token->type != TOKENTYPE_ID) {
+				PRINT_ERROR(TOKENTYPE_ID, token->type);
 				return 2;
 			}
 
@@ -459,6 +464,7 @@ int parse_statement(
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type != TOKENTYPE_BRACE_L) {
+			PRINT_ERROR(TOKENTYPE_BRACE_L, token->type);
 			return 2;
 		}
 
@@ -470,7 +476,8 @@ int parse_statement(
 		);
 
 		if (ret != -2) { // -2 == skoncilo s '}' to je spravne
-			return 2;
+			PRINT_TEXT("parse list neskoncilo s }");
+			return ret;
 		}
 
 		// rozsireni nepovinny else
@@ -483,6 +490,7 @@ int parse_statement(
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 			if (token->type != TOKENTYPE_BRACE_L) {
+				PRINT_ERROR(TOKENTYPE_BRACE_L, token->type);
 				return 2;
 			}
 
@@ -499,7 +507,8 @@ int parse_statement(
 			);
 
 			if (ret != -2) {
-				return 2;
+				PRINT_TEXT("parse list neskoncilo s }");
+				return ret;
 			}
 
 			vartable_stack_pop( var_table_stack, NULL );
@@ -555,7 +564,8 @@ int parse_statement(
 			);
 
 			if (ret != -2) {
-				return 2;
+				PRINT_TEXT("parse list neskoncilo s }");
+				return ret;
 			}
 
 			vartable_stack_pop( var_table_stack, NULL );
@@ -563,6 +573,7 @@ int parse_statement(
 			return 0;
 		}
 
+		PRINT_ERROR(TOKENTYPE_BRACE_L, token->type);
 		return 2;
 	}
 
@@ -610,6 +621,7 @@ int parse_statement(
 						(*statement)->var.data_type.type = VARTYPE_STRING;
 						break;
 					default:
+						PRINT_ERROR(KEYWORD_DOUBLE, token->value.keyword);
 						return 2;
 					}
 
@@ -631,10 +643,12 @@ int parse_statement(
 					}
 					else if (!(*statement)->var.modifiable && token->type == TOKENTYPE_NEWLINE) {
 						// let a : Int \n => error
+						PRINT_TEXT("NASTALO let a : Int \n");
 						return 2;
 					}
 				}
 				else {
+					PRINT_ERROR(TOKENTYPE_KEYWORD, token->type);
 					return 2;
 				}
 			}
@@ -656,7 +670,7 @@ int parse_statement(
 
 				if (do_semantic_analysis) {
 					ret = semantic_variable(var_table_stack, *statement, symtab, func_table); //return value = jestli prosla
-
+					
 					if (ret != 0)
 						return ret;
 				}
@@ -673,7 +687,7 @@ int parse_statement(
 				}
 			}
 		}
-
+		PRINT_ERROR(TOKENTYPE_ID, token->type);
 		return 2;
 	}
 
@@ -713,6 +727,7 @@ int parse_statement(
 			return 0;
 		}
 
+		PRINT_ERROR(TOKENTYPE_NEWLINE, token->type);
 		return 2;
 	}
 
@@ -768,8 +783,11 @@ int parse_statement(
 				return 0;
 			}
 
+			PRINT_ERROR(TOKENTYPE_NEWLINE, token->type);
 			return 2;
 		}
+
+		PRINT_TEXT("OCEKAVANO ( NEBO == ");
 		return 2;
 	}
 
@@ -795,12 +813,14 @@ int parse_statement(
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 			if (token->type != TOKENTYPE_PAR_L) {
+				PRINT_ERROR(TOKENTYPE_PAR_L, token->type);
 				return 2;
 			}
 
 			ret = parse_parameters(input, symtab, *statement);
 
 			if (ret != -3) { // -3 == skoncilo ')'
+				PRINT_TEXT("NESKONCILO S )");
 				return 2;
 			}
 
@@ -809,6 +829,7 @@ int parse_statement(
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 			if (token->type != TOKENTYPE_ARROW && token->type != TOKENTYPE_BRACE_L) {
+				PRINT_TEXT("OCEKAVNO -> NEBO {");
 				return 2;
 			}
 
@@ -818,6 +839,7 @@ int parse_statement(
 				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 				if (token->type != TOKENTYPE_KEYWORD) {
+					PRINT_ERROR(TOKENTYPE_KEYWORD, token->type);
 					return 2;
 				}
 
@@ -834,6 +856,7 @@ int parse_statement(
 					dt.type = VARTYPE_STRING;
 					break;
 				default:
+					PRINT_TEXT("OCEKAVANO DOUBLE, INT, STRING");
 					return 2;
 				}
 
@@ -863,7 +886,8 @@ int parse_statement(
 
 
 				if (ret != -2) {
-					return 2;
+
+					return ret;
 				}
 
 				vartable_stack_pop( var_table_stack, NULL );
@@ -871,9 +895,11 @@ int parse_statement(
 				return 0;
 			}
 		}
+		PRINT_ERROR(TOKENTYPE_ID, token->type);
 		return 2;
 	}
 
+	PRINT_TEXT("NEMATCHNULO NIC");
 	return 2;
 }
 

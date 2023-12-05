@@ -75,7 +75,7 @@ void var_table_insert(VarTable* table, Variable var) {
 Variable* var_table_get(VarTable* table, SymbolRecord* id) {
 	if (!table) return NULL;
 	for (size_t i = 0; i < table->vars_size; i++) {
-		const Variable* v = table->vars + i;
+		Variable* v = table->vars + i;
 		assert( v->id );
 		if (
 			v->id->hash == id->hash &&

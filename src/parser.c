@@ -36,8 +36,10 @@ int parse(Input* input, AST* ast) {
 	int ret = 0;
 
 	VarTableStack var_table_stack;
-	init_vartable_stack(&var_table_stack);
-	vartable_stack_push_empty( &var_table_stack );
+	init_vartable_stack( &var_table_stack );
+	VarTable var_table;
+	init_var_table( &var_table );
+	vartable_stack_push( &var_table_stack, &var_table );
 
 	FuncTable func_table;
 	init_func_table(&func_table);
@@ -415,9 +417,6 @@ int parse_statement(
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		// zacatek scope
-		VarTable vartable;
-		init_var_table(&vartable);
-		vartable_stack_push(var_table_stack, &vartable);
 
 		if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_LET) {
 
@@ -487,6 +486,10 @@ int parse_statement(
 				return 2;
 			}
 
+			VarTable var_table;
+			init_var_table( &var_table );
+			vartable_stack_push( &var_table_stack, &var_table );
+
 			// parse else body
 			ret = parse_statement_list(input,
 				symtab, &(*statement)->if_.else_,
@@ -497,6 +500,8 @@ int parse_statement(
 			if (ret != -2) {
 				return 2;
 			}
+
+			vartable_stack_pop( &var_table_stack, NULL );
 
 		}
 		else {
@@ -512,10 +517,6 @@ int parse_statement(
 
 		Expression* exp;
 
-		// zacatek scope
-		VarTable vartable;
-		init_var_table(&vartable);
-		vartable_stack_push(var_table_stack, &vartable);
 
 		get_token(input, symtab, token);
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
@@ -542,6 +543,11 @@ int parse_statement(
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type == TOKENTYPE_BRACE_L) {
+			// zacatek scope
+			VarTable vartable;
+			init_var_table(&vartable);
+			vartable_stack_push(var_table_stack, &vartable);
+
 			ret = parse_statement_list(input,
 				symtab, &(*statement)->while_.body,
 				var_table_stack, func_table,
@@ -551,6 +557,8 @@ int parse_statement(
 			if (ret != -2) {
 				return 2;
 			}
+
+			vartable_stack_pop( &var_table_stack, NULL );
 
 			return 0;
 		}
@@ -748,10 +756,6 @@ int parse_statement(
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type == TOKENTYPE_ID) {
-			// zacatek scope
-			VarTable vartable;
-			init_var_table(&vartable);
-			vartable_stack_push(var_table_stack, &vartable);
 
 			(*statement)->func.id = token->value.id;
 
@@ -818,6 +822,10 @@ int parse_statement(
 			}
 
 			if (token->type == TOKENTYPE_BRACE_L) {
+				// zacatek scope
+				VarTable vartable;
+				init_var_table(&vartable);
+				vartable_stack_push(var_table_stack, &vartable);
 
 				ret = parse_statement_list(input,
 					symtab, &(*statement)->func.body,
@@ -829,6 +837,8 @@ int parse_statement(
 				if (ret != -2) {
 					return 2;
 				}
+
+				vartable_stack_pop( &var_table_stack, NULL );
 
 				return 0;
 			}

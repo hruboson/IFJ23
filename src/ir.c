@@ -258,6 +258,24 @@ convert_exp( IR* ir, IR_Body* body, Expression* exp ) {
 		ir_append( body, &i );
 		return i.ops[2];
 	case ET_FUNC:
+		// built-in write
+		if ( strcmp( "write", exp->fn_call.id->symbol.data ) == 0 ) {
+			for ( size_t j = 0; j < exp->fn_call.arg_count; j++ ) {
+				i.type = IRT_call;
+				i.fn_call.ret_id = NULL;
+				i.fn_call.args = malloc( sizeof( i.fn_call.args[ 0 ] ) );
+				if ( i.fn_call.args == NULL )
+					exit( 99 );
+
+				i.fn_call.args[ 0 ] = convert_exp( ir, body, exp->fn_call.args[ j ].exp );
+
+				ir_append( body, &i );
+			}
+
+			return NULL;
+		}
+
+		// other function calls
 		i.type = IRT_call;
 		i.fn_call.ret_id = NULL;
 

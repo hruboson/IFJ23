@@ -470,9 +470,8 @@ append_builtin_functions( String* c ) {
 	);
 
 	// write
-	// $write
 	string_append( c,
-		"LABEL $write\n"
+		"LABEL write\n"
 		"WRITE TF@%p0\n"
 		"RETURN\n"
 	);

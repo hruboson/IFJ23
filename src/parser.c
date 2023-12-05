@@ -906,70 +906,41 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 	Token* token = &_token;
 	if (in_token != NULL) {
 		token = in_token;
-	}
-	else {
+	} else {
 		get_token(input, symtab, token);
 	}
-
-
 	*exp = (Expression*)malloc(sizeof(Expression));
 	if (*exp == NULL) {
 		exit(99);
 	}
-
-	// Naplnit pole tokenů, které patří do expressionu(načítáš tokeny do tokenu, který nemůže být v expressionu)
-	#define MAX_EXP_LEN 256
-
-	bool token_accepted = true;
-	Token token_list[MAX_EXP_LEN];
-	size_t token_index = 0;
-	while (token_accepted) {
-		get_token(input, symtab, token);
-		if (token->type != TOKENTYPE_QUESTIONMARK2 ||
-			token->type != TOKENTYPE_EQUALS2 ||
-			token->type != TOKENTYPE_NOT_EQUALS ||
-			token->type != TOKENTYPE_LESSER ||
-			token->type != TOKENTYPE_GREATER ||
-			token->type != TOKENTYPE_LESSER_OR_EQUAL ||
-			token->type != TOKENTYPE_GREATER_OR_EQUAL ||
-			token->type != TOKENTYPE_PLUS ||
-			token->type != TOKENTYPE_MINUS ||
-			token->type != TOKENTYPE_SLASH ||
-			token->type != TOKENTYPE_EXCLAMATION ||
-			token->type != TOKENTYPE_INT ||
-			token->type != TOKENTYPE_STRING ||
-			token->type != TOKENTYPE_DOUBLE ||
-			token->type != TOKENTYPE_ID ||
-			token->type != TOKENTYPE_COMMA) {
-			token_accepted = false;
-		}
-
-		token_list[token_index++] = *token;
+	switch (token->type) {
+		case TOKENTYPE_DOUBLE:
+			(*exp)->type = ET_DOUBLE;
+			(*exp)->double_ = token->value.double_;
+			break;
+		case TOKENTYPE_INT:
+			(*exp)->type = ET_INT;
+			(*exp)->int_ = token->value.int_;
+			break;
+		case TOKENTYPE_STRING:
+			(*exp)->type = ET_STRING;
+			(*exp)->str_ = token->value.str_;
+			break;
+		case TOKENTYPE_KEYWORD:
+			if (token->value.keyword != KEYWORD_NIL) {
+				return 2;
+			}
+			(*exp)->type = ET_NIL;
+			break;
+		case TOKENTYPE_ID:
+			(*exp)->type = ET_ID;
+			(*exp)->id = token->value.id;
+			break;
+		default:
+			return 2;
 	}
-
-	// Máš nějaký stack terminálů a neterminálů, na spodu je terminál "$" nad tím je neterminál <exp>
-	TNTStack tnt_stack_;
-	TNTStack* tnt_stack = &tnt_stack_;
-	init_tnt_stack(tnt_stack);
-	TNT tnt_end = { .is_terminal = true, .terminal = T_END };
-	tnt_stack_push(tnt_stack, &tnt_end);
-
-	TNT tnt_exp = { .is_terminal = false, .non_terminal = NT_EXP }; // počáteční <exp>
-	tnt_stack_push(tnt_stack, &tnt_exp);
-
-	// Tvoříš strom, pomocí pomocí pravidel zjištěných z tabulky (2D pole) - Enumy na řádky a na sloupce
-	Node* tree;
-	init_rule_tree(&tree);
-
-	while (!(tnt_stack_is_empty(tnt_stack))) {
-		
-	}
-
-
-
 	//TODO: out_token
 	*out_token_returned = false;
-
 	return 0;
 }
 

@@ -145,7 +145,9 @@ i_asgn_nil( String* c, enum frame f, SymbolRecord* id ) {
 }
 
 void
-i_move( String* code, enum frame f_dst, SymbolRecord* dst, enum frame f_src, SymbolRecord* src ) {
+i_move( String* code, SymbolRecord* dst, SymbolRecord* src ) {
+	enum frame f_dst = get_frame( dst );
+	enum frame f_src = get_frame( src );
 	string_append( code, "MOVE " );
 	append_var( code, f_dst, dst );
 	string_append( code, " " );
@@ -431,7 +433,7 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		i_defvar( code, f, i->id );
 		break;
 	case IRT_asgn:
-		i_move( code, get_frame( i->ops[ 0 ] ), i->ops[ 0 ], get_frame( i->ops[ 0 ] ), i->ops[ 1 ] );
+		i_move( code, i->ops[ 0 ], i->ops[ 1 ] );
 		break;
 	case IRT_asgn_int:
 		i_defvar( code, f, i->a_i.id );

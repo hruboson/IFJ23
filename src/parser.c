@@ -487,7 +487,7 @@ int parse_statement(
 			// zacatek scope
 			VarTable var_table;
 			init_var_table( &var_table );
-			vartable_stack_push( &var_table_stack, &var_table );
+			vartable_stack_push( var_table_stack, &var_table );
 
 			// parse else body
 			ret = parse_statement_list(input,
@@ -500,7 +500,7 @@ int parse_statement(
 				return 2;
 			}
 
-			vartable_stack_pop( &var_table_stack, NULL );
+			vartable_stack_pop( var_table_stack, NULL );
 
 		}
 		else {
@@ -556,7 +556,7 @@ int parse_statement(
 				return 2;
 			}
 
-			vartable_stack_pop( &var_table_stack, NULL );
+			vartable_stack_pop( var_table_stack, NULL );
 
 			return 0;
 		}
@@ -850,7 +850,7 @@ int parse_statement(
 					return 2;
 				}
 
-				vartable_stack_pop( &var_table_stack, NULL );
+				vartable_stack_pop( var_table_stack, NULL );
 
 				return 0;
 			}

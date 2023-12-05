@@ -1,4 +1,8 @@
 #include "parser.h"
+#include "rule_stack.h"
+#include "tnt_stack.h"
+#include "rule_tree.h"
+#include "rules.h"
 
 #include "AST.h"
 #include "semantic.h"
@@ -41,7 +45,7 @@ int parse(Input* input, AST* ast) {
 
 	ret = parse_statement_list(input,
 		&ast->symtab, &ast->statement,
-		&var_table_stack, &func_table, 
+		&var_table_stack, &func_table,
 		NULL, NULL, 0
 	);
 
@@ -49,6 +53,7 @@ int parse(Input* input, AST* ast) {
 		ret = 0;
 	}
 	else {
+
 		// TODO: clear structs
 		// TODO: dodělat řešení, jestli se ti vrátila sémantická chyba, nebo ne
 		// TODO: předělat, aby nevracelo vždy 2 (například, pokud je if a semantic vrátí error 9, pak se vypíše v testech, že se vrací 2)
@@ -365,10 +370,10 @@ void insert_builtin_functions(FuncTable* func_table, SymbolTable* symtab) {
 }
 
 int parse_statement(
-	Input *input, SymbolTable* symtab, Statement** statement,
+	Input* input, SymbolTable* symtab, Statement** statement,
 	VarTableStack* var_table_stack, FuncTable* func_table,
 	Statement* current_function, size_t block_counter
-	) {
+) {
 
 	Token _token;
 	Token* token = &_token;
@@ -376,7 +381,7 @@ int parse_statement(
 	Token out_token;
 	bool out_token_returned;
 
-	Expression *exp;
+	Expression* exp;
 
 	int ret;
 
@@ -402,7 +407,7 @@ int parse_statement(
 
 	// <statement> -> if [\n] let [\n] <id> [\n] { [\n] <statementList> [\n] } [\n] [else [\n] { [\n] <statementList> [\n] }]
 	// <statement> -> if [\n] <exp> [\n] { [\n] <statementList> [\n] } [\n] [else [\n] { [\n] <statementList> [\n] }]
-	if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_IF) {		
+	if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_IF) {
 		(*statement)->type = ST_IF;
 
 		get_token(input, symtab, token);
@@ -414,7 +419,7 @@ int parse_statement(
 		vartable_stack_push(var_table_stack, &vartable);
 
 		if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_LET) {
-			
+
 			get_token(input, symtab, token);
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
@@ -424,10 +429,11 @@ int parse_statement(
 
 			(*statement)->if_.check_nil = true;
 
-		} else {
+		}
+		else {
 			(*statement)->if_.check_nil = false;
 		}
-		
+
 		ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
 		if (ret != 0) {
@@ -445,7 +451,8 @@ int parse_statement(
 
 		if (out_token_returned) {
 			token = &out_token;
-		} else {
+		}
+		else {
 			get_token(input, symtab, token);
 		}
 
@@ -458,7 +465,7 @@ int parse_statement(
 		// parse if body
 		ret = parse_statement_list(input,
 			symtab, &(*statement)->if_.body,
-			var_table_stack, func_table, 
+			var_table_stack, func_table,
 			*statement, current_function, ++block_counter
 		);
 
@@ -469,7 +476,7 @@ int parse_statement(
 		// rozsireni nepovinny else
 		get_token(input, symtab, token);
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
-		
+
 		if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_ELSE) {
 
 			get_token(input, symtab, token);
@@ -482,7 +489,7 @@ int parse_statement(
 			// parse else body
 			ret = parse_statement_list(input,
 				symtab, &(*statement)->if_.else_,
-				var_table_stack, func_table, 
+				var_table_stack, func_table,
 				*statement, current_function, ++block_counter
 			);
 
@@ -490,7 +497,8 @@ int parse_statement(
 				return 2;
 			}
 
-		} else {
+		}
+		else {
 			(*statement)->if_.else_ = NULL;
 		}
 
@@ -501,7 +509,7 @@ int parse_statement(
 	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_WHILE) {
 		(*statement)->type = ST_WHILE;
 
-		Expression *exp;
+		Expression* exp;
 
 		// zacatek scope
 		VarTable vartable;
@@ -525,23 +533,24 @@ int parse_statement(
 
 		if (out_token_returned) {
 			token = &out_token;
-		} else {
+		}
+		else {
 			get_token(input, symtab, token);
 		}
 
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type == TOKENTYPE_BRACE_L) {
-			ret = parse_statement_list( input,
-					symtab, &(*statement)->while_.body,
-					var_table_stack, func_table,
-					*statement, current_function, ++block_counter
-				);
+			ret = parse_statement_list(input,
+				symtab, &(*statement)->while_.body,
+				var_table_stack, func_table,
+				*statement, current_function, ++block_counter
+			);
 
 			if (ret != -2) {
 				return 2;
 			}
-			
+
 			return 0;
 		}
 
@@ -553,7 +562,7 @@ int parse_statement(
 	// <statement> -> var [\n] <id> [\n] : <type> [\n] [= [\n] <exp>] \n
 	else if (token->type == TOKENTYPE_KEYWORD && (token->value.keyword == KEYWORD_LET || token->value.keyword == KEYWORD_VAR)) {
 		(*statement)->type = ST_VAR;
-		
+
 		(*statement)->var.modifiable = token->value.keyword == KEYWORD_VAR;
 
 		get_token(input, symtab, token);
@@ -569,45 +578,49 @@ int parse_statement(
 			if (token->type == TOKENTYPE_COLON) {
 				get_token(input, symtab, token);
 				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
-				
+
 				if (token->type == TOKENTYPE_KEYWORD) {
 
 					switch (token->value.keyword) {
-						case KEYWORD_DOUBLE:
-							(*statement)->var.data_type = VARTYPE_DOUBLE;
-							break;
-						case KEYWORD_INT:
-							(*statement)->var.data_type = VARTYPE_INT;
-							break;
-						case KEYWORD_STRING:
-							(*statement)->var.data_type = VARTYPE_STRING;
-							break;
-						default:
-							return 2;
+					case KEYWORD_DOUBLE:
+						(*statement)->var.data_type = VARTYPE_DOUBLE;
+						break;
+					case KEYWORD_INT:
+						(*statement)->var.data_type = VARTYPE_INT;
+						break;
+					case KEYWORD_STRING:
+						(*statement)->var.data_type = VARTYPE_STRING;
+						break;
+					default:
+						return 2;
 					}
 
 					get_token(input, symtab, token);
-					
+
 					if (token->type == TOKENTYPE_QUESTIONMARK) {
 						//TODO: Double \n ? byt nemuze ne?
 						(*statement)->var.allow_nil = true;
 						get_token(input, symtab, token);
-					} else {
+					}
+					else {
 						(*statement)->var.allow_nil = false;
 					}
 
 					// var a : Int \n => correct
-					if ((*statement)->var.modifiable && token->type == TOKENTYPE_NEWLINE) {					
+					if ((*statement)->var.modifiable && token->type == TOKENTYPE_NEWLINE) {
 						return 0;
-						
-					} else if (!(*statement)->var.modifiable && token->type == TOKENTYPE_NEWLINE) {
+
+					}
+					else if (!(*statement)->var.modifiable && token->type == TOKENTYPE_NEWLINE) {
 						// let a : Int \n => error
 						return 2;
 					}
-				} else {
+				}
+				else {
 					return 2;
 				}
-			} else {
+			}
+			else {
 				(*statement)->var.data_type = VARTYPE_VOID;
 			}
 
@@ -628,7 +641,8 @@ int parse_statement(
 
 				if (out_token_returned) {
 					token = &out_token;
-				} else {
+				}
+				else {
 					get_token(input, symtab, token);
 				}
 
@@ -668,7 +682,8 @@ int parse_statement(
 
 		if (out_token_returned) {
 			token = &out_token;
-		} else {
+		}
+		else {
 			get_token(input, symtab, token);
 		}
 
@@ -692,7 +707,7 @@ int parse_statement(
 
 			get_token(input, symtab, token);
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
-			
+
 			ret = parse_expression(input, symtab, &exp, token, &out_token, &out_token_returned);
 
 			if (do_semantic_analysis) {
@@ -707,7 +722,8 @@ int parse_statement(
 
 			if (out_token_returned) {
 				token = &out_token;
-			} else {
+			}
+			else {
 				get_token(input, symtab, token);
 			}
 
@@ -722,7 +738,7 @@ int parse_statement(
 	// <func> -> func <id> ( [<id> <id> : <type>] ) [-> <type>] { <statementList> }
 	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_FUNC) {
 		(*statement)->type = ST_FUNC;
-		
+
 		get_token(input, symtab, token);
 
 		//TODO: <statement> -> <func> () volani funkce
@@ -737,24 +753,24 @@ int parse_statement(
 			vartable_stack_push(var_table_stack, &vartable);
 
 			(*statement)->func.id = token->value.id;
-			
+
 			get_token(input, symtab, token);
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 			if (token->type != TOKENTYPE_PAR_L) {
 				return 2;
 			}
-			
+
 			ret = parse_parameters(input, symtab, *statement);
 
 			if (ret != -3) { // -3 == skoncilo ')'
 				return 2;
 			}
-			
+
 			get_token(input, symtab, token);
 
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
-			
+
 			if (token->type != TOKENTYPE_ARROW && token->type != TOKENTYPE_BRACE_L) {
 				return 2;
 			}
@@ -763,7 +779,7 @@ int parse_statement(
 
 				get_token(input, symtab, token);
 				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
-				
+
 				if (token->type != TOKENTYPE_KEYWORD) {
 					return 2;
 				}
@@ -771,25 +787,26 @@ int parse_statement(
 				DataType dt = { .type = VARTYPE_VOID, .nil_allowed = false };
 
 				switch (token->value.keyword) {
-					case KEYWORD_DOUBLE:
-						dt.type = VARTYPE_DOUBLE;
-						break;
-					case KEYWORD_INT:
-						dt.type = VARTYPE_INT;
-						break;
-					case KEYWORD_STRING:
-						dt.type = VARTYPE_STRING;
-						break;
-					default:
-						PRINT_LINE;
-						return 2;
+				case KEYWORD_DOUBLE:
+					dt.type = VARTYPE_DOUBLE;
+					break;
+				case KEYWORD_INT:
+					dt.type = VARTYPE_INT;
+					break;
+				case KEYWORD_STRING:
+					dt.type = VARTYPE_STRING;
+					break;
+				default:
+					PRINT_LINE;
+					return 2;
 				}
-				
+
 				get_token(input, symtab, token);
 				if (token->type == TOKENTYPE_QUESTIONMARK) {
 					dt.nil_allowed = true;
 					get_token(input, symtab, token);
-				} else {
+				}
+				else {
 					dt.nil_allowed = false;
 				}
 
@@ -798,14 +815,14 @@ int parse_statement(
 				(*statement)->func.return_type = dt;
 
 			}
-			
+
 			if (token->type == TOKENTYPE_BRACE_L) {
 
-				ret = parse_statement_list( input,
-						symtab, &(*statement)->func.body,
-						var_table_stack, func_table,
-						*statement, *statement, ++block_counter
-					);
+				ret = parse_statement_list(input,
+					symtab, &(*statement)->func.body,
+					var_table_stack, func_table,
+					*statement, *statement, ++block_counter
+				);
 
 
 				if (ret != -2) {
@@ -827,8 +844,8 @@ int parse_statement(
 // out_token => vraci prvni precteny token, ktery uz nepatri statement listu (napr. EOF, {, Int, Double, String,...)
 int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statement,
 	VarTableStack* var_table_stack, FuncTable* func_table,
-	Statement *current_scope, Statement* current_function, size_t block_counter
-	) {
+	Statement* current_scope, Statement* current_function, size_t block_counter
+) {
 	int ret = 0;
 
 	Statement* st;
@@ -837,9 +854,9 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 	while (ret == 0) {
 		st = NULL;
 		ret = parse_statement(input,
-			symtab, &st, 
+			symtab, &st,
 			var_table_stack,
-			func_table, 
+			func_table,
 			current_function, block_counter
 		);
 
@@ -851,14 +868,16 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 			st->var.id_prefix.block_counter = block_counter;
 			if (current_function == NULL) {
 				st->var.id_prefix.func_id = NULL;
-			} else {
+			}
+			else {
 				st->var.id_prefix.func_id = current_function->func.id;
 			}
 		}
 
 		if (st->type == ST_FUNC && current_scope != NULL) {
-						return 2;
-		} else if (st->type == ST_RETURN && !current_function) {
+			return 2;
+		}
+		else if (st->type == ST_RETURN && !current_function) {
 			return 2;
 		}
 
@@ -869,7 +888,8 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 	if (ret == -1 && current_scope != NULL) { // ret == -1 znamena EOF
 		return 2;
 
-	} else if (ret == -2 && current_scope == NULL) { // ret == -2 znamena '}'
+	}
+	else if (ret == -2 && current_scope == NULL) { // ret == -2 znamena '}'
 		return 2;
 	}
 
@@ -886,7 +906,8 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 	Token* token = &_token;
 	if (in_token != NULL) {
 		token = in_token;
-	} else {
+	}
+	else {
 		get_token(input, symtab, token);
 	}
 
@@ -896,37 +917,55 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 		exit(99);
 	}
 
-	switch (token->type) {
-		case TOKENTYPE_DOUBLE:
-			(*exp)->type = ET_DOUBLE;
-			(*exp)->double_ = token->value.double_;
-			break;
+	// Naplnit pole tokenů, které patří do expressionu(načítáš tokeny do tokenu, který nemůže být v expressionu)
+	#define MAX_EXP_LEN 256
 
-		case TOKENTYPE_INT:
-			(*exp)->type = ET_INT;
-			(*exp)->int_ = token->value.int_;
-			break;
+	bool token_accepted = true;
+	Token token_list[MAX_EXP_LEN];
+	size_t token_index = 0;
+	while (token_accepted) {
+		get_token(input, symtab, token);
+		if (token->type != TOKENTYPE_QUESTIONMARK2 ||
+			token->type != TOKENTYPE_EQUALS2 ||
+			token->type != TOKENTYPE_NOT_EQUALS ||
+			token->type != TOKENTYPE_LESSER ||
+			token->type != TOKENTYPE_GREATER ||
+			token->type != TOKENTYPE_LESSER_OR_EQUAL ||
+			token->type != TOKENTYPE_GREATER_OR_EQUAL ||
+			token->type != TOKENTYPE_PLUS ||
+			token->type != TOKENTYPE_MINUS ||
+			token->type != TOKENTYPE_SLASH ||
+			token->type != TOKENTYPE_EXCLAMATION ||
+			token->type != TOKENTYPE_INT ||
+			token->type != TOKENTYPE_STRING ||
+			token->type != TOKENTYPE_DOUBLE ||
+			token->type != TOKENTYPE_ID ||
+			token->type != TOKENTYPE_COMMA) {
+			token_accepted = false;
+		}
 
-		case TOKENTYPE_STRING:
-			(*exp)->type = ET_STRING;
-			(*exp)->str_ = token->value.str_;
-			break;
-
-		case TOKENTYPE_KEYWORD:
-			if (token->value.keyword != KEYWORD_NIL) {
-				return 2;
-			}
-			(*exp)->type = ET_NIL;
-			break;
-
-		case TOKENTYPE_ID:
-			(*exp)->type = ET_ID;
-			(*exp)->id = token->value.id;
-			break;
-
-		default:
-			return 2;
+		token_list[token_index++] = *token;
 	}
+
+	// Máš nějaký stack terminálů a neterminálů, na spodu je terminál "$" nad tím je neterminál <exp>
+	TNTStack tnt_stack_;
+	TNTStack* tnt_stack = &tnt_stack_;
+	init_tnt_stack(tnt_stack);
+	TNT tnt_end = { .is_terminal = true, .terminal = T_END };
+	tnt_stack_push(tnt_stack, &tnt_end);
+
+	TNT tnt_exp = { .is_terminal = false, .non_terminal = NT_EXP }; // počáteční <exp>
+	tnt_stack_push(tnt_stack, &tnt_exp);
+
+	// Tvoříš strom, pomocí pomocí pravidel zjištěných z tabulky (2D pole) - Enumy na řádky a na sloupce
+	Node* tree;
+	init_rule_tree(&tree);
+
+	while (!(tnt_stack_is_empty(tnt_stack))) {
+		
+	}
+
+
 
 	//TODO: out_token
 	*out_token_returned = false;
@@ -936,22 +975,22 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 
 // return -3 : ukoncujici: ')'
 // return 2 : syntakticka chyba
-int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statement ) {
+int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statement) {
 	Token token_;
 	Token* token = &token_;
 
 	func_statement->func.param_count = 0;
 
 	size_t param_cap = 128;
-	
-	func_statement->func.parameters = (Parameter*)malloc(sizeof(Parameter) * param_cap );
+
+	func_statement->func.parameters = (Parameter*)malloc(sizeof(Parameter) * param_cap);
 	if (func_statement->func.parameters == NULL) {
 		exit(99);
 	}
 
 	Parameter param;
 
-	
+
 	//TODO: free_params()
 
 	do {
@@ -961,15 +1000,17 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 
 		if (func_statement->func.param_count == 0 &&
 			token->type == TOKENTYPE_PAR_R) {
-				return -3;
+			return -3;
 		}
 
 		// extern
 		if (token->type == TOKENTYPE_UNDERSCORE) {
 			param.extern_id = NULL;
-		} else if (token->type == TOKENTYPE_ID) {
+		}
+		else if (token->type == TOKENTYPE_ID) {
 			param.extern_id = token->value.id;
-		} else {
+		}
+		else {
 			printf("TOKEN: %d\n", token->type);
 			return 2;
 		}
@@ -980,7 +1021,8 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 		//intern
 		if (token->type == TOKENTYPE_ID) {
 			param.intern_id = token->value.id;
-		} else {
+		}
+		else {
 			return 2;
 		}
 
@@ -999,38 +1041,39 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 
 		if (token->type == TOKENTYPE_KEYWORD) {
 			switch (token->value.keyword) {
-				case KEYWORD_DOUBLE:
-					dt.type = VARTYPE_DOUBLE;
-					break;
-				case KEYWORD_INT:
-					dt.type = VARTYPE_INT;
-					break;
-				case KEYWORD_STRING:
-					dt.type = VARTYPE_STRING;
-					break;
-				default:
-					return 2;
+			case KEYWORD_DOUBLE:
+				dt.type = VARTYPE_DOUBLE;
+				break;
+			case KEYWORD_INT:
+				dt.type = VARTYPE_INT;
+				break;
+			case KEYWORD_STRING:
+				dt.type = VARTYPE_STRING;
+				break;
+			default:
+				return 2;
 			}
 
-			
+
 			get_token(input, symtab, token);
 
 			if (token->type == TOKENTYPE_QUESTIONMARK) {
 				//TODO: Double \n ? nemuze byt ne?
 				dt.nil_allowed = true;
 				get_token(input, symtab, token);
-			} else {
+			}
+			else {
 				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 				dt.nil_allowed = false;
 			}
 
 			param.type = dt;
 		}
-		
+
 		if (func_statement->func.param_count >= param_cap) {
 			param_cap *= 2;
 			func_statement->func.parameters = realloc(func_statement->func.parameters, param_cap);
-			
+
 			if (func_statement->func.parameters == NULL) {
 				exit(99);
 			}
@@ -1041,10 +1084,12 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 
 		if (token->type == TOKENTYPE_PAR_R) {
 			return -3;
-		} else if (token->type == TOKENTYPE_COMMA) {
+		}
+		else if (token->type == TOKENTYPE_COMMA) {
 			continue;
-		} else {
-						return 2;
+		}
+		else {
+			return 2;
 		}
 
 	} while (1);

@@ -10,7 +10,7 @@
 typedef struct Node Node;
 
 struct Node {
-	Node* node_list[3];
+	Node* children_nodes[3];
 	bool isTerminal;
 	union {
 		Token* val;

@@ -37,6 +37,7 @@ int parse(Input* input, AST* ast) {
 
 	VarTableStack var_table_stack;
 	init_vartable_stack(&var_table_stack);
+	vartable_stack_push_empty( &var_table_stack );
 
 	FuncTable func_table;
 	init_func_table(&func_table);

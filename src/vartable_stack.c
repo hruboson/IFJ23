@@ -72,3 +72,10 @@ Variable* var_table_stack_get_var(VarTableStack* stack, SymbolRecord* id) {
 
     return var;
 }
+
+void
+vartable_stack_push_empty( VarTableStack* s ) {
+	VarTable t;
+	init_var_table( &t );
+	vartable_stack_push( s, &t );
+}

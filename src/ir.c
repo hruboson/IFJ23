@@ -388,6 +388,41 @@ convert_st( IR* ir, IR_Body* body, const Statement* st ) {
 
 			break;
 		case ST_IF:
+			if ( i->if_.check_nil ) {
+				// if let <id> { <body> } else { <body2> }
+
+				// <id> == nil
+				// if true: goto else
+				// <body1>
+				// goto skip
+				// else:
+				// <body2>
+				// skip:
+
+				s = string_copy( &i->if_.exp->id->symbol );
+				symboltable_insert( &ir->symtab, &s, &id );
+
+				inst.type = IRT_branch_nil;
+				inst.ops[ 0 ] = id;
+				inst.ops[ 1 ] = l_else = new_label( ir, body );
+				ir_append( body, &inst );
+
+				convert_st( ir, body, i->if_.body );
+
+				inst.type = IRT_goto;
+				inst.label = l_skip;
+				ir_append( body, &inst );
+
+				insert_label( body, l_else );
+
+				convert_st( ir, body, i->if_.else_ );
+
+
+				insert_label( body, l_skip );
+
+				break;
+			}
+
 			// if <exp> { <body> } else { <body2> }
 			//
 			// t0 = exp

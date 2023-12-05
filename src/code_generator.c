@@ -451,6 +451,7 @@ append_ir_fn_init( String* c, const IR_Func* f ) {
 	string_append( c, "\n" );
 	// PUSHFRAME
 	string_append( c, "PUSHFRAME\n" );
+	i_defvar_cstr( c, f_l, "%ret" );
 	// MOVE %p_n -> args
 	for ( size_t i = 0; i < f->param_count; i++ ) {
 		i_defvar( c, f_l, f->params[ i ] );

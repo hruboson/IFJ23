@@ -378,6 +378,8 @@ int parse_statement(
 	Statement* current_function, size_t block_counter
 ) {
 
+	
+
 	Token _token;
 	Token* token = &_token;
 
@@ -569,6 +571,15 @@ int parse_statement(
 	// <statement> -> var [\n] <id> [\n] : <type> [\n] [= [\n] <exp>] \n
 	else if (token->type == TOKENTYPE_KEYWORD && (token->value.keyword == KEYWORD_LET || token->value.keyword == KEYWORD_VAR)) {
 		(*statement)->type = ST_VAR;
+
+		// pridani hodnoty zanoreni a nazvu funkce do var.id_prefix
+		(*statement)->var.id_prefix.block_counter = block_counter;
+		if (current_function == NULL) {
+			(*statement)->var.id_prefix.func_id = NULL;
+		}
+		else {
+			(*statement)->var.id_prefix.func_id = current_function->func.id;
+		}
 
 		(*statement)->var.modifiable = token->value.keyword == KEYWORD_VAR;
 
@@ -764,6 +775,7 @@ int parse_statement(
 
 	// <func> -> func <id> ( [<id> <id> : <type>] ) [-> <type>] { <statementList> }
 	else if (token->type == TOKENTYPE_KEYWORD && token->value.keyword == KEYWORD_FUNC) {
+		
 		(*statement)->type = ST_FUNC;
 
 		get_token(input, symtab, token);
@@ -822,9 +834,10 @@ int parse_statement(
 					dt.type = VARTYPE_STRING;
 					break;
 				default:
-					PRINT_LINE;
 					return 2;
 				}
+
+				
 
 				get_token(input, symtab, token);
 				if (token->type == TOKENTYPE_QUESTIONMARK) {
@@ -842,7 +855,6 @@ int parse_statement(
 			}
 
 			if (token->type == TOKENTYPE_BRACE_L) {
-
 				ret = parse_statement_list(input,
 					symtab, &(*statement)->func.body,
 					var_table_stack, func_table,
@@ -875,6 +887,8 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 ) {
 	int ret = 0;
 
+	
+
 	Statement* st;
 	Statement** next_st = statement;
 
@@ -889,17 +903,6 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 
 		if (ret)
 			break;
-
-		// pridani hodnoty zanoreni a nazvu funkce do var.id_prefix
-		if (st->type == ST_VAR) {
-			st->var.id_prefix.block_counter = block_counter;
-			if (current_function == NULL) {
-				st->var.id_prefix.func_id = NULL;
-			}
-			else {
-				st->var.id_prefix.func_id = current_function->func.id;
-			}
-		}
 
 		if (st->type == ST_FUNC && current_scope != NULL) {
 			return 2;

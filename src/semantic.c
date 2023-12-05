@@ -33,6 +33,10 @@
     return 7; \
 } while (0)
 
+#define SEMANTIC_ERROR_TYPE_INFERENCE do { \
+    return 8; \
+} while (0)
+
 
 int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
     DataType d0, d1;
@@ -206,7 +210,7 @@ void insert_to_var_table(Statement *statement, VarTable *var_table){
     // pridani do vartable
     //ternary op je tam kvuli tomu kdyby se allow_nil rovnalo NULL aby se do .nil_allowed nepriradilo null ale false
     DataType dt = { .type = statement->var.data_type.type, .nil_allowed = statement->var.data_type.nil_allowed == true ? true : false}; 
-    Variable var = { .id = statement->var.id, .type = dt, .initialized = !(statement->var.exp == NULL) };
+    Variable var = { .is_const = !statement->var.modifiable, .id = statement->var.id, .type = dt, .initialized = !(statement->var.exp == NULL) };
     var_table_insert(var_table, var);
 }
 
@@ -326,11 +330,22 @@ int semantic_assignment(VarTableStack *stack, FuncTable *table, Statement *state
 }
 
 // If (expression) { ... } else { ... }
-int semantic_if(VarTableStack *stack, FuncTable *table, Statement *statement) {
+int semantic_if(VarTableStack *stack, FuncTable *table, Statement *statement){
     if(!statement->if_.exp){
         SEMANTIC_ERROR_UNDEFINED_VARIABLE;
     }
     
+    if(statement->if_.check_nil){
+        Variable *var = var_table_get(table, statement->if_.exp->id);
+        if(var == NULL){
+            ERROR; 
+        }
+        if(var->type.nil_allowed && var->is_const){
+            return 0;
+        }
+        SEMANTIC_ERROR_TYPE_INFERENCE; 
+    }
+
     int ret = set_type(stack, table, statement->if_.exp);
     if(ret != 0){
         return ret;

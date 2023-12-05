@@ -29,6 +29,7 @@ typedef struct Variable {
     SymbolRecord* unique_id;
     DataType type;
     bool initialized;
+    bool is_const;
 } Variable;
 
 typedef struct Function {

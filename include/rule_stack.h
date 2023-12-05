@@ -15,6 +15,6 @@ void init_rule_stack(RuleStack* stack);
 void clear_rule_stack(RuleStack* stack);
 
 void rule_stack_push(RuleStack* stack, Rule* rule);
-void rule_stack_pop(RuleStack* stack, Rule* rule);
+void rule_stack_pop(RuleStack* stack, Rule** rule);
 
 bool rule_stack_is_empty(RuleStack* stack);

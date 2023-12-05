@@ -56,7 +56,7 @@ void test_rule_stack_pop(void) {
     rule_stack_push(stack, r);
 
     Rule* r_pop;
-    rule_stack_pop(stack, r_pop);
+    rule_stack_pop(stack, &r_pop);
     TEST_ASSERT_EQUAL_PTR(r, r_pop);
 }
 
@@ -66,7 +66,7 @@ void test_rule_stack_is_empty(void) {
     rule_stack_push(stack, r);
 
     Rule* r_pop;
-    rule_stack_pop(stack, r_pop);
+    rule_stack_pop(stack, &r_pop);
 
     bool empty = rule_stack_is_empty(stack);
     TEST_ASSERT_TRUE(empty);

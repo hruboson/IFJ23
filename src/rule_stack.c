@@ -7,6 +7,7 @@ void init_rule_stack(RuleStack* stack) {
         exit(99);
     } else {
         stack->size = -1;
+		stack->capacity = STACK_SIZE;
         stack->rules = malloc(sizeof(Rule*) * STACK_SIZE);
         if (!stack->rules) {
             exit(99);
@@ -23,18 +24,23 @@ void clear_rule_stack(RuleStack* stack) {
 }
 
 void rule_stack_push(RuleStack* stack, Rule* rule) {
-    if (stack->size == stack->capacity) {
+    if (stack->size >= stack->capacity - 1) {
         stack->capacity *= 2;
         stack->rules = realloc(stack->rules, sizeof(Rule*) * stack->capacity);
         if (!stack->rules) exit(99);
     }
 
-    stack->size++;
+    if (stack->size == -1) {
+        stack->size = 1;
+    } else {
+        stack->size++;
+    }
+
     stack->rules[stack->size - 1] = rule;
 }
-void rule_stack_pop(RuleStack* stack, Rule* rule) {
+void rule_stack_pop(RuleStack* stack, Rule** rule) {
     if (!rule_stack_is_empty(stack)) {
-        rule = stack->rules[stack->size - 1];
+        *rule = stack->rules[stack->size - 1];
         stack->size--;
     }
 }

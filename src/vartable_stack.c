@@ -21,7 +21,6 @@ void clear_vartable_stack(VarTableStack* stack) {
         stack->vartables = NULL;
         stack->size = 0;
         stack->cap = 0;
-        stack = NULL;  //! only clear or delete ?
     }
 }
 
@@ -32,7 +31,11 @@ void vartable_stack_push(VarTableStack* stack, VarTable* table) {
         if (!stack->vartables) exit(99);
     }
 
-    stack->size++;
+    if(stack->size == -1){
+        stack->size = 1;
+    }else{
+        stack->size++;
+    }
 
     stack->vartables[stack->size - 1] = table;
 }
@@ -41,6 +44,7 @@ void vartable_stack_pop(VarTableStack* stack, VarTable** table) {
     if (!vartable_stack_is_empty(stack)) {
         if ( table != NULL )
             *table = stack->vartables[stack->size - 1];
+            
         stack->size--;
     }
 }

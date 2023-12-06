@@ -4,6 +4,7 @@
 
 typedef enum NonTerminal {
 	NT_EXP,
+	NT_EXP_,
 	NT_EXP1,
 	NT_EXP1_,
 	NT_EXP2,
@@ -13,6 +14,12 @@ typedef enum NonTerminal {
 	NT_EXP4,
 	NT_EXP4_,
 	NT_EXP5,
+	NT_ARGS,
+	NT_ARGS_LIST,
+	NT_E_ID,
+	NT_ARG_LIST_N,
+	NT_EXP_ID,
+
 	NT_END
 } NonTerminal;
 
@@ -35,8 +42,10 @@ typedef enum Terminal {
 	T_DOUBLE,
 	T_ID,
 	T_COMMA,
-	T_EPS,
-	T_END
+	T_PAR_R,
+	T_END,
+
+	T_END__
 } Terminal;
 
 typedef struct TNT { // Terminal / Non Terminal
@@ -47,26 +56,18 @@ typedef struct TNT { // Terminal / Non Terminal
 	};
 } TNT;
 
+extern TNT NT_exp;
+
 // (valid, expand_to) =>
 // (1, neprazdne) == standardni pravidlo
 // (1, prazdne) == epsilon pravidlo
 // (0, jakekoliv) == chyba syntaktické analýzy
 typedef struct Rule {
-	bool valid;
-	TNT expand_to[3];
+	TNT* expand_to[5];
 } Rule;
 
-// TODO: 2D pole pravidel
-// tabulka v "../LL-table.csv"
-// Rule rule_table[NT_END+1][T_END+1] = {
-// 	{{.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = true}},
-// 	{{.valid = true, .expand_to = {{.is_terminal = true, .terminal = T_NIL_TEST}, {.is_terminal = false, .non_terminal = NT_EXP}}}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true}, {.valid = true} },
-// 	{{.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = true}},
-// 	{{.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = true}},
-// 	{{.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = true}},
-// 	{{.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = true}},
-// 	{{.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = true}},
-// 	{{.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = true}},
-// 	{{.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = true}},
-// 	{{.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = false}, {.valid = true}}
-// };
+typedef struct RuleTable {
+	Rule* table[NT_END][T_END__];
+} RuleTable;
+
+Rule* get_rule( NonTerminal, Terminal );

@@ -8,6 +8,8 @@ typedef struct AST {
 	Statement* statement;
 } AST;
 
+void print_exp(const Expression*);
+
 void init_ast(AST*);
 void clear_ast(AST*);
 void ast_first(AST*, Statement*);

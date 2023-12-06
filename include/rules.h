@@ -19,6 +19,8 @@ typedef enum NonTerminal {
 	NT_E_ID,
 	NT_ARG_LIST_N,
 	NT_EXP_ID,
+
+	NT_END
 } NonTerminal;
 
 typedef enum Terminal {
@@ -41,7 +43,9 @@ typedef enum Terminal {
 	T_ID,
 	T_COMMA,
 	T_PAR_R,
-	T_END
+	T_END,
+
+	T_END__
 } Terminal;
 
 typedef struct TNT { // Terminal / Non Terminal
@@ -61,8 +65,8 @@ typedef struct Rule {
 	TNT* expand_to[5];
 } Rule;
 
-// TODO: 2D pole pravidel
-
 typedef struct RuleTable {
-	Rule* table[16][20];
+	Rule* table[NT_END][T_END__];
 } RuleTable;
+
+Rule* get_rule( NonTerminal, Terminal );

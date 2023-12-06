@@ -97,7 +97,8 @@ static RuleTable rt = {
 			[T_DOUBLE] = &R_one,
 			[T_ID] = &R_one,
 			[T_NIL] = &R_one,
-			[T_COMMA] = &R_one
+			[T_COMMA] = &R_one,
+			[T_PAR_L] = &R_one
 		},
 		[NT_EXP_] = {
 			[T_NIL_TEST] = &R_two,
@@ -126,7 +127,8 @@ static RuleTable rt = {
 			[T_ID] = &R_three,
 			[T_NIL] = &R_three,
 			[T_COMMA] = &R_three,
-			[T_END] = &R_eps
+			[T_END] = &R_eps,
+			[T_PAR_L] = &R_three
 		},
 		[NT_EXP1_] = {
 			[T_NIL_TEST] = &R_eps,

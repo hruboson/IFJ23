@@ -265,6 +265,7 @@ static RuleTable rt = {
 			[T_ID] = &R_eps,
 			[T_COMMA] = &R_eps,
 			[T_PAR_L] = &R_twelve,
+			[T_PAR_R] = &R_eps,
 			[T_END] = &R_eps
 		},
 		[NT_ARGS_LIST] = {

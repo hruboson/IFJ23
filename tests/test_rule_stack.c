@@ -4,6 +4,8 @@
 RuleStack stack_;
 RuleStack* stack = &stack_;
 
+#define STACK_SIZE RULE_STACK_SIZE
+
 //! always needs to be defined
 void setUp() {
     init_rule_stack(stack);

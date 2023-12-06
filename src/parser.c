@@ -720,6 +720,56 @@ print_rule_tree( const Node* n, size_t i ) {
 
 }
 
+const char*
+terminal_to_string( Terminal t ) {
+	switch ( t ) {
+	case T_NIL_TEST: return "??";
+	case T_EQUAL: return "==";
+	case T_N_EQUAL: return "!=";
+	case T_LT: return "<";
+	case T_GT: return ">";
+	case T_LTE: return "<=";
+	case T_GTE: return ">=";
+	case T_ADD: return "+";
+	case T_SUB: return "-";
+	case T_MULT: return "*";
+	case T_DIV: return "/";
+	case T_NT_EXCLAMATION: return "!";
+	case T_PAR_L: return "(";
+	case T_INT: return "int";
+	case T_STRING: return "string";
+	case T_DOUBLE: return "double";
+	case T_ID: return "id";
+	case T_COMMA: return ",";
+	case T_PAR_R: return ")";
+	case T_END: return "$";
+	default: return "DEFAULT";
+	}
+}
+
+const char*
+nonterminal_to_string( NonTerminal nt ) {
+	switch ( nt ) {
+	case NT_EXP: return "<exp>";
+	case NT_EXP_: return "<exp'>";
+	case NT_EXP1: return "<exp1>";
+	case NT_EXP1_: return "<exp1'>";
+	case NT_EXP2: return "<exp2>";
+	case NT_EXP2_: return "<exp2'>";
+	case NT_EXP3: return "<exp3>";
+	case NT_EXP3_: return "<exp3'>";
+	case NT_EXP4: return "<exp4>";
+	case NT_EXP4_: return "<exp4'>";
+	case NT_EXP5: return "<exp5>";
+	case NT_ARGS: return "<args>";
+	case NT_ARGS_LIST: return "<args_list>";
+	case NT_E_ID: return "<e_id>";
+	case NT_ARG_LIST_N: return "<arg_list_n>";
+	case NT_EXP_ID: return "<exp_id>";
+	default: return "DEFAULT";
+	}
+}
+
 // vraci int 0 pokud je ten exp validni
 // vraci expression pointer
 // vraci ukazatel na to kde skoncila
@@ -842,6 +892,11 @@ int parse_expression(
 	 		Rule* r = get_rule( top.tnt->non_terminal, term );
 			if ( r == NULL ) {
 				//*(int*)NULL = 0;
+				printf(
+					"expression error: no rule for NT '%s' and T '%s'\n",
+					nonterminal_to_string( top.tnt->non_terminal ),
+					terminal_to_string( term )
+				);
 				return 2;
 			}
 
@@ -871,6 +926,13 @@ int parse_expression(
 	 	} else {
 
 			if ( term != top.tnt->terminal ) {
+
+				printf(
+					"expression error: expected '%s' but got '%s'\n",
+					terminal_to_string( top.tnt->terminal ),
+					terminal_to_string( term )
+				);
+
 				//*(int*)NULL = 0;
 				return 2;
 			}

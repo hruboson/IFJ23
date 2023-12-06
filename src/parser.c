@@ -466,16 +466,17 @@ int parse_statement(
 
 		(*statement)->assign.id = token->value.id;
 
-		Token* token_1 = token;
+		Token token_1 = *token;
 
 		get_token(input, symtab, token);
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type == TOKENTYPE_PAR_L) {
 
-			ret = parse_expression(input, symtab, &exp,(Token*[]){token_1,token}, &out_token, &out_token_returned);
+			ret = parse_expression(input, symtab, &exp,(Token*[]){&token_1,token}, &out_token, &out_token_returned);
 
-			(*statement)->assign.exp = exp;
+			(*statement)->type = ST_EXP;
+			(*statement)->exp.exp = exp;
 
 			if (ret != 0) {
 				return ret;

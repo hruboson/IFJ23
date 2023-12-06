@@ -193,7 +193,7 @@ void test_while(void){
         const char* str;
         int ret;
     } tests[] = {
-        { "while a {}\n", 7},
+        { "while a {}\n", 5},
         { "let a : Int = 1\n while a {}", 7},
 		//TODO: následující test je správně, ale parser neumí bool
         //{ "let a : Int = 10\n while a == 10 {}\n", 0},

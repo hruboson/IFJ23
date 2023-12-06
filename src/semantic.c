@@ -38,6 +38,11 @@
 } while (0)
 
 
+/// @brief Metoda set_type nastaví expression.data_type podle získaného typu
+/// @param stack 
+/// @param table 
+/// @param exp 
+/// @return pokud prošel, vrací se 0, jinak číslo chyby
 int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
     DataType d0, d1;
 
@@ -204,8 +209,10 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
     return 0;
 }
 
-// Var x = 5
-
+/// @brief Porovnává 2 datové typy, jestli jsou sémanticky správně
+/// @param L 
+/// @param R 
+/// @return Pokud jsou sémanticky správně, vrátí se 0, jinak odpovídající error
 int semantic_type_match(DataType* L, DataType* R) {
     if (L->type == VARTYPE_VOID) {
         if (R->type == VARTYPE_VOID) {
@@ -237,6 +244,12 @@ int semantic_type_match(DataType* L, DataType* R) {
     return 0;
 }
 
+/// @brief Tato metoda ověřuje, zda je proměnná sémanticky korektní(Var x = 5)
+/// @param stack 
+/// @param statement 
+/// @param symtab 
+/// @param func_table 
+/// @return Pokud je metoda korektní, vrací se 0, jinak odpovídající error
 int semantic_variable(VarTableStack *stack, Statement *statement, SymbolTable *symtab, FuncTable* func_table) {
     // unique_id = "$" + statement->var.id_prefix.func_id->symbol.data + "%" + statement->var.id_prefix.block_counter + "%" + statement->var.id->symbol.data
     
@@ -244,7 +257,8 @@ int semantic_variable(VarTableStack *stack, Statement *statement, SymbolTable *s
         ERROR;
     }
 
-    //untested
+    // Vytvoří se nový string, do kterého se přidává nové jméno proměnné, aby se dala
+    // korektně vygenerovat proměnná a uloží se do var.unique_id
     String string;
     init_string(&string);
     string_append(&string, "$");
@@ -295,7 +309,11 @@ int semantic_variable(VarTableStack *stack, Statement *statement, SymbolTable *s
     return 0;
 }
 
-// Assign x = y
+/// @brief Sémantické ověření uložení proměnné do proměnné (x = y)
+/// @param stack 
+/// @param statement 
+/// @param func_table 
+/// @return pokud je správně, vrátí se 0, jinak error
 int semantic_assignment(VarTableStack *stack, Statement* statement, FuncTable *func_table) {
     assert(statement->type == ST_ASSIGN);
 
@@ -320,7 +338,11 @@ int semantic_assignment(VarTableStack *stack, Statement* statement, FuncTable *f
     return 0;    
 }
 
-// If (expression) { ... } else { ... }
+/// @brief Sémantická kontrola, zda je podmínka korektní (If (expression) { ... } else { ... })
+/// @param stack 
+/// @param func_table 
+/// @param statement 
+/// @return pokud je korektní, vrací se 0, jinak error
 int semantic_if(VarTableStack *stack, FuncTable *func_table, Statement *statement){
     if(!statement->if_.exp){
         SEMANTIC_ERROR_UNDEFINED_VARIABLE;
@@ -351,7 +373,11 @@ int semantic_if(VarTableStack *stack, FuncTable *func_table, Statement *statemen
     return 0;
 }
 
-// While (expression) { ... }
+/// @brief ověřuje, zda je podmínka sémanticky korektní (While (expression) { ... })
+/// @param stack 
+/// @param table 
+/// @param statement 
+/// @return pokud ano, vrací se 0, jinak error
 int semantic_while(VarTableStack *stack, FuncTable *table, Statement *statement) {
 
     if(!statement->while_.exp){
@@ -370,7 +396,12 @@ int semantic_while(VarTableStack *stack, FuncTable *table, Statement *statement)
     return 0;
 }
 
-// Return expression;
+/// @brief ověřuje se, zda návratový typ odpovídá funkci, ve které se nachází return
+/// @param stack 
+/// @param table 
+/// @param statement 
+/// @param funcId 
+/// @return pokud ano, vrací se 0, jinak error
 int semantic_return(VarTableStack *stack, FuncTable *table, Statement *statement, SymbolRecord *funcId) {
 
     if (funcId == NULL) {
@@ -411,14 +442,22 @@ int semantic_return(VarTableStack *stack, FuncTable *table, Statement *statement
     return 0;
 }
 
-// Expression;
+/// @brief sémantické ověření, zda expression je sémanticky správně. ověření pomocí set_type
+/// @param stack 
+/// @param table 
+/// @param statement 
+/// @return vrací se výstup set_type.
 int semantic_expression(VarTableStack *stack, FuncTable *table, Statement *statement) {
     int ret = set_type(stack, table, statement->exp.exp);
 
     return ret;  
 }
 
-// Function declaration
+/// @brief sémantické ověření, jestli je implementace funkce korektní, jestli jsou korektní parametry a jestli funkce existuje
+/// @param stack 
+/// @param table 
+/// @param statement 
+/// @return pokud je metoda sémanticky správně, vrátí se 0, jinak číslo erroru
 int semantic_function(VarTableStack *stack, FuncTable *table, Statement *statement) {
 
     Function *func = func_table_get(table, statement->func.id);

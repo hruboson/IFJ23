@@ -1310,7 +1310,7 @@ void test_exp(void) {
 	bool t_out;
 	Token t_out_t;
 
-	ret = parse_expression( &in, &symtab, &exp, NULL, &t_out_t, NULL, &t_out );
+	ret = parse_expression( &in, &symtab, &exp, (Token*[]){NULL,NULL}, &t_out_t, &t_out );
 
 	printf( "ret = %i\n", ret );
 	if ( ret != 0 )

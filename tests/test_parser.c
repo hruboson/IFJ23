@@ -1290,7 +1290,7 @@ void test_complex(void) {
 }
 
 void test_exp(void) {
-	const char* data = "write( a, b, 1 )";
+	const char* data = "write( getstring(), b, 1 )";
 
 	Input in = {
 		.type = INT_STRING,

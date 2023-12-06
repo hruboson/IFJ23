@@ -60,7 +60,7 @@ RULE(four_lte) { &T_lte, & NT_exp1 } ENDRULE;
 RULE(four_gte) { &T_gte, & NT_exp1 } ENDRULE;
 RULE(five) { &NT_exp3, & NT_exp2_ } ENDRULE;
 RULE(six_add) { &T_add, & NT_exp2 } ENDRULE;
-RULE(six_sub) { &T_add, & NT_exp2 } ENDRULE;
+RULE(six_sub) { &T_sub, & NT_exp2 } ENDRULE;
 RULE(seven) { &NT_exp4, & NT_exp3_ } ENDRULE;
 RULE(eight_mult) { &T_mult, & NT_exp3 } ENDRULE;
 RULE(eight_div) { &T_div, & NT_exp3 } ENDRULE;
@@ -145,6 +145,7 @@ static RuleTable rt = {
 			[T_END] = &R_eps
 		},
 		[NT_EXP2] = {
+			[T_PAR_L] = &R_five,
 			[T_INT] = &R_five,
 			[T_STRING] = &R_five,
 			[T_DOUBLE] = &R_five,
@@ -175,6 +176,7 @@ static RuleTable rt = {
 			[T_END] = &R_eps
 		},
 		[NT_EXP3] = {
+			[T_PAR_L] = &R_seven,
 			[T_INT] = &R_seven,
 			[T_STRING] = &R_seven,
 			[T_DOUBLE] = &R_seven,
@@ -205,6 +207,7 @@ static RuleTable rt = {
 			[T_END] = &R_eps
 		},
 		[NT_EXP4] = {
+			[T_PAR_L] = &R_nine,
 			[T_INT] = &R_nine,
 			[T_STRING] = &R_nine,
 			[T_DOUBLE] = &R_nine,
@@ -235,6 +238,7 @@ static RuleTable rt = {
 			[T_END] = &R_eps
 		},
 		[NT_EXP5] = {
+			[T_PAR_L] = &R_eleven_exp,
 			[T_INT] = &R_eleven_t_int,
 			[T_STRING] = &R_eleven_t_string,
 			[T_DOUBLE] = &R_eleven_t_double,
@@ -349,7 +353,8 @@ static RuleTable rt = {
 			[T_ID] = &R_twenty, // ?
 			[T_PAR_R] = &R_eps,
 			[T_END] = &R_eps,
-			[T_PAR_L] = &R_twentythree
+			[T_PAR_L] = &R_twentythree,
+			[T_COMMA] = &R_eps,
 		}
 	}
 };

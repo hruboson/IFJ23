@@ -893,6 +893,7 @@ int parse_expression(
 		case TOKENTYPE_ID: term = T_ID; break;
 		case TOKENTYPE_PAR_L: term = T_PAR_L; break;
 		case TOKENTYPE_PAR_R: term = T_PAR_R; break;
+		case TOKENTYPE_COMMA: term = T_COMMA; break;
 		}
 
 	 	if ( top.tnt->is_terminal == false ) { // není terminál

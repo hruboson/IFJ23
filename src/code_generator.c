@@ -153,6 +153,8 @@ void
 i_move( String* code, enum frame f, SymbolRecord* dst, SymbolRecord* src ) {
 	enum frame f_dst = get_frame( dst );
 	enum frame f_src = get_frame( src );
+	if ( f_src == f_g )
+		f = f_g;
 	string_append( code, "MOVE " );
 	append_var( code, f_dst, dst );
 	string_append( code, " " );

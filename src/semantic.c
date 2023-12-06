@@ -43,14 +43,14 @@
 /// @param table 
 /// @param exp 
 /// @return pokud prošel, vrací se 0, jinak číslo chyby
-int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
+int set_type(VarTableStack *stack, FuncTable *func_table, Expression *exp){
     DataType d0, d1;
 
     Function *func = NULL;
     switch(exp->type){
         case ET_ADD:
-            set_type(stack, table, exp->ops[0]);
-            set_type(stack, table, exp->ops[1]);
+            set_type(stack, func_table, exp->ops[0]);
+            set_type(stack, func_table, exp->ops[1]);
             DataType d0_add = exp->ops[0]->data_type;
             DataType d1_add = exp->ops[1]->data_type;
             if(d0_add.type == d1_add.type){
@@ -62,8 +62,8 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
         case ET_SUB:
         case ET_MULT:
         case ET_DIV:
-            set_type(stack, table, exp->ops[0]);
-            set_type(stack, table, exp->ops[1]);
+            set_type(stack, func_table, exp->ops[0]);
+            set_type(stack, func_table, exp->ops[1]);
             DataType d0_div = exp->ops[0]->data_type;
             DataType d1_div = exp->ops[1]->data_type;
             if((d0_div.type == VARTYPE_INT || VARTYPE_DOUBLE) && d0_div.type == d1_div.type)
@@ -108,8 +108,8 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
         case ET_EQUAL:
         case ET_N_EQUAL:
             exp->data_type.type = VARTYPE_BOOL;
-            set_type(stack, table, exp->ops[0]);
-            set_type(stack, table, exp->ops[1]);
+            set_type(stack, func_table, exp->ops[0]);
+            set_type(stack, func_table, exp->ops[1]);
             d0 = exp->ops[0]->data_type;
             d1 = exp->ops[1]->data_type;
             if( d0.nil_allowed == false && d1.nil_allowed == false &&
@@ -128,8 +128,8 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
         case ET_LTE:
         case ET_GTE:
             exp->data_type.type = VARTYPE_BOOL;
-            set_type(stack, table, exp->ops[0]);
-            set_type(stack, table, exp->ops[1]);
+            set_type(stack, func_table, exp->ops[0]);
+            set_type(stack, func_table, exp->ops[1]);
             d0 = exp->ops[0]->data_type;
             d1 = exp->ops[1]->data_type;
             if( d0.nil_allowed == false && d1.nil_allowed == false &&
@@ -144,7 +144,7 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
             SEMANTIC_ERROR_TYPE_MISMATCH;
 
         case ET_FUNC:
-            func = func_table_get(table, exp->fn_call.id);
+            func = func_table_get(func_table, exp->fn_call.id);
             if(func == NULL){
                 Function new_func;
                 new_func.id = exp->fn_call.id;
@@ -166,7 +166,7 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
                 }
 
                 new_func.return_type.type = VARTYPE_VOID;
-                func_table_insert(table, new_func);
+                func_table_insert(func_table, new_func);
             }
             else{
                 if(func->param_count == exp->fn_call.arg_count){
@@ -201,6 +201,28 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
                 }
             }
             return 0;
+
+        case ET_NIL_TEST:
+            set_type(stack, func_table, exp->ops[0]);
+            set_type(stack, func_table, exp->ops[1]);
+            DataType left = exp->ops[0]->data_type;
+            DataType right = exp->ops[1]->data_type;
+
+            if (right.type == VARTYPE_VOID || right.nil_allowed)
+                SEMANTIC_ERROR_TYPE_MISMATCH;
+            
+            if (left.nil_allowed == false)
+                SEMANTIC_ERROR_TYPE_MISMATCH;
+
+            if ( left.type == right.type ||
+                (left.type == VOID && left.nil_allowed)
+            ) {
+                exp->data_type = exp->ops[1]->data_type; 
+                return 0; 
+            }
+
+            SEMANTIC_ERROR_TYPE_MISMATCH;
+            break;
 
         default:
             printf("default error\n");
@@ -616,7 +638,7 @@ int semantic_were_all_functions_defined( FuncTable *func_table ) {
     
     for (size_t i = 0; i < func_table->funcs_size; i++) {
         if (func_table->funcs[i].is_defined == false) {
-            SEMANTIC_ERROR_UNDEFINED_FUNCTION;
+            SEMANTIC_ERROR_UNDEFINED_FUNCTION;;
         }
     }
 

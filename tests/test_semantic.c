@@ -258,7 +258,7 @@ void test_if(void){
 
         int ret = parse(&in, &ast);
         if (ret != tests[i].ret) {
-            printf("NOT EQUAL: %i\n", i);
+            printf("NOT EQUAL: %lu\n", i);
         }
         TEST_ASSERT_EQUAL_INT(tests[i].ret, ret);
     }

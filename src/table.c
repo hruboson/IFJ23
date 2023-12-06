@@ -32,18 +32,21 @@ void func_table_insert(FuncTable* table, Function func) {
 }
 
 Function* func_table_get(FuncTable* table, SymbolRecord* id) {
-    Function* f;
-    for (size_t i = 0; i < table->funcs_size; i++) {
-        f = &(table->funcs[i]);
-        if (f) {
-            if (f->id->hash == id->hash) {
-                return f;
-            }
-        }
-        i++;
-    }
+	assert( id );
+	Function* f;
+	for (size_t i = 0; i < table->funcs_size; i++) {
+		Function* f = table->funcs + i;
+		if ( f == NULL )
+			continue;
+		if (
+			f->id->hash == id->hash &&
+			string_eq( &f->id->symbol, &id->symbol )
+		) {
+			return f;
+		}
+	}
 
-    return NULL;
+	return NULL;
 }
 
 void init_var_table(VarTable* table) {

@@ -770,6 +770,14 @@ nonterminal_to_string( NonTerminal nt ) {
 	}
 }
 
+const char*
+tnt_to_string( const TNT* boom ) {
+	if ( boom->is_terminal )
+		return terminal_to_string( boom->terminal );
+	else
+		return nonterminal_to_string( boom->non_terminal );
+}
+
 // vraci int 0 pokud je ten exp validni
 // vraci expression pointer
 // vraci ukazatel na to kde skoncila
@@ -909,7 +917,7 @@ int parse_expression(
 			for ( int i = 0; i < 3; i++ ) {
 				if ( r->expand_to[ i ] == NULL )
 					break;
-				printf( "%p ", r->expand_to[i] );
+				printf( "%s ", tnt_to_string( r->expand_to[i] ) );
 			}
 			printf( "\n" );
 

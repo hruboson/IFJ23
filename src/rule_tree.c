@@ -58,20 +58,22 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 	if ( e == NULL )
 		exit( 99 );
 
+	Token* c0t = c0->val;
+
 
 	// pokud je to operátor - vyber dva a dej je do jednoho expressionu
 	if (
-		c0->val->type == TOKENTYPE_QUESTIONMARK2 ||
-		c0->val->type == TOKENTYPE_EQUALS2 ||
-		c0->val->type == TOKENTYPE_NOT_EQUALS ||
-		c0->val->type == TOKENTYPE_LESSER ||
-		c0->val->type == TOKENTYPE_GREATER ||
-		c0->val->type == TOKENTYPE_LESSER_OR_EQUAL ||
-		c0->val->type == TOKENTYPE_GREATER_OR_EQUAL ||
-		c0->val->type == TOKENTYPE_PLUS ||
-		c0->val->type == TOKENTYPE_MINUS ||
-		c0->val->type == TOKENTYPE_STAR ||
-		c0->val->type == TOKENTYPE_SLASH
+		c0t->type == TOKENTYPE_QUESTIONMARK2 ||
+		c0t->type == TOKENTYPE_EQUALS2 ||
+		c0t->type == TOKENTYPE_NOT_EQUALS ||
+		c0t->type == TOKENTYPE_LESSER ||
+		c0t->type == TOKENTYPE_GREATER ||
+		c0t->type == TOKENTYPE_LESSER_OR_EQUAL ||
+		c0t->type == TOKENTYPE_GREATER_OR_EQUAL ||
+		c0t->type == TOKENTYPE_PLUS ||
+		c0t->type == TOKENTYPE_MINUS ||
+		c0t->type == TOKENTYPE_STAR ||
+		c0t->type == TOKENTYPE_SLASH
 	) {
 		Expression* e1;
 		Expression* e2;
@@ -82,7 +84,7 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 		e->ops[2] = NULL;
 		exp_stack_push(stack, e);
 
-		switch ( c0->val->type ) {
+		switch ( c0t->type ) {
 		case TOKENTYPE_QUESTIONMARK2: e->type = ET_NIL_TEST; break;
 		case TOKENTYPE_EQUALS2: e->type = ET_EQUAL; break;
 		case TOKENTYPE_NOT_EQUALS: e->type = ET_N_EQUAL; break;
@@ -97,7 +99,7 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 		}
 	}
 	// pokud je to '!'
-	else if (c0->val->type == TOKENTYPE_EXCLAMATION) {
+	else if (c0t->type == TOKENTYPE_EXCLAMATION) {
 		e->type = ET_EXCLAMATION;
 		Expression* e1;
 		exp_stack_pop(stack, &e1);
@@ -108,21 +110,24 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 	}
 	// pokud je to id / int / double / string
 	else {
-		if (c0->val->type == TOKENTYPE_ID) {
+		if (c0t->type == TOKENTYPE_ID) {
 			e->type = ET_ID;
 			e->id = c0->val->value.id;
 		}
-		else if (c0->val->type == TOKENTYPE_INT) {
+		else if (c0t->type == TOKENTYPE_INT) {
 			e->type = ET_INT;
 			e->int_ = c0->val->value.int_;
 		}
-		else if (c0->val->type == TOKENTYPE_DOUBLE) {
+		else if (c0t->type == TOKENTYPE_DOUBLE) {
 			e->type = ET_DOUBLE;
 			e->double_ = c0->val->value.double_;
 		}
-		else if (c0->val->type == TOKENTYPE_STRING) {
+		else if (c0t->type == TOKENTYPE_STRING) {
 			e->type = ET_STRING;
 			e->str_ = c0->val->value.str_;
+		}
+		else if (c0t->type == TOKENTYPE_KEYWORD && c0t->value.keyword == KEYWORD_NIL) {
+			e->type = ET_NIL;
 		} else {
 			fprintf( stdout, "error: unexpected terminal: " );
 			print_token( c0->val );

@@ -34,9 +34,9 @@ print_keyword( Keyword k ) {
 	};
 
 	if ( k <= arraysize( a ) && a[ k ] != NULL )
-		fprintf( stderr, a[ k ] );
+		fprintf( stdout, a[ k ] );
 	else
-		fprintf( stderr, "unhandeled keyword %i", k );
+		fprintf( stdout, "unhandeled keyword %i", k );
 
 	return;
 }
@@ -112,6 +112,7 @@ terminal_to_string( Terminal t ) {
 	case T_STRING: return "string";
 	case T_DOUBLE: return "double";
 	case T_ID: return "id";
+	case T_NIL: return "nil";
 	case T_COMMA: return ",";
 	case T_PAR_R: return ")";
 	case T_END: return "$";

@@ -41,6 +41,7 @@ typedef enum Terminal {
 	T_STRING,
 	T_DOUBLE,
 	T_ID,
+	T_NIL,
 	T_COMMA,
 	T_PAR_R,
 	T_COLON,

@@ -719,7 +719,10 @@ int parse_expression(
 	 		token.type != TOKENTYPE_ID &&
 	 		token.type != TOKENTYPE_COMMA &&
 			token.type != TOKENTYPE_PAR_L &&
-			token.type != TOKENTYPE_PAR_R
+			token.type != TOKENTYPE_PAR_R &&
+			!( token.type == TOKENTYPE_KEYWORD &&
+				token.value.keyword == KEYWORD_NIL
+			)
 		) {
 	 		*out_token = token; //! correct ?
 	 		*out_token_returned = true;
@@ -776,6 +779,10 @@ int parse_expression(
 		case TOKENTYPE_PAR_L: term = T_PAR_L; break;
 		case TOKENTYPE_PAR_R: term = T_PAR_R; break;
 		case TOKENTYPE_COMMA: term = T_COMMA; break;
+		case TOKENTYPE_KEYWORD:
+			assert( t->value.keyword == KEYWORD_NIL );
+			term = T_NIL;
+			break;
 		}
 
 	 	if ( top.tnt->is_terminal == false ) { // není terminál

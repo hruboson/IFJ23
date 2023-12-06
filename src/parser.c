@@ -13,6 +13,8 @@
 #include "table.h"
 #include <assert.h>
 
+#include "utils.h"
+
 // newline check
 // pars: Input* input, SymbolTable* symtab, Token* token
 #define PARSE_POTENTIAL_NEWLINE(input, symtab, token) do { \
@@ -133,7 +135,7 @@ int parse_statement(
 			(*statement)->if_.check_nil = false;
 		}
 
-		ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
+		ret = parse_expression(input, symtab, &exp, (Token*[]){token,NULL}, &out_token, &out_token_returned);
 		if (ret != 0) {
 			return ret;
 		}
@@ -221,7 +223,7 @@ int parse_statement(
 		get_token(input, symtab, token);
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
-		ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
+		ret = parse_expression(input, symtab, &exp, (Token*[]){token,NULL}, &out_token, &out_token_returned);
 
 		if (do_semantic_analysis) {
 			//TODO: ret = semantic_condition(VarTableStack, FunctionTable, Statement) return value = jestli prosla
@@ -351,7 +353,7 @@ int parse_statement(
 				get_token(input, symtab, token);
 				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
-				ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
+				ret = parse_expression(input, symtab, &exp, (Token*[]){token,NULL}, &out_token, &out_token_returned);
 
 				if (ret != 0) {
 					return ret;
@@ -396,7 +398,7 @@ int parse_statement(
 			return 0;
 		}
 
-		ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
+		ret = parse_expression(input, symtab, &exp, (Token*[]){token,NULL}, &out_token, &out_token_returned);
 
 		if (do_semantic_analysis) {
 			//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
@@ -435,7 +437,7 @@ int parse_statement(
 
 		if (token->type == TOKENTYPE_PAR_L) {
 
-			ret = parse_expression(input, symtab, &exp, token_1, token, &out_token, &out_token_returned);
+			ret = parse_expression(input, symtab, &exp,(Token*[]){token_1,token}, &out_token, &out_token_returned);
 
 			(*statement)->assign.exp = exp;
 
@@ -451,7 +453,7 @@ int parse_statement(
 			get_token(input, symtab, token);
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
-			ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
+			ret = parse_expression(input, symtab, &exp,(Token*[]){token,NULL}, &out_token, &out_token_returned);
 
 			if (do_semantic_analysis) {
 				//TODO: ret = semantic_assignment(VarTableStack, FunctionTable, Statement) return value = jestli prosla
@@ -638,146 +640,6 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 	return ret;
 }
 
-void
-print_token( const Token* t ) {
-	switch ( t->type ) {
-	case TOKENTYPE_NEWLINE: printf( "NL" ); break;
-	case TOKENTYPE_EOF: printf( "EOF" ); break;
-	case TOKENTYPE_PLUS: printf( "+" ); break;
-	case TOKENTYPE_MINUS: printf( "-" ); break;
-	case TOKENTYPE_STAR: printf( "*" ); break;
-	case TOKENTYPE_SLASH: printf( "/" ); break;
-	case TOKENTYPE_QUESTIONMARK2: printf( "??" ); break;
-	case TOKENTYPE_EQUALS2: printf( "==" ); break;
-	case TOKENTYPE_NOT_EQUALS: printf( "!=" ); break;
-	case TOKENTYPE_LESSER: printf( "<" ); break;
-	case TOKENTYPE_GREATER: printf( ">" ); break;
-	case TOKENTYPE_LESSER_OR_EQUAL: printf( "<=" ); break;
-	case TOKENTYPE_GREATER_OR_EQUAL: printf( ">=" ); break;
-	case TOKENTYPE_EXCLAMATION: printf( "!" ); break;
-	case TOKENTYPE_QUESTIONMARK: printf( "?" ); break;
-	case TOKENTYPE_EQUALS: printf( "=" ); break;
-	case TOKENTYPE_ARROW: printf( "->" ); break;
-	case TOKENTYPE_COLON: printf( ":" ); break;
-	case TOKENTYPE_PAR_L: printf( "(" ); break;
-	case TOKENTYPE_PAR_R: printf( ")" ); break;
-	case TOKENTYPE_BRACE_L: printf( "{" ); break;
-	case TOKENTYPE_BRACE_R: printf( "}" ); break;
-	case TOKENTYPE_COMMA: printf( "," ); break;
-	case TOKENTYPE_UNDERSCORE: printf( "_" ); break;
-	case TOKENTYPE_ID:
-		printf( "id( %s )", t->value.id->symbol.data );
-		break;
-	case TOKENTYPE_STRING:
-		printf( "string( \"" );
-		for ( size_t i = 0; i < t->value.str_.length; i++ ) {
-			char c = t->value.str_.data[ i ];
-			if ( c <= 31 )
-				printf( "\\u{%x}", c );
-			else
-				printf( "%c", c );
-		}
-		printf( "\" )" );
-		break;
-	case TOKENTYPE_INT:
-		printf( "int( %i )", t->value.int_ );
-		break;
-	case TOKENTYPE_DOUBLE:
-		printf( "double( %f )", t->value.double_ );
-		break;
-	case TOKENTYPE_KEYWORD:
-		printf( "KEYWORD" );
-		break;
-	default:
-		printf( "DEFAULT(%i)", t->type );
-	}
-}
-
-void
-print_rule_tree( const Node* n, size_t i ) {
-	if ( n == NULL )
-		return;
-
-	for ( size_t j = 0; j < i; j++ )
-		printf( "  " );
-
-	printf( "%s ", n->isTerminal ? "T" : "NT" );
-	if ( n->isTerminal ) {
-		print_token( n->val );
-
-		printf( "\n" );
-
-		return;
-	} else {
-		printf( "%i", n->nt );
-
-		printf( "\n" );
-		for ( size_t ii = 0; ii < 3; ii++ )
-			print_rule_tree( n->children_nodes[ ii ], i + 1 );
-
-		return;
-	}
-
-}
-
-const char*
-terminal_to_string( Terminal t ) {
-	switch ( t ) {
-	case T_NIL_TEST: return "??";
-	case T_EQUAL: return "==";
-	case T_N_EQUAL: return "!=";
-	case T_LT: return "<";
-	case T_GT: return ">";
-	case T_LTE: return "<=";
-	case T_GTE: return ">=";
-	case T_ADD: return "+";
-	case T_SUB: return "-";
-	case T_MULT: return "*";
-	case T_DIV: return "/";
-	case T_NT_EXCLAMATION: return "!";
-	case T_PAR_L: return "(";
-	case T_INT: return "int";
-	case T_STRING: return "string";
-	case T_DOUBLE: return "double";
-	case T_ID: return "id";
-	case T_COMMA: return ",";
-	case T_PAR_R: return ")";
-	case T_END: return "$";
-	default: return "DEFAULT";
-	}
-}
-
-const char*
-nonterminal_to_string( NonTerminal nt ) {
-	switch ( nt ) {
-	case NT_EXP: return "<exp>";
-	case NT_EXP_: return "<exp'>";
-	case NT_EXP1: return "<exp1>";
-	case NT_EXP1_: return "<exp1'>";
-	case NT_EXP2: return "<exp2>";
-	case NT_EXP2_: return "<exp2'>";
-	case NT_EXP3: return "<exp3>";
-	case NT_EXP3_: return "<exp3'>";
-	case NT_EXP4: return "<exp4>";
-	case NT_EXP4_: return "<exp4'>";
-	case NT_EXP5: return "<exp5>";
-	case NT_ARGS: return "<args>";
-	case NT_ARGS_LIST: return "<args_list>";
-	case NT_E_ID: return "<e_id>";
-	case NT_ARG_LIST_N: return "<arg_list_n>";
-	case NT_EXP_ID: return "<exp_id>";
-	default: return "DEFAULT";
-	}
-}
-
-const char*
-tnt_to_string( const TNT* boom ) {
-	if ( boom->is_terminal )
-		return terminal_to_string( boom->terminal );
-	else
-		return nonterminal_to_string( boom->non_terminal );
-}
-
 // vraci int 0 pokud je ten exp validni
 // vraci expression pointer
 // vraci ukazatel na to kde skoncila
@@ -785,16 +647,12 @@ tnt_to_string( const TNT* boom ) {
 // out_token Token, ktery muze vratit parse_statementu
 int parse_expression(
 	Input* input, SymbolTable* symtab,
-	Expression** exp, Token* in_token,
-	Token* out_token, Token* in_token_2,
-	bool* out_token_returned
+	Expression** exp, Token* in_tokens[2],
+	Token* out_token, bool* out_token_returned
 ) {
 	//TODO: pokud prijdou in_token a in_token_2 prvni je dat do listu tokenu a pak teprve nacitat
-
-	*exp = (Expression*)malloc(sizeof(Expression));
-	if (*exp == NULL) {
-		exit(99);
-	}
+	assert( out_token );
+	assert( out_token_returned );
 
 	// Naplnit pole tokenů, které patří do expressionu(načítáš tokeny do tokenu, který nemůže být v expressionu)
 	#define MAX_EXP_LEN 256
@@ -806,10 +664,10 @@ int parse_expression(
 
 	Token token;
 
-	if (in_token) {
-		token_list[token_count++] = *in_token;
-		if (in_token_2) {
-			token_list[token_count++] = *in_token_2;
+	if (in_tokens[0]) {
+		token_list[token_count++] = *in_tokens[0];
+		if (in_tokens[1]) {
+			token_list[token_count++] = *in_tokens[1];
 		}
 	}
 
@@ -859,10 +717,6 @@ int parse_expression(
 	init_rule_tree(&tree_root);
 
 	tnt_stack_push( tnt_stack, ( TS_Item ){ &NT_exp, tree_root } );
-
-	// Tvoříš strom, pomocí pomocí pravidel zjištěných z tabulky (2D pole) - Enumy na řádky a na sloupce
-	ExpStack exp_stack_;
-	ExpStack* exp_stack = &exp_stack_;
 
 	token_index = 0;
 	while (!(tnt_stack_is_empty(tnt_stack))) { // stack není prázdný
@@ -963,6 +817,21 @@ int parse_expression(
 	}
 
 	print_rule_tree( tree_root, 0 );
+
+	// convert tree to Expression* tree
+	*exp = NULL;
+
+	// Tvoříš strom, pomocí pomocí pravidel zjištěných z tabulky (2D pole) - Enumy na řádky a na sloupce
+	ExpStack exp_stack;
+	init_exp_stack( &exp_stack );
+	rule_tree_postorder( tree_root, &exp_stack );
+	assert( exp_stack.size == 1 );
+
+	dispose_rule_tree( tree_root );
+
+	*exp = exp_stack.exps[ 0 ];
+
+	clear_exp_stack( &exp_stack );
 
 	return 0;
 }

@@ -40,57 +40,85 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 		rule_tree_postorder((tree->children_nodes)[i], stack);
 	}
 
-	if (tree->children_nodes[0] != NULL) {
-		if (!(tree->isTerminal) && tree->children_nodes[0]->isTerminal) {
-			Expression e;
-			// pokud je to operátor - vyber dva a dej je do jednoho expressionu
-			if (tree->children_nodes[0]->val->type == TOKENTYPE_QUESTIONMARK2 ||
-				tree->children_nodes[0]->val->type == TOKENTYPE_EQUALS2 ||
-				tree->children_nodes[0]->val->type == TOKENTYPE_NOT_EQUALS ||
-				tree->children_nodes[0]->val->type == TOKENTYPE_LESSER ||
-				tree->children_nodes[0]->val->type == TOKENTYPE_GREATER ||
-				tree->children_nodes[0]->val->type == TOKENTYPE_LESSER_OR_EQUAL ||
-				tree->children_nodes[0]->val->type == TOKENTYPE_GREATER_OR_EQUAL ||
-				tree->children_nodes[0]->val->type == TOKENTYPE_PLUS ||
-				tree->children_nodes[0]->val->type == TOKENTYPE_MINUS ||
-				tree->children_nodes[0]->val->type == TOKENTYPE_STAR ||
-				tree->children_nodes[0]->val->type == TOKENTYPE_SLASH) {
-				Expression* e1;
-				Expression* e2;
-				exp_stack_pop(stack, &e1);
-				exp_stack_pop(stack, &e2);
-				e.ops[0] = e1;
-				e.ops[1] = e2;
-				exp_stack_push(stack, &e);
-			}
-			// pokud je to '!'
-			else if (tree->children_nodes[0]->val->type == TOKENTYPE_EXCLAMATION) {
-				e.type = ET_EXCLAMATION;
-				Expression* e1;
-				exp_stack_pop(stack, &e1);
-				e.ops[0] = e1;
-				exp_stack_push(stack, &e);
-			}
-			// pokud je to id / int / double / string
-			else {
-				if (tree->children_nodes[0]->val->type == TOKENTYPE_ID) {
-					e.type = ET_ID;
-					e.id = tree->children_nodes[0]->val->value.id;
-				}
-				else if (tree->children_nodes[0]->val->type == TOKENTYPE_INT) {
-					e.type = ET_INT;
-					e.int_ = tree->children_nodes[0]->val->value.int_;
-				}
-				else if (tree->children_nodes[0]->val->type == TOKENTYPE_DOUBLE) {
-					e.type = ET_DOUBLE;
-					e.double_ = tree->children_nodes[0]->val->value.double_;
-				}
-				else if (tree->children_nodes[0]->val->type == TOKENTYPE_STRING) {
-					e.type = ET_STRING;
-					e.str_ = tree->children_nodes[0]->val->value.str_;
-				}
-				exp_stack_push(stack, &e);
-			}
+	if (tree->children_nodes[0] == NULL)
+		return;
+	if ( tree->isTerminal )
+		return;
+	if ( tree->children_nodes[ 0 ]->isTerminal == false)
+		return;
+
+	Expression* e;
+	e = malloc( sizeof( *e ) );
+	if ( e == NULL )
+		exit( 99 );
+
+	Node* c0 = tree->children_nodes[ 0 ];
+
+	// pokud je to operátor - vyber dva a dej je do jednoho expressionu
+	if (
+		c0->val->type == TOKENTYPE_QUESTIONMARK2 ||
+		c0->val->type == TOKENTYPE_EQUALS2 ||
+		c0->val->type == TOKENTYPE_NOT_EQUALS ||
+		c0->val->type == TOKENTYPE_LESSER ||
+		c0->val->type == TOKENTYPE_GREATER ||
+		c0->val->type == TOKENTYPE_LESSER_OR_EQUAL ||
+		c0->val->type == TOKENTYPE_GREATER_OR_EQUAL ||
+		c0->val->type == TOKENTYPE_PLUS ||
+		c0->val->type == TOKENTYPE_MINUS ||
+		c0->val->type == TOKENTYPE_STAR ||
+		c0->val->type == TOKENTYPE_SLASH
+	) {
+		Expression* e1;
+		Expression* e2;
+		exp_stack_pop(stack, &e2);
+		exp_stack_pop(stack, &e1);
+		e->ops[0] = e1;
+		e->ops[1] = e2;
+		e->ops[2] = NULL;
+		exp_stack_push(stack, e);
+
+		switch ( c0->val->type ) {
+		case TOKENTYPE_QUESTIONMARK2: e->type = ET_NIL_TEST; break;
+		case TOKENTYPE_EQUALS2: e->type = ET_EQUAL; break;
+		case TOKENTYPE_NOT_EQUALS: e->type = ET_N_EQUAL; break;
+		case TOKENTYPE_LESSER: e->type = ET_LT; break;
+		case TOKENTYPE_GREATER: e->type = ET_GT; break;
+		case TOKENTYPE_LESSER_OR_EQUAL: e->type = ET_LTE; break;
+		case TOKENTYPE_GREATER_OR_EQUAL: e->type = ET_GTE; break;
+		case TOKENTYPE_PLUS: e->type = ET_ADD; break;
+		case TOKENTYPE_MINUS: e->type = ET_SUB; break;
+		case TOKENTYPE_STAR: e->type = ET_MULT; break;
+		case TOKENTYPE_SLASH: e->type = ET_DIV; break;
 		}
+	}
+	// pokud je to '!'
+	else if (c0->val->type == TOKENTYPE_EXCLAMATION) {
+		e->type = ET_EXCLAMATION;
+		Expression* e1;
+		exp_stack_pop(stack, &e1);
+		e->ops[0] = e1;
+		e->ops[1] = e->ops[2] = NULL;
+		e->type = ET_EXCLAMATION;
+		exp_stack_push(stack, e);
+	}
+	// pokud je to id / int / double / string
+	else {
+		if (c0->val->type == TOKENTYPE_ID) {
+			e->type = ET_ID;
+			e->id = c0->val->value.id;
+		}
+		else if (c0->val->type == TOKENTYPE_INT) {
+			e->type = ET_INT;
+			e->int_ = c0->val->value.int_;
+		}
+		else if (c0->val->type == TOKENTYPE_DOUBLE) {
+			e->type = ET_DOUBLE;
+			e->double_ = c0->val->value.double_;
+		}
+		else if (c0->val->type == TOKENTYPE_STRING) {
+			e->type = ET_STRING;
+			e->str_ = c0->val->value.str_;
+		}
+		exp_stack_push(stack, e);
 	}
 }

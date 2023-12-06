@@ -23,8 +23,12 @@ void clear_ast(AST* ast) {
 
 void
 print_exp( const Expression* e ) {
-	if ( e == NULL )
+	if ( e == NULL ) {
+		printf( "NULL" );
 		return;
+	}
+
+	printf( "(" );
 
 	switch ( e->type ) {
 	case ET_EXCLAMATION:
@@ -132,6 +136,7 @@ print_exp( const Expression* e ) {
 		printf( "DEFAULT" );
 	}
 
+	printf( ")" );
 
 }
 

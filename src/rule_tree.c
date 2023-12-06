@@ -37,6 +37,7 @@ void rule_tree_insert(Node* root, size_t node_index, Token* val) {
 	}
 }
 
+// pomocná funkce pro sečtení argumentů volání funkce
 size_t rule_tree_fn_args(Node* root, ExpStack* stack) {
 	Node* c0 = root->children_nodes[0];
 	Node* c1 = root->children_nodes[1];
@@ -45,7 +46,9 @@ size_t rule_tree_fn_args(Node* root, ExpStack* stack) {
 	case NT_EXP:
 		rule_tree_postorder(c0, stack);
 		break;
-
+	case NT_E_ID:
+		
+		break;
 	default:
 		break;
 	}
@@ -80,7 +83,7 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 		}
 
 		e->fn_call.arg_count = rule_tree_fn_args(c1->children_nodes[1], stack);
-		printf("ARG CUNT = %lu\n", e->fn_call.arg_count);
+		//printf("ARG CUNT = %lu\n", e->fn_call.arg_count); //! remove
 		e->fn_call.args = malloc(sizeof(Argument) * e->fn_call.arg_count);
 		if (e->fn_call.args == NULL) exit(99);
 		for (int i = e->fn_call.arg_count - 1; i >= 0; i--) {

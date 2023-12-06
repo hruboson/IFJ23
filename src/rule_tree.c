@@ -4,6 +4,8 @@
 #include "rules.h"
 #include "stdlib.h"
 
+#include "utils.h"
+
 void init_rule_tree(Node** tree) {
 	(*tree) = (Node*)malloc(sizeof(Node));
 	(*tree)->val = NULL;
@@ -40,11 +42,12 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 		rule_tree_postorder((tree->children_nodes)[i], stack);
 	}
 
-	if (tree->children_nodes[0] == NULL)
+	Node* c0 = tree->children_nodes[ 0 ];
+	if ( c0 == NULL )
 		return;
 	if ( tree->isTerminal )
 		return;
-	if ( tree->children_nodes[ 0 ]->isTerminal == false)
+	if ( c0->isTerminal == false )
 		return;
 
 	Expression* e;
@@ -52,7 +55,6 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 	if ( e == NULL )
 		exit( 99 );
 
-	Node* c0 = tree->children_nodes[ 0 ];
 
 	// pokud je to operátor - vyber dva a dej je do jednoho expressionu
 	if (
@@ -118,6 +120,11 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 		else if (c0->val->type == TOKENTYPE_STRING) {
 			e->type = ET_STRING;
 			e->str_ = c0->val->value.str_;
+		} else {
+			fprintf( stdout, "error: unexpected terminal: " );
+			print_token( c0->val );
+			fprintf( stdout, "\n" );
+			exit( 99 );
 		}
 		exp_stack_push(stack, e);
 	}

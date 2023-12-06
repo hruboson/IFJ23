@@ -95,7 +95,6 @@ void test_type_match_2(void) {
 	}
 }
 
-
 void test_assign(void) {
 	struct {
 		const char* str;
@@ -144,6 +143,171 @@ void test_assign(void) {
 		TEST_ASSERT_EQUAL_INT(tests[i].dt.nil_allowed, data_type.nil_allowed);
 	}
 }
+
+void test_assign_exp(void) {
+	struct {
+		const char* str;
+		DataType dt;
+		int ret;
+	} tests[] = {
+		{ "var a : Int = 1 + 1\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 - 1\n", {VARTYPE_INT, false}, 0},
+
+		{ "var a : Int = 1 + 1\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 - 1\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 / 1\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 * 1\n", {VARTYPE_INT, false}, 0},
+
+		{ "var a : Int? = 1 + 1\n", {VARTYPE_INT, true}, 0},
+		{ "var a : Int? = 1 + 1\n", {VARTYPE_INT, true}, 0},
+		{ "var a : Int? = 1 + 1\n", {VARTYPE_INT, true}, 0},
+		{ "var a : Int? = 1 + 1\n", {VARTYPE_INT, true}, 0},
+
+		{ "var a : Double = 1.0 + 1.0\n", {VARTYPE_DOUBLE, false}, 0},
+		{ "var a : Double = 1.0 - 1.0\n", {VARTYPE_DOUBLE, false}, 0},
+		{ "var a : Double = 1.0 * 1.0\n", {VARTYPE_DOUBLE, false}, 0},
+		{ "var a : Double = 1.0 / 1.0\n", {VARTYPE_DOUBLE, false}, 0},
+
+		{ "var a : Double? = 1.0 + 1.0\n", {VARTYPE_DOUBLE, true}, 0},
+		{ "var a : Double? = 1.0 - 1.0\n", {VARTYPE_DOUBLE, true}, 0},
+		{ "var a : Double? = 1.0 * 1.0\n", {VARTYPE_DOUBLE, true}, 0},
+		{ "var a : Double? = 1.0 / 1.0\n", {VARTYPE_DOUBLE, true}, 0},
+
+		{ "var a : String = \"ah\" + \"oj\"\n", {VARTYPE_STRING, false}, 0},
+		{ "var a : String = \"ah\" - \"oj\"\n", {VARTYPE_STRING, false}, 7},
+		{ "var a : String = \"ah\" * \"oj\"\n", {VARTYPE_STRING, false}, 7},
+		{ "var a : String = \"ah\" / \"oj\"\n", {VARTYPE_STRING, false}, 7},
+
+		// zavorky
+		{ "var a : Int = (1 + 1)\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = (1 - 1)\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = (1 * 1)\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = (1 / 1)\n", {VARTYPE_INT, false}, 0},
+
+		{ "var a : Int = 1 + (1 - 1)\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 - (1 + 1)\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 / (1 + 1)\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 * (1 + 1)\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 - (1 / 1)\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 * (1 / 1)\n", {VARTYPE_INT, false}, 0},
+
+		// priority
+		{ "var a : Int = 1 + 1 * 1\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 * 1 + 1\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 / 2 * 1\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 * 4 / 2\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 - 4 / 2\n", {VARTYPE_INT, false}, 0},
+		{ "var a : Int = 1 - 4 / 2\n", {VARTYPE_INT, false}, 0},
+
+		//{ "var a : Double = 1.0\n a = 3.0\n", {VARTYPE_DOUBLE, false}, 0},
+	};
+
+	for (size_t i = 0; i < arraysize(tests); i++) {
+		
+		Input in = {
+			.type = INT_STRING,
+			.string = {
+				.s = tests[i].str,
+				.i = 0, .store = 0,
+			},
+		};
+
+		AST ast;
+		init_ast(&ast);
+
+		int ret = parse(&in, &ast);
+		if (ret != tests[i].ret) {
+			printf("NOT EQUAL: %lu\n", i);
+		}
+		TEST_ASSERT_EQUAL_INT(tests[i].ret, ret);
+		if (ret != 0) continue;
+
+		DataType data_type = ast.statement->var.data_type;
+
+		if (data_type.type != tests[i].dt.type) {
+			printf("NOT EQUAL TYPE: %lu\n", i);
+		}
+		if (data_type.nil_allowed != tests[i].dt.nil_allowed) {
+			printf("NOT EQUAL NIL ALLOWED: %lu\n", i);
+		}
+		TEST_ASSERT_EQUAL_INT(tests[i].dt.type, data_type.type);
+		TEST_ASSERT_EQUAL_INT(tests[i].dt.nil_allowed, data_type.nil_allowed);
+	}
+}
+
+void test_write(void) {
+	struct {
+		const char* str;
+		int ret;
+	} tests[] = {
+		{ "write()\n", 4},
+		{ "write(1)\n", 0},
+		{ "write(1, 2 + 2)\n", 0},
+		{ "write(nil)\n", 0},
+		{ "write(\"ahoj\")\n", 0},
+		{ "write(1, 2, 3, 4.0)\n", 0},
+	};
+
+	for (size_t i = 0; i < arraysize(tests); i++) {
+		
+		Input in = {
+			.type = INT_STRING,
+			.string = {
+				.s = tests[i].str,
+				.i = 0, .store = 0,
+			},
+		};
+
+		AST ast;
+		init_ast(&ast);
+
+		int ret = parse(&in, &ast);
+		if (ret != tests[i].ret) {
+			printf("NOT EQUAL: %lu\n", i);
+		}
+		TEST_ASSERT_EQUAL_INT(tests[i].ret, ret);
+		if (ret != 0) continue;
+
+	}
+}
+
+void test_function(void) {
+	struct {
+		const char* str;
+		int ret;
+	} tests[] = {
+		{ "func a() -> Int { return 1\n } \n var b : Int = a()\n", 0},
+	};
+
+	for (size_t i = 0; i < arraysize(tests); i++) {
+		
+		Input in = {
+			.type = INT_STRING,
+			.string = {
+				.s = tests[i].str,
+				.i = 0, .store = 0,
+			},
+		};
+
+		AST ast;
+		init_ast(&ast);
+
+		int ret = parse(&in, &ast);
+		if (ret != tests[i].ret) {
+			printf("NOT EQUAL: %lu\n", i);
+		}
+		TEST_ASSERT_EQUAL_INT(tests[i].ret, ret);
+		if (ret != 0) continue;
+
+	}
+}
+
+void test_multiple(void) {
+	//TODO: kontrolovat vysledky obou statementu 		
+	// nil test
+	// { "var a : Int? = 5\n var b : Int = a ?? 5\n", {VARTYPE_INT, false}, 0},
+}
+
 
 void test_return(void) {
 	struct {
@@ -272,9 +436,14 @@ int main(void) {
 	RUN_TEST(test_type_match);
 	RUN_TEST(test_type_match_2);
 	RUN_TEST(test_assign);
+	RUN_TEST(test_assign_exp);
 	RUN_TEST(test_return);
 	RUN_TEST(test_while);
 	RUN_TEST(test_if);
+
+	RUN_TEST(test_write);
+
+	RUN_TEST(test_function);
     
 	return UNITY_END();
 }

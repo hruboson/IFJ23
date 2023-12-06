@@ -66,7 +66,8 @@ int set_type(VarTableStack *stack, FuncTable *func_table, Expression *exp){
             set_type(stack, func_table, exp->ops[1]);
             DataType d0_div = exp->ops[0]->data_type;
             DataType d1_div = exp->ops[1]->data_type;
-            if((d0_div.type == VARTYPE_INT || VARTYPE_DOUBLE) && d0_div.type == d1_div.type)
+
+            if((d0_div.type == VARTYPE_INT || d0_div.type == VARTYPE_DOUBLE) && d0_div.type == d1_div.type)
             {
                 exp->data_type = exp->ops[0]->data_type;  
                 return 0;              
@@ -75,7 +76,7 @@ int set_type(VarTableStack *stack, FuncTable *func_table, Expression *exp){
 
         case ET_ID: {
             Variable *id_var = var_table_stack_get_var(stack, exp->id);
-            if(id_var == NULL){
+            if(id_var == NULL) {
                 SEMANTIC_ERROR_UNDEFINED_VARIABLE;
             }
             exp->data_type = id_var->type;
@@ -603,6 +604,9 @@ int semantic_function_call(VarTableStack *stack, FuncTable *func_table, Expressi
         
     } else { // uz je definovana
         // muzou se zkontrolovat argumenty
+        if (func->is_write && func->param_count < 1)
+            SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
+
         for (size_t i = 0; i < func->param_count; ++i) {
             ret = set_type(stack, func_table, exp);
 

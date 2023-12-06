@@ -25,12 +25,21 @@
 	} \
 } while (1)
 
-//#define DEBUG //TODO: ODDELAT
+// #define DEBUG //TODO: ODDELAT
 
 #ifdef DEBUG
 #define PRINT_LINE printf("LINE: %d\n", __LINE__)
 #define PRINT_TEXT(text) printf("LINE %d: %s, \n", __LINE__, text)
-#define PRINT_ERROR(expected, found) fprintf( stderr, "PARSER ERROR: EXPECTED '%i' FOUND '%i'\n\t%s:%i\n", expected, found, __FILE__, __LINE__ )
+
+//#define PRINT_ERROR(expected, found) fprintf( stderr, "PARSER ERROR: EXPECTED '%i' FOUND '%i'\n\t%s:%i\n", expected, found->type, __FILE__, __LINE__ ) 
+
+#define PRINT_ERROR(expected, found) do { \
+	printf("LINE: %d EXPECTED: %d,", __LINE__, expected); \
+	printf("FOUND: "); \
+	print_token(found); \
+	printf("\n"); \
+} while (0)
+
 #else
 #define PRINT_LINE
 #define PRINT_TEXT
@@ -125,7 +134,7 @@ int parse_statement(
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 			if (token->type != TOKENTYPE_ID) {
-				PRINT_ERROR(TOKENTYPE_ID, token->type);
+				PRINT_ERROR(TOKENTYPE_ID, token);
 				return 2;
 			}
 
@@ -158,7 +167,7 @@ int parse_statement(
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 		if (token->type != TOKENTYPE_BRACE_L) {
-			PRINT_ERROR(TOKENTYPE_BRACE_L, token->type);
+			PRINT_ERROR(TOKENTYPE_BRACE_L, token);
 			return 2;
 		}
 
@@ -184,7 +193,7 @@ int parse_statement(
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 			if (token->type != TOKENTYPE_BRACE_L) {
-				PRINT_ERROR(TOKENTYPE_BRACE_L, token->type);
+				PRINT_ERROR(TOKENTYPE_BRACE_L, token);
 				return 2;
 			}
 
@@ -270,7 +279,7 @@ int parse_statement(
 			return 0;
 		}
 
-		PRINT_ERROR(TOKENTYPE_BRACE_L, token->type);
+		PRINT_ERROR(TOKENTYPE_BRACE_L, token);
 		return 2;
 	}
 
@@ -318,7 +327,7 @@ int parse_statement(
 						(*statement)->var.data_type.type = VARTYPE_STRING;
 						break;
 					default:
-						PRINT_ERROR(KEYWORD_DOUBLE, token->value.keyword);
+						PRINT_ERROR(KEYWORD_DOUBLE, token);
 						return 2;
 					}
 
@@ -345,7 +354,7 @@ int parse_statement(
 					}
 				}
 				else {
-					PRINT_ERROR(TOKENTYPE_KEYWORD, token->type);
+					PRINT_ERROR(TOKENTYPE_KEYWORD, token);
 					return 2;
 				}
 			}
@@ -384,7 +393,7 @@ int parse_statement(
 				}
 			}
 		}
-		PRINT_ERROR(TOKENTYPE_ID, token->type);
+		PRINT_ERROR(TOKENTYPE_ID, token);
 		return 2;
 	}
 
@@ -415,7 +424,13 @@ int parse_statement(
     }
     
 		if (do_semantic_analysis) {
-			//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+			if (current_function == NULL) {
+				ret = semantic_return(var_table_stack, func_table, *statement, NULL); //return value = jestli prosla
+			} else {
+				ret = semantic_return(var_table_stack, func_table, *statement, current_function->func.id); //return value = jestli prosla
+			}
+			if (ret != 0)
+					return ret;
 		}
 
 		(*statement)->return_.exp = exp;
@@ -441,7 +456,7 @@ int parse_statement(
 			return 0;
 		}
 
-		PRINT_ERROR(TOKENTYPE_NEWLINE, token->type);
+		PRINT_ERROR(TOKENTYPE_NEWLINE, token);
 		return 2;
 	}
 
@@ -500,7 +515,7 @@ int parse_statement(
 				return 0;
 			}
 
-			PRINT_ERROR(TOKENTYPE_NEWLINE, token->type);
+			PRINT_ERROR(TOKENTYPE_NEWLINE, token);
 			return 2;
 		}
 
@@ -530,7 +545,7 @@ int parse_statement(
 			PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 			if (token->type != TOKENTYPE_PAR_L) {
-				PRINT_ERROR(TOKENTYPE_PAR_L, token->type);
+				PRINT_ERROR(TOKENTYPE_PAR_L, token);
 				return 2;
 			}
 
@@ -558,7 +573,7 @@ int parse_statement(
 				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
 				if (token->type != TOKENTYPE_KEYWORD) {
-					PRINT_ERROR(TOKENTYPE_KEYWORD, token->type);
+					PRINT_ERROR(TOKENTYPE_KEYWORD, token);
 					return 2;
 				}
 
@@ -616,7 +631,7 @@ int parse_statement(
 				return 0;
 			}
 		}
-		PRINT_ERROR(TOKENTYPE_ID, token->type);
+		PRINT_ERROR(TOKENTYPE_ID, token);
 		return 2;
 	}
 

@@ -45,8 +45,6 @@ T(t_double, T_DOUBLE);
 T(id, T_ID);
 T(comma, T_COMMA);
 
-static RuleTable rt;
-
 #define RULE(n) static Rule R_##n = { .expand_to =
 #define ENDRULE }
 
@@ -78,7 +76,20 @@ RULE(fourteen_else) { &NT_exp, & NT_arg_list_n } ENDRULE;
 RULE(sixteen) { &T_id, & NT_exp_id } ENDRULE;
 RULE(eighteen) { &T_comma, & NT_arg_list } ENDRULE;
 RULE(twentythree) { &T_left_par, & NT_arg_list, & T_right_par } ENDRULE;
+RULE(exp) {} ENDRULE;
+
+//TEMP
 static Rule eps;
+
+static RuleTable rt = {
+	.table = {
+	[NT_EXP] = {
+		[T_INT] = &R_one,
+		[T_STRING] = &R_one,
+	}
+
+	}
+};
 
 Rule*
 get_rule(NonTerminal nt, Terminal t) {

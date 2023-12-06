@@ -47,6 +47,11 @@ T(comma, T_COMMA);
 
 static RuleTable rt;
 
+#define RULE(n) static Rule R_##n = { .expand_to =
+#define ENDRULE }
+
+RULE(one) { &NT_exp1, &NT_exp_ } ENDRULE;
+
 Rule*
 get_rule( NonTerminal nt, Terminal t ) {
 	if ( t < 0 || t >= T_END__ )
@@ -54,164 +59,128 @@ get_rule( NonTerminal nt, Terminal t ) {
 	if ( nt < 0 || nt >= NT_END )
 		return NULL;
 
-	Rule no_match;
-	no_match.valid = false; // syntactic error
-
 	Rule eps;
-	eps.valid = true;
-
-	Rule one;
-	one.valid = true;
-	one.expand_to[0] = &NT_exp1;
-	one.expand_to[1] = &NT_exp_;
 
 	Rule two;
-	two.valid = true;
 	two.expand_to[0] = &T_double_question_mark;
 	two.expand_to[1] = &NT_exp;
 
 	Rule three;
-	three.valid = true;
 	three.expand_to[0] = &NT_exp2;
 	three.expand_to[1] = &NT_exp1_;
 	three.expand_to[2] = NULL;
 
 	Rule four_equals;
-	four_equals.valid = true;
 	four_equals.expand_to[0] = &T_equal;
 	four_equals.expand_to[1] = &NT_exp1;
 	four_equals.expand_to[2] = NULL;
 
 	Rule four_n_equals;
-	four_n_equals.valid = true;
 	four_n_equals.expand_to[0] = &T_n_equal;
 	four_n_equals.expand_to[0] = &NT_exp1;
 
 	Rule four_lt;
-	four_lt.valid = true;
 	four_lt.expand_to[0] = &T_lt;
 	four_lt.expand_to[1] = &NT_exp1;
 
 	Rule four_gt;
-	four_gt.valid = true;
 	four_gt.expand_to[0] = &T_gt;
 	four_gt.expand_to[1] = &NT_exp1;
 
 
 	Rule four_gte;
-	four_gte.valid = true;
 	four_gte.expand_to[0] = &T_gte;
 	four_gte.expand_to[1] = &NT_exp1;
 
 
 	Rule four_lte;
-	four_lte.valid = true;
 	four_lte.expand_to[0] = &T_lte;
 	four_lte.expand_to[1] = &NT_exp1;
 
 	Rule five;
-	five.valid = true;
 	five.expand_to[0] = &NT_exp3;
 	five.expand_to[1] = &NT_exp2_;
 
 	Rule six_add;
-	six_add.valid = true;
 	six_add.expand_to[0] = &T_add;
 	six_add.expand_to[1] = &NT_exp2;
 
 	Rule six_sub;
-	six_sub.valid = true;
 	six_sub.expand_to[0] = &T_sub;
 	six_sub.expand_to[1] = &NT_exp2;
 
 	Rule seven;
-	seven.valid = true;
 	seven.expand_to[0] = &NT_exp4;
 	seven.expand_to[1] = &NT_exp3_;
 
 	Rule eight_mult;
-	eight_mult.valid = true;
 	eight_mult.expand_to[0] = &T_mult;
 	eight_mult.expand_to[1] = &NT_exp3;
 
 	Rule eight_div;
-	eight_div.valid = true;
 	eight_div.expand_to[0] = &T_div;
 	eight_div.expand_to[1] = &NT_exp3;
 
 	Rule nine;
-	nine.valid = true;
 	nine.expand_to[0] = &NT_exp5;
 	nine.expand_to[1] = &NT_exp4_;
 
 	Rule ten;
-	ten.valid = true;
 	ten.expand_to[0] = &NT_exp;
 
 	Rule eleven_exp;
-	eleven_exp.valid = true;
 	eleven_exp.expand_to[0] = &T_left_par;
 	eleven_exp.expand_to[1] = &NT_exp;
 	eleven_exp.expand_to[2] = &T_right_par;
 
 	Rule eleven_t_int;
-	eleven_t_int.valid = true;
 	eleven_t_int.expand_to[0] = &T_t_int;
 
 	Rule eleven_t_string;
-	eleven_t_string.valid = true;
 	eleven_t_string.expand_to[0] = &T_t_string;
 
 	Rule eleven_t_double;
-	eleven_t_double.valid = true;
 	eleven_t_double.expand_to[0] = &T_t_double;
 
 	//! todo rule eleven_id_args => id <args>
 	//! todo rules for id()
 	Rule eleven_id_args;
-	eleven_id_args.valid = true;
 	eleven_id_args.expand_to[0] = &T_id;
 	eleven_id_args.expand_to[1] = &NT_args;
 
 	Rule twelve;
-	twelve.valid = true;
 	twelve.expand_to[0] = &T_left_par;
 	twelve.expand_to[1] = &NT_arg_list;
 	twelve.expand_to[2] = &T_right_par;
 
 	Rule fourteen_id;
-	fourteen_id.valid = true;
 	fourteen_id.expand_to[0] = &NT_e_id;
 	fourteen_id.expand_to[1] = &NT_arg_list_n;
 
 	Rule fourteen_else; // int, double, string
-	fourteen_else.valid = true;
 	fourteen_else.expand_to[0] = &NT_exp;
 	fourteen_else.expand_to[1] = &NT_arg_list_n;
 
 	Rule sixteen;
-	sixteen.valid = true;
 	sixteen.expand_to[0] = &T_id;
 	sixteen.expand_to[0] = &NT_exp_id;
 
 	Rule eighteen;
-	eighteen.valid = true;
 	eighteen.expand_to[0] = &T_comma;
 	eighteen.expand_to[1] = &NT_arg_list;
 
 	Rule twentythree;
-	eighteen.valid = true;
 	eighteen.expand_to[0] = &T_left_par;
 	eighteen.expand_to[1] = &NT_arg_list;
 	eighteen.expand_to[2] = &T_right_par;
 
 	// tabulka v "../LL-table.csv"
 	RuleTable rule_table;
-	rule_table.table[NT_EXP][T_INT] = &one;
-	rule_table.table[NT_EXP][T_STRING] = &one;
-	rule_table.table[NT_EXP][T_DOUBLE] = &one;
-	rule_table.table[NT_EXP][T_ID] = &one;
-	rule_table.table[NT_EXP][T_COMMA] = &one;
+	rule_table.table[NT_EXP][T_INT] = &R_one;
+	rule_table.table[NT_EXP][T_STRING] = &R_one;
+	rule_table.table[NT_EXP][T_DOUBLE] = &R_one;
+	rule_table.table[NT_EXP][T_ID] = &R_one;
+	rule_table.table[NT_EXP][T_COMMA] = &R_one;
 
 	rule_table.table[NT_EXP_][T_NIL_TEST] = &two;
 	rule_table.table[NT_EXP_][T_EQUAL] = &eps;

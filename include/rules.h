@@ -61,7 +61,6 @@ typedef struct TNT { // Terminal / Non Terminal
 // (1, prazdne) == epsilon pravidlo
 // (0, jakekoliv) == chyba syntaktické analýzy
 typedef struct Rule {
-	bool valid;
 	TNT* expand_to[5];
 } Rule;
 

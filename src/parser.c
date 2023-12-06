@@ -25,7 +25,7 @@
 	} \
 } while (1)
 
-#define DEBUG //TODO: ODDELAT
+//#define DEBUG //TODO: ODDELAT
 
 #ifdef DEBUG
 #define PRINT_LINE printf("LINE: %d\n", __LINE__)
@@ -732,12 +732,14 @@ int parse_expression(
 	 	token_list[token_count++] = token;
 	}
 
+#ifdef DEBUG
 	printf( "token count = %lu\n", token_count );
 	for ( size_t i = 0; i < token_count; i++ ) {
 		printf( "\t" );
 		print_token( &token_list[ i ] );
 		printf( "\n" );
 	}
+#endif
 
 	// Máš nějaký stack terminálů a neterminálů, na spodu je terminál "$" nad tím je neterminál <exp>
 	TNTStack tnt_stack_;
@@ -801,6 +803,7 @@ int parse_expression(
 			top.node->isTerminal = false;
 			top.node->nt = top.tnt->non_terminal;
 
+#ifdef DEBUG
 			printf( "%s -> ",
 				nonterminal_to_string( top.tnt->non_terminal )
 			);
@@ -810,6 +813,7 @@ int parse_expression(
 				printf( "%s ", tnt_to_string( r->expand_to[i] ) );
 			}
 			printf( "\n" );
+#endif
 
 	 		for (int i = 2; i >= 0; i--) {
 	 			if (r->expand_to[i] != NULL) {
@@ -851,7 +855,9 @@ int parse_expression(
 
 	}
 
+#ifdef DEBUG
 	print_rule_tree( tree_root, 0 );
+#endif
 
 	// convert tree to Expression* tree
 	*exp = NULL;

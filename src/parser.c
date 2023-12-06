@@ -38,7 +38,6 @@ bool do_semantic_analysis = true;
 
 int parse(Input* input, AST* ast) {
 
-
 	int ret = 0;
 
 	VarTableStack var_table_stack;
@@ -60,8 +59,7 @@ int parse(Input* input, AST* ast) {
 
 	if (ret == -1) {
 		ret = 0;
-	}
-	else {
+	} else {
 
 		// TODO: clear structs
 		// TODO: dodělat řešení, jestli se ti vrátila sémantická chyba, nebo ne
@@ -82,8 +80,6 @@ int parse_statement(
 	Statement* current_function, size_t block_counter
 ) {
 
-
-
 	Token _token;
 	Token* token = &_token;
 
@@ -100,9 +96,7 @@ int parse_statement(
 
 	if (token->type == TOKENTYPE_EOF) {
 		return -1;
-	}
-
-	else if (token->type == TOKENTYPE_BRACE_R) {
+	} else if (token->type == TOKENTYPE_BRACE_R) {
 		return -2; // -2 oznacuje "}"
 	}
 
@@ -134,13 +128,11 @@ int parse_statement(
 
 			(*statement)->if_.check_nil = true;
 
-		}
-		else {
+		} else {
 			(*statement)->if_.check_nil = false;
 		}
 
 		ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
-
 		if (ret != 0) {
 			return ret;
 		}
@@ -156,8 +148,7 @@ int parse_statement(
 
 		if (out_token_returned) {
 			token = &out_token;
-		}
-		else {
+		} else {
 			get_token(input, symtab, token);
 		}
 
@@ -213,8 +204,7 @@ int parse_statement(
 
 			vartable_stack_pop(var_table_stack, NULL);
 
-		}
-		else {
+		} else {
 			(*statement)->if_.else_ = NULL;
 		}
 
@@ -613,8 +603,6 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 ) {
 	int ret = 0;
 
-
-
 	Statement* st;
 	Statement** next_st = statement;
 
@@ -632,8 +620,7 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 
 		if (st->type == ST_FUNC && current_scope != NULL) {
 			return 2;
-		}
-		else if (st->type == ST_RETURN && !current_function) {
+		} else if (st->type == ST_RETURN && !current_function) {
 			return 2;
 		}
 
@@ -643,9 +630,7 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 
 	if (ret == -1 && current_scope != NULL) { // ret == -1 znamena EOF
 		return 2;
-
-	}
-	else if (ret == -2 && current_scope == NULL) { // ret == -2 znamena '}'
+	} else if (ret == -2 && current_scope == NULL) { // ret == -2 znamena '}'
 		return 2;
 	}
 
@@ -657,14 +642,18 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 // vraci ukazatel na to kde skoncila
 // in_token Token, ktery muze dostat od parse_statement 
 // out_token Token, ktery muze vratit parse_statementu
-int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token* in_token, Token* out_token, Token* in_token_2, bool* out_token_returned) {
+int parse_expression(
+	Input* input, SymbolTable* symtab,
+	Expression** exp, Token* in_token,
+	Token* out_token, Token* in_token_2,
+	bool* out_token_returned
+) {
 	Token _token;
 	Token* token = &_token;
 
 	if (in_token != NULL) {
 		token = in_token;
-	}
-	else {
+	} else {
 		get_token(input, symtab, token);
 	}
 
@@ -782,7 +771,7 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 
 
 	//}
-return 0;
+	return 0;
 }
 
 // return -3 : ukoncujici: ')'
@@ -802,7 +791,6 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 
 	Parameter param;
 
-
 	//TODO: free_params()
 
 	do {
@@ -818,11 +806,9 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 		// extern
 		if (token->type == TOKENTYPE_UNDERSCORE) {
 			param.extern_id = NULL;
-		}
-		else if (token->type == TOKENTYPE_ID) {
+		} else if (token->type == TOKENTYPE_ID) {
 			param.extern_id = token->value.id;
-		}
-		else {
+		} else {
 			return 2;
 		}
 
@@ -832,8 +818,7 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 		//intern
 		if (token->type == TOKENTYPE_ID) {
 			param.intern_id = token->value.id;
-		}
-		else {
+		} else {
 			return 2;
 		}
 
@@ -893,15 +878,10 @@ int parse_parameters(Input* input, SymbolTable* symtab, Statement* func_statemen
 		func_statement->func.parameters[func_statement->func.param_count] = param;
 		func_statement->func.param_count++;
 
-		if (token->type == TOKENTYPE_PAR_R) {
+		if (token->type == TOKENTYPE_PAR_R)
 			return -3;
-		}
-		else if (token->type == TOKENTYPE_COMMA) {
+		if (token->type == TOKENTYPE_COMMA)
 			continue;
-		}
-		else {
-			return 2;
-		}
-
+		return 2;
 	} while (1);
 }

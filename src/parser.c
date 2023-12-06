@@ -711,6 +711,7 @@ int parse_expression(
 	 		token.type != TOKENTYPE_GREATER_OR_EQUAL &&
 	 		token.type != TOKENTYPE_PLUS &&
 	 		token.type != TOKENTYPE_MINUS &&
+	 		token.type != TOKENTYPE_STAR &&
 	 		token.type != TOKENTYPE_SLASH &&
 	 		token.type != TOKENTYPE_EXCLAMATION &&
 	 		token.type != TOKENTYPE_INT &&

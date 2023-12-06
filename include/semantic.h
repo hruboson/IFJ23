@@ -7,7 +7,7 @@
 // int semantic( Input*, AST* );
 
 int semantic_variable(VarTableStack* , Statement* , SymbolTable*, FuncTable* );
-int semantic_assignment(VarTableStack* , FuncTable*, Statement* );
+int semantic_assignment(VarTableStack* , Statement*, FuncTable* );
 int semantic_if(VarTableStack*, FuncTable*, Statement* );
 int semantic_while(VarTableStack*, FuncTable*, Statement* );
 int semantic_return(VarTableStack*, FuncTable*, Statement*, SymbolRecord *funcId);

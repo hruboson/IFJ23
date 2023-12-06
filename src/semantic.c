@@ -204,16 +204,6 @@ int set_type(VarTableStack *stack, FuncTable *table, Expression *exp){
     return 0;
 }
 
-
-// Helper function
-void insert_to_var_table(Statement *statement, VarTable *var_table){
-    // pridani do vartable
-    //ternary op je tam kvuli tomu kdyby se allow_nil rovnalo NULL aby se do .nil_allowed nepriradilo null ale false
-    DataType dt = { .type = statement->var.data_type.type, .nil_allowed = statement->var.data_type.nil_allowed == true ? true : false}; 
-    Variable var = { .is_const = !statement->var.modifiable, .id = statement->var.id, .type = dt, .initialized = !(statement->var.exp == NULL) };
-    var_table_insert(var_table, var);
-}
-
 // Var x = 5
 
 int semantic_type_match(DataType* L, DataType* R) {
@@ -299,13 +289,14 @@ int semantic_variable(VarTableStack *stack, Statement *statement, SymbolTable *s
     var.unique_id = statement->var.unique_id;
     var.type = statement->var.data_type;
     var.initialized = statement->var.exp != NULL;
+    var.is_const = !statement->var.modifiable;
 
     var_table_insert(var_table, var);
     return 0;
 }
 
 // Assign x = y
-int semantic_assignment(VarTableStack *stack, FuncTable *table, Statement *statement) {
+int semantic_assignment(VarTableStack *stack, Statement* statement, FuncTable *func_table) {
     assert(statement->type == ST_ASSIGN);
 
     Variable *get_var = var_table_stack_get_var(stack, statement->assign.id);
@@ -313,45 +304,47 @@ int semantic_assignment(VarTableStack *stack, FuncTable *table, Statement *state
         SEMANTIC_ERROR_UNDEFINED_VARIABLE;
     }
 
-    int ret = set_type(stack, table, statement->assign.exp);
+    int ret = set_type(stack, func_table, statement->assign.exp);
     if(ret != 0){
         return ret;
     }
 
-    if(get_var->type.type == statement->assign.exp->data_type.type){
-        if(statement->assign.exp->data_type.nil_allowed){
-            if(get_var->type.nil_allowed == false){
-                SEMANTIC_ERROR_TYPE_MISMATCH;
-            }
-        }
-        return 0;
+    DataType *L = &get_var->type;
+    DataType *R = &statement->assign.exp->data_type;
+
+    ret = semantic_type_match(L, R);
+    if ( ret != 0){
+        return ret;
     }
-    SEMANTIC_ERROR_TYPE_MISMATCH;    
+
+    return 0;    
 }
 
 // If (expression) { ... } else { ... }
-int semantic_if(VarTableStack *stack, FuncTable *table, Statement *statement){
+int semantic_if(VarTableStack *stack, FuncTable *func_table, Statement *statement){
     if(!statement->if_.exp){
         SEMANTIC_ERROR_UNDEFINED_VARIABLE;
     }
     
-    if(statement->if_.check_nil){
-        Variable *var = var_table_get(table, statement->if_.exp->id);
-        if(var == NULL){
-            ERROR; 
+    if(statement->if_.check_nil){ //TODO
+        Variable *var = var_table_stack_get_var(stack, statement->if_.exp->id);
+        if (!var) {
+            SEMANTIC_ERROR_UNDEFINED_VARIABLE;
         }
-        if(var->type.nil_allowed && var->is_const){
+
+        if(var->type.nil_allowed && var->is_const) {
             return 0;
         }
+
         SEMANTIC_ERROR_TYPE_INFERENCE; 
     }
 
-    int ret = set_type(stack, table, statement->if_.exp);
+    int ret = set_type(stack, func_table, statement->if_.exp);
     if(ret != 0){
         return ret;
     }
     
-    if(statement->if_.exp->data_type.type == VARTYPE_BOOL){
+    if(statement->if_.exp->data_type.type != VARTYPE_BOOL){
         SEMANTIC_ERROR_TYPE_MISMATCH;
     }
 
@@ -362,7 +355,7 @@ int semantic_if(VarTableStack *stack, FuncTable *table, Statement *statement){
 int semantic_while(VarTableStack *stack, FuncTable *table, Statement *statement) {
 
     if(!statement->while_.exp){
-        SEMANTIC_ERROR_UNDEFINED_VARIABLE;
+        SEMANTIC_ERROR_TYPE_MISMATCH;
     }
 
     int ret = set_type(stack, table, statement->while_.exp);
@@ -370,7 +363,7 @@ int semantic_while(VarTableStack *stack, FuncTable *table, Statement *statement)
         return ret;
     }
     
-    if(statement->while_.exp->data_type.type == VARTYPE_BOOL){
+    if(statement->while_.exp->data_type.type != VARTYPE_BOOL){
         SEMANTIC_ERROR_TYPE_MISMATCH;
     }
 
@@ -379,13 +372,18 @@ int semantic_while(VarTableStack *stack, FuncTable *table, Statement *statement)
 
 // Return expression;
 int semantic_return(VarTableStack *stack, FuncTable *table, Statement *statement, SymbolRecord *funcId) {
-    Function *func_table = func_table_get(table, funcId);
-    if(func_table == NULL){
+
+    if (funcId == NULL) {
+        SEMANTIC_ERROR_WRONG_RETURN_TYPE_OF_FUNCTION;
+    }
+    
+    Function *function = func_table_get(table, funcId);
+    if(function == NULL){
         exit(99);
     }
     
     if(!statement->return_.exp){
-        if(func_table->return_type.type == VARTYPE_VOID){
+        if(function->return_type.type == VARTYPE_VOID){
             return 0;
         }
         SEMANTIC_ERROR_WRONG_RETURN_TYPE_OF_FUNCTION;
@@ -396,14 +394,18 @@ int semantic_return(VarTableStack *stack, FuncTable *table, Statement *statement
         return ret;
     }
 
-    if(statement->return_.exp->data_type.nil_allowed){
-        if(func_table->return_type.nil_allowed == false){
+    if(statement->return_.exp->data_type.type == VARTYPE_VOID &&
+        statement->return_.exp->data_type.nil_allowed
+    ){
+        if(function->return_type.nil_allowed == false){
             SEMANTIC_ERROR_WRONG_RETURN_TYPE_OF_FUNCTION;
         }
+
+        return 0;
     }
 
-    if(statement->return_.exp->data_type.type != func_table->return_type.type){
-        SEMANTIC_ERROR_TYPE_MISMATCH;
+    if(statement->return_.exp->data_type.type != function->return_type.type){
+        SEMANTIC_ERROR_WRONG_RETURN_TYPE_OF_FUNCTION;
     }
 
     return 0;
@@ -418,9 +420,11 @@ int semantic_expression(VarTableStack *stack, FuncTable *table, Statement *state
 
 // Function declaration
 int semantic_function(VarTableStack *stack, FuncTable *table, Statement *statement) {
+
     Function *func = func_table_get(table, statement->func.id);
-    
+
     if(func == NULL){
+
         Function new_function;
         new_function.id = statement->func.id;
         new_function.is_defined = true;
@@ -439,7 +443,7 @@ int semantic_function(VarTableStack *stack, FuncTable *table, Statement *stateme
             param_in->type = param_out->type;
         }
 
-        new_function.return_type.type = statement->func.return_type.type;
+        new_function.return_type = statement->func.return_type;
         func_table_insert(table, new_function);
     }
     else{
@@ -483,7 +487,11 @@ int semantic_function(VarTableStack *stack, FuncTable *table, Statement *stateme
     vartable_stack_peek(stack, &var_table);
     for(size_t i = 0; i < statement->func.param_count; i++){
         DataType dt = {.type = statement->func.parameters[i].type.type, .nil_allowed = statement->func.parameters[i].type.nil_allowed };
-        Variable var = {.id = statement->func.parameters[i].intern_id, .initialized = true, .type = dt};
+        Variable var = {
+            .id = statement->func.parameters[i].intern_id,
+            .initialized = true,
+            .type = dt
+        };
         var_table_insert(var_table, var);
     }
     return 0;

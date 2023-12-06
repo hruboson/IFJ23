@@ -22,11 +22,11 @@
 	} \
 } while (1)
 
-// #define DEBUG //TODO: ODDELAT
+#define DEBUG //TODO: ODDELAT
 
 #ifdef DEBUG
 #define PRINT_LINE printf("LINE: %d\n", __LINE__)
-#define PRINT_TEXT(text) printf("LINE: %s, \n", __LINE__, text)
+#define PRINT_TEXT(text) printf("LINE %d: %s, \n", __LINE__, text)
 #define PRINT_ERROR(expected, found) fprintf( stderr, "PARSER ERROR: EXPECTED '%i' FOUND '%i'\n\t%s:%i\n", expected, found, __FILE__, __LINE__ )
 #else
 #define PRINT_LINE
@@ -37,6 +37,7 @@
 bool do_semantic_analysis = true;
 
 int parse(Input* input, AST* ast) {
+
 	int ret = 0;
 
 	VarTableStack var_table_stack;
@@ -68,7 +69,7 @@ int parse(Input* input, AST* ast) {
 	}
 
 	if (do_semantic_analysis) {
-		// TODO: ret = semantic_check_if_called_functions_were_declared()
+		// TODO: ret = semantic_check_if_called_functions_were_declared() // + check parameters
 		// TODO: if (ret != 0) return ret;	
 	}
 
@@ -433,7 +434,6 @@ int parse_statement(
 			}
 
 			(*statement)->if_.check_nil = true;
-
 		}
 		else {
 			(*statement)->if_.check_nil = false;
@@ -532,21 +532,25 @@ int parse_statement(
 
 		ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
 
-		if (do_semantic_analysis) {
-			//TODO: ret = semantic_condition(VarTableStack, FunctionTable, Statement) return value = jestli prosla
-		}
-
-		(*statement)->while_.exp = exp;
-
 		if (ret != 0) {
 			return ret;
 		}
+
+		(*statement)->while_.exp = exp;
 
 		if (out_token_returned) {
 			token = &out_token;
 		}
 		else {
 			get_token(input, symtab, token);
+		}
+
+		if (do_semantic_analysis) {
+			ret = semantic_while(var_table_stack, func_table, *statement); //return value = jestli prosla
+			
+			if(ret != 0){
+				return ret;
+			}
 		}
 
 		PARSE_POTENTIAL_NEWLINE(input, symtab, token);
@@ -700,20 +704,33 @@ int parse_statement(
 		if (token->type == TOKENTYPE_NEWLINE) {
 			(*statement)->return_.exp = NULL;
 			if (do_semantic_analysis) {
-				//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+				if (current_function == NULL) {
+					ret = semantic_return(var_table_stack, func_table, *statement, NULL); //return value = jestli prosla
+				} else {
+					ret = semantic_return(var_table_stack, func_table, *statement, current_function->func.id); //return value = jestli prosla
+				}
+				if (ret != 0)
+					return ret;
 			}
 			return 0;
 		}
 
 		ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
-
-		if (do_semantic_analysis) {
-			//TODO: ret = semantic_return(VarTableStack, FunctionTable, Statement) return value = jestli prosla
-		}
-		(*statement)->return_.exp = exp;
-
+		
 		if (ret != 0) {
 			return ret;
+		}
+
+		(*statement)->return_.exp = exp;
+
+		if (do_semantic_analysis) {
+			if (current_function == NULL) {
+				ret = semantic_return(var_table_stack, func_table, *statement, NULL); //return value = jestli prosla
+			} else {
+				ret = semantic_return(var_table_stack, func_table, *statement, current_function->func.id); //return value = jestli prosla
+			}
+			if (ret != 0)
+				return ret;
 		}
 
 		if (out_token_returned) {
@@ -762,14 +779,17 @@ int parse_statement(
 
 			ret = parse_expression(input, symtab, &exp, token, NULL, &out_token, &out_token_returned);
 
-			if (do_semantic_analysis) {
-				//TODO: ret = semantic_assignment(VarTableStack, FunctionTable, Statement) return value = jestli prosla
+			if (ret != 0) {
+				return ret;
 			}
 
 			(*statement)->assign.exp = exp;
 
-			if (ret != 0) {
-				return ret;
+			if (do_semantic_analysis) {
+				ret = semantic_assignment(var_table_stack, *statement, func_table); // return value = jestli prosla
+				
+				if (ret != 0)
+						return ret;
 			}
 
 			if (out_token_returned) {
@@ -833,6 +853,8 @@ int parse_statement(
 				return 2;
 			}
 
+			DataType dt = { .type = VARTYPE_VOID, .nil_allowed = false };
+
 			if (token->type == TOKENTYPE_ARROW) {
 
 				get_token(input, symtab, token);
@@ -842,8 +864,6 @@ int parse_statement(
 					PRINT_ERROR(TOKENTYPE_KEYWORD, token->type);
 					return 2;
 				}
-
-				DataType dt = { .type = VARTYPE_VOID, .nil_allowed = false };
 
 				switch (token->value.keyword) {
 				case KEYWORD_DOUBLE:
@@ -873,9 +893,13 @@ int parse_statement(
 
 				PARSE_POTENTIAL_NEWLINE(input, symtab, token);
 
-				(*statement)->func.return_type = dt;
-
 			}
+
+			(*statement)->func.return_type = dt;
+
+			ret = semantic_function(var_table_stack, func_table, *statement);
+			if (ret != 0)
+				return ret;
 
 			if (token->type == TOKENTYPE_BRACE_L) {
 				ret = parse_statement_list(input,
@@ -933,9 +957,6 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 		if (st->type == ST_FUNC && current_scope != NULL) {
 			return 2;
 		}
-		else if (st->type == ST_RETURN && !current_function) {
-			return 2;
-		}
 
 		*next_st = st;
 		next_st = &st->next;
@@ -973,6 +994,7 @@ int parse_expression(Input* input, SymbolTable* symtab, Expression** exp, Token*
 	if (*exp == NULL) {
 		exit(99);
 	}
+
 	switch (token->type) {
 		case TOKENTYPE_DOUBLE:
 			(*exp)->type = ET_DOUBLE;

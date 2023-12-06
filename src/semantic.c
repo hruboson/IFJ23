@@ -145,62 +145,67 @@ int set_type(VarTableStack *stack, FuncTable *func_table, Expression *exp){
             SEMANTIC_ERROR_TYPE_MISMATCH;
 
         case ET_FUNC:
-            func = func_table_get(func_table, exp->fn_call.id);
+            Function *func = func_table_get(func_table, exp->fn_call.id);
+
+            int ret;
+
             if(func == NULL){
-                Function new_func;
-                new_func.id = exp->fn_call.id;
-                new_func.is_defined = false;
-                new_func.param_count = exp->fn_call.arg_count;
-                new_func.parameters = malloc(sizeof(Parameter) * (exp->fn_call.arg_count));
-                if(new_func.parameters == NULL){
-                    exit(99);
-                }
+                Function func;
+                func.id = exp->fn_call.id;
+                func.is_defined = false;
+                func.param_count = exp->fn_call.arg_count;
 
-                for (size_t i = 0; i < exp->fn_call.arg_count; ++i) {
-                    Parameter *param_in = new_func.parameters + i;
-                    const Argument *param_out = exp->fn_call.args + i;
-
-                    param_in->extern_id = param_out->id;
-                    param_in->intern_id = NULL;
-                    param_in->type.type = param_out->exp->data_type.type;
-                    param_in->type.nil_allowed = param_out->exp->data_type.nil_allowed;
-                }
-
-                new_func.return_type.type = VARTYPE_VOID;
-                func_table_insert(func_table, new_func);
-            }
-            else{
-                if(func->param_count == exp->fn_call.arg_count){
-                    exp->data_type = func->return_type;
-                    for(size_t i = 0; i < func->param_count; i++){
-                        if(func->parameters[i].extern_id != exp->fn_call.args[i].id){
-                            ERROR;
-                        }
-                        
-                        if(func->parameters[i].type.type != exp->fn_call.args[i].exp->data_type.type){
-                            if(func->parameters[i].type.type != VARTYPE_VOID){
-                                ERROR;
-                            }
-                            func->parameters[i].type.type = exp->fn_call.args[i].exp->data_type.type;
-                        }
-                        
-                        if (func->parameters[i].type.nil_allowed == false) {
-                            if (exp->fn_call.args[i].exp->data_type.nil_allowed) {
-                                func->parameters[i].type.nil_allowed = true;
-                            } else {
-                                ERROR;
-                            }
-                        }
-                        else{
-                            if(func->parameters[i].type.nil_allowed == true){
-                                ERROR;
-                            }
-                        }
+                // naplni argumenty, se kterymi byla zavolana
+                func.parameters = malloc(sizeof(Parameter) * (exp->fn_call.arg_count));
+                    if(func.parameters == NULL){
+                        exit(99);
                     }
-                }
-                else{
+
+                    for (size_t i = 0; i < exp->fn_call.arg_count; ++i) {
+                        //CHECK
+                        Parameter *param_in = func.parameters + i;
+                        const Argument *argument = exp->fn_call.args + i;
+
+                        param_in->extern_id = argument->id;
+                        param_in->type = argument->exp->data_type;
+                    }
+
+                    func_table_insert(func_table, func);
+                
+            } else { // uz je definovana
+                // muzou se zkontrolovat argumenty
+                if (func->is_write && exp->fn_call.arg_count < 1) {
+                    printf("FAILED HERE: %d\n", __LINE__);
                     SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
                 }
+
+                for (size_t i = 0; i < func->param_count; ++i) {
+                    ret = set_type(stack, func_table, exp);
+
+                    if (ret != 0)
+                        return ret;
+
+                    if (func->is_write) continue; // na write se vola jenom set_var
+
+                    //check_params1
+                    if(func->param_count == exp->fn_call.arg_count){
+                        for(size_t i = 0; i < func->param_count; i++){
+                            if(func->parameters[i].extern_id != exp->fn_call.args[i].id){
+                                ERROR;
+                            }
+                            
+                            //CHECK
+                            ret = semantic_type_match(&func->parameters[i].type, &exp->fn_call.args[i].exp->data_type);
+                            if (ret != 0)
+                                return ret;
+                        }
+                    }
+                    else{
+                        printf("FAILED HERE: %d\n", __LINE__);
+                        SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
+                    }
+                }
+                
             }
             return 0;
 
@@ -445,6 +450,7 @@ int semantic_return(VarTableStack *stack, FuncTable *table, Statement *statement
         if(function->return_type.type == VARTYPE_VOID){
             return 0;
         }
+        printf("FAILED HERE: %d\n", __LINE__);
         SEMANTIC_ERROR_WRONG_RETURN_TYPE_OF_FUNCTION;
     }
 
@@ -457,6 +463,7 @@ int semantic_return(VarTableStack *stack, FuncTable *table, Statement *statement
         statement->return_.exp->data_type.nil_allowed
     ){
         if(function->return_type.nil_allowed == false){
+            printf("FAILED HERE: %d\n", __LINE__);
             SEMANTIC_ERROR_WRONG_RETURN_TYPE_OF_FUNCTION;
         }
 
@@ -464,6 +471,7 @@ int semantic_return(VarTableStack *stack, FuncTable *table, Statement *statement
     }
 
     if(statement->return_.exp->data_type.type != function->return_type.type){
+        printf("FAILED HERE: %d\n", __LINE__);
         SEMANTIC_ERROR_WRONG_RETURN_TYPE_OF_FUNCTION;
     }
 
@@ -529,6 +537,7 @@ int semantic_function(VarTableStack *stack, FuncTable *func_table, Statement *st
             }
 
             if(func->param_count != called_function.param_count){
+                printf("FAILED HERE: %d\n", __LINE__);
                 SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
             }
 
@@ -606,6 +615,7 @@ int semantic_function_call(VarTableStack *stack, FuncTable *func_table, Expressi
     } else { // uz je definovana
         // muzou se zkontrolovat argumenty
         if (func->is_write && func->param_count < 1) {
+            printf("FAILED HERE: %d\n", __LINE__);
             SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
         }
 
@@ -631,6 +641,7 @@ int semantic_function_call(VarTableStack *stack, FuncTable *func_table, Expressi
                 }
             }
             else{
+                printf("FAILED HERE: %d\n", __LINE__);
                 SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
             }
         }

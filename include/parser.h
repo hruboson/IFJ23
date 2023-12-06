@@ -1,3 +1,10 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xhrubo01 Ondřej Hruboš
+ * xsatin03 Ondřej Šatinský
+ * xjestr04 Radek Jestřabík
+*/
+
 #pragma once
 
 #include <stdbool.h>

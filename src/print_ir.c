@@ -1,3 +1,8 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xsatin03 Ondřej Šatinský
+*/
+
 #include "ir.h"
 
 #include <stdio.h>

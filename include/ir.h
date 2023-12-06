@@ -1,3 +1,8 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xsatin03 Ondřej Šatinský
+*/
+
 #pragma once
 
 #include "AST.h"

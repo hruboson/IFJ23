@@ -1,3 +1,8 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xsatin03 Ondřej Šatinský
+*/
+
 #include "scanner.h"
 
 #include <string.h>

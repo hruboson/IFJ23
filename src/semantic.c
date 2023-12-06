@@ -1,3 +1,9 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xjestr04 Radek Jestřabík
+ * xborek12 Dominik Borek
+*/
+
 #include "semantic.h"
 #include "vartable_stack.h"
 #include <assert.h>

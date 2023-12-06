@@ -1,3 +1,8 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xjestr04 Radek Jestřabík
+*/
+
 #include "semantic.h"
 #include "AST.h"
 

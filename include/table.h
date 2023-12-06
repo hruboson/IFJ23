@@ -1,3 +1,11 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xhrubo01 Ondřej Hruboš
+ * xsatin03 Ondřej Šatinský
+ * xjestr04 Radek Jestřabík
+ * xborek12 Dominik Borek
+*/
+
 #pragma once
 
 #include "symtable.h"

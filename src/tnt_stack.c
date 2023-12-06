@@ -1,3 +1,8 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xhrubo01 Ondřej Hruboš
+*/
+
 #include "rules.h"
 #include "tnt_stack.h"
 

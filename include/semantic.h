@@ -1,3 +1,9 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xjestr04 Radek Jestřabík
+ * xborek12 Dominik Borek
+*/
+
 #pragma once
 
 #include "AST.h"

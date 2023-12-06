@@ -1,3 +1,9 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xhrubo01 Ondřej Hruboš
+ * xsatin03 Ondřej Šatinský
+*/
+
 #include "rules.h"
 
 #include <stddef.h>

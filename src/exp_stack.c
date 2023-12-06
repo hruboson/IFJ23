@@ -1,3 +1,8 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xhrubo01 Ondřej Hruboš
+*/
+
 #include "exp_stack.h"
 
 #include "stdlib.h"

@@ -1,3 +1,9 @@
+/**
+ * Implementace překladače imperativního jazyka IFJ23
+ * xhrubo01 Ondřej Hruboš
+ * xjestr04 Radek Jestřabík
+*/
+
 #include "../include/string_.h"
 
 #include <stdlib.h>

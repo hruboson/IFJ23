@@ -26,40 +26,95 @@ void rule_tree_insert(Node* root, size_t node_index, Token* val) {
 	Node* rule = malloc(sizeof(Node));
 	if (!rule) exit(99);
 
-	//todo naplnit rule
-
 	if (node_index >= 0 && node_index < 3) {
 		root->children_nodes[node_index] = rule;
 		for (size_t i = 0; i < 3; i++) {
 			rule->children_nodes[i] = NULL;
 		}
-	} else {
+	}
+	else {
 		exit(99);
 	}
+}
+
+size_t rule_tree_fn_args(Node* root, ExpStack* stack) {
+	Node* c0 = root->children_nodes[0];
+	Node* c1 = root->children_nodes[1];
+	if (c0 == NULL) return 0;
+	switch (c0->nt) {
+	case NT_EXP:
+		rule_tree_postorder(c0, stack);
+		break;
+
+	default:
+		break;
+	}
+
+	if (c1->children_nodes[0] == NULL) {
+		return 1;
+	}
+	return 1 + rule_tree_fn_args(c1->children_nodes[1], stack);
 }
 
 void rule_tree_postorder(Node* tree, ExpStack* stack) {
 	if (!tree) return;
 
+	Node* c0 = tree->children_nodes[0];
+	Node* c1 = tree->children_nodes[1];
+
+	// zpracování (<arg_list>)
+	if (tree->nt == NT_EXP5 && c0->val->type == TOKENTYPE_ID && c1->children_nodes[0] != NULL) {
+		Expression* e;
+		e = malloc(sizeof(*e));
+		if (e == NULL)
+			exit(99);
+
+		e->type = ET_FUNC;
+		e->fn_call.id = c0->val->value.id;
+		e->fn_call.arg_count = 0;
+
+		Node* c110 = c1->children_nodes[1]->children_nodes[0];
+		if (c110 == NULL) {
+			exp_stack_push(stack, e);
+			return;
+		}
+
+		e->fn_call.arg_count = rule_tree_fn_args(c1->children_nodes[1], stack);
+		printf("ARG CUNT = %lu\n", e->fn_call.arg_count);
+		e->fn_call.args = malloc(sizeof(Argument) * e->fn_call.arg_count);
+		if (e->fn_call.args == NULL) exit(99);
+		for (int i = e->fn_call.arg_count - 1; i >= 0; i--) {
+			exp_stack_pop(stack, &e->fn_call.args[i].exp);
+			e->fn_call.args[i].id = NULL;
+		}
+		exp_stack_push(stack, e);
+		return;
+	}
+
+
 	for (size_t i = 0; i < 3; i++) {
 		rule_tree_postorder((tree->children_nodes)[i], stack);
 	}
 
-	Node* c0 = tree->children_nodes[ 0 ];
-	if ( c0 == NULL )
+	if (c0 == NULL)
 		return;
-	if ( tree->isTerminal )
+	if (tree->isTerminal)
 		return;
-	if ( c0->isTerminal == false )
+	if (c0->isTerminal == false)
+		return;
+	if (tree->nt == NT_EXP5 && c0->val->type == TOKENTYPE_PAR_L)
 		return;
 
 	Expression* e;
-	e = malloc( sizeof( *e ) );
-	if ( e == NULL )
-		exit( 99 );
+	e = malloc(sizeof(*e));
+	if (e == NULL)
+		exit(99);
 
 	Token* c0t = c0->val;
 
+	if (tree->nt == NT_EXP5 && tree->children_nodes[1]) {
+
+	}
 
 	// pokud je to operátor - vyber dva a dej je do jednoho expressionu
 	if (
@@ -74,7 +129,7 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 		c0t->type == TOKENTYPE_MINUS ||
 		c0t->type == TOKENTYPE_STAR ||
 		c0t->type == TOKENTYPE_SLASH
-	) {
+		) {
 		Expression* e1;
 		Expression* e2;
 		exp_stack_pop(stack, &e2);
@@ -84,7 +139,7 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 		e->ops[2] = NULL;
 		exp_stack_push(stack, e);
 
-		switch ( c0t->type ) {
+		switch (c0t->type) {
 		case TOKENTYPE_QUESTIONMARK2: e->type = ET_NIL_TEST; break;
 		case TOKENTYPE_EQUALS2: e->type = ET_EQUAL; break;
 		case TOKENTYPE_NOT_EQUALS: e->type = ET_N_EQUAL; break;
@@ -128,11 +183,12 @@ void rule_tree_postorder(Node* tree, ExpStack* stack) {
 		}
 		else if (c0t->type == TOKENTYPE_KEYWORD && c0t->value.keyword == KEYWORD_NIL) {
 			e->type = ET_NIL;
-		} else {
-			fprintf( stdout, "error: unexpected terminal: " );
-			print_token( c0->val );
-			fprintf( stdout, "\n" );
-			exit( 99 );
+		}
+		else if (1) {
+			fprintf(stdout, "error: unexpected terminal: ");
+			print_token(c0->val);
+			fprintf(stdout, "\n");
+			exit(99);
 		}
 		exp_stack_push(stack, e);
 	}

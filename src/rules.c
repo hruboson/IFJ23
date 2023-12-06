@@ -64,7 +64,7 @@ RULE(seven) { &NT_exp4, & NT_exp3_ } ENDRULE;
 RULE(eight_mult) { &T_mult, & NT_exp3 } ENDRULE;
 RULE(eight_div) { &T_div, & NT_exp3 } ENDRULE;
 RULE(nine) { &NT_exp5, & NT_exp4_ } ENDRULE;
-RULE(ten) { &NT_exp } ENDRULE;
+RULE(ten) { &T_exc } ENDRULE;
 RULE(eleven_exp) { &T_left_par, & NT_exp, & T_right_par } ENDRULE;
 RULE(eleven_t_int) { &T_t_int } ENDRULE;
 RULE(eleven_t_string) { &T_t_string } ENDRULE;
@@ -76,18 +76,191 @@ RULE(fourteen_else) { &NT_exp, & NT_arg_list_n } ENDRULE;
 RULE(sixteen) { &T_id, & NT_exp_id } ENDRULE;
 RULE(eighteen) { &T_comma, & NT_arg_list } ENDRULE;
 RULE(twentythree) { &T_left_par, & NT_arg_list, & T_right_par } ENDRULE;
-RULE(exp) {} ENDRULE;
+RULE(eps) {} ENDRULE;
 
 //TEMP
 static Rule eps;
 
+
+// tabulka v "../LL-table.csv"
 static RuleTable rt = {
 	.table = {
-	[NT_EXP] = {
-		[T_INT] = &R_one,
-		[T_STRING] = &R_one,
-	}
-
+		[NT_EXP] = {
+			[T_INT] = &R_one,
+			[T_STRING] = &R_one,
+			[T_DOUBLE] = &R_one,
+			[T_ID] = &R_one,
+			[T_COMMA] = &R_one
+		},
+		[NT_EXP_] = {
+			[T_NIL_TEST] = &R_two,
+			[T_EQUAL] = &R_eps,
+			[T_N_EQUAL] = &R_eps,
+			[T_GT] = &R_eps,
+			[T_GTE] = &R_eps,
+			[T_ADD] = &R_eps,
+			[T_SUB] = &R_eps,
+			[T_MULT] = &R_eps,
+			[T_DIV] = &R_eps,
+			[T_NT_EXCLAMATION] = &R_eps,
+			[T_PAR_L] = &R_eps,
+			[T_INT] = &R_eps,
+			[T_STRING] = &R_eps,
+			[T_DOUBLE] = &R_eps,
+			[T_ID] = &R_eps,
+			[T_COMMA] = &R_eps,
+			[T_PAR_R] = &R_eps,
+			[T_END] = &R_eps
+		},
+		[NT_EXP1] = {
+			[T_INT] = &R_three,
+			[T_STRING] = &R_three,
+			[T_DOUBLE] = &R_three,
+			[T_ID] = &R_three,
+			[T_COMMA] = &R_three,
+			[T_END] = &R_eps
+		},
+		[NT_EXP1_] = {
+			[T_NIL_TEST] = &R_eps,
+			[T_EQUAL] = &R_four_equals,
+			[T_N_EQUAL] = &R_four_n_equals,
+			[T_N_EQUAL] = &R_four_lt,
+			[T_GT] = &R_four_gt,
+			[T_LTE] = &R_four_lte,
+			[T_GTE] = &R_four_gte,
+			[T_ADD] = &R_eps,
+			[T_SUB] = &R_eps,
+			[T_MULT] = &R_eps,
+			[T_DIV] = &R_eps,
+			[T_NT_EXCLAMATION] = &R_eps,
+			[T_PAR_L] = &R_eps,
+			[T_INT] = &R_eps,
+			[T_STRING] = &R_eps,
+			[T_DOUBLE] = &R_eps,
+			[T_ID] = &R_eps,
+			[T_COMMA] = &R_eps,
+			[T_PAR_R] = &R_eps,
+			[T_END] = &R_eps
+		},
+		[NT_EXP2] = {
+			[T_INT] = &R_five,
+			[T_STRING] = &R_five,
+			[T_DOUBLE] = &R_five,
+			[T_ID] = &R_five,
+			[T_COMMA] = &R_five,
+			[T_END] = &R_eps
+		},
+		[NT_EXP2_] = {
+			[T_NIL_TEST] = &R_eps,
+			[T_EQUAL] = &R_eps,
+			[T_N_EQUAL] = &R_eps,
+			[T_N_EQUAL] = &R_eps,
+			[T_GT] = &R_eps,
+			[T_LTE] = &R_eps,
+			[T_GTE] = &R_eps,
+			[T_ADD] = &R_six_add,
+			[T_SUB] = &R_six_sub,
+			[T_MULT] = &R_eps,
+			[T_DIV] = &R_eps,
+			[T_NT_EXCLAMATION] = &R_eps,
+			[T_PAR_L] = &R_eps,
+			[T_INT] = &R_eps,
+			[T_STRING] = &R_eps,
+			[T_DOUBLE] = &R_eps,
+			[T_ID] = &R_eps,
+			[T_COMMA] = &R_eps,
+			[T_PAR_R] = &R_eps,
+			[T_END] = &R_eps
+		},
+		[NT_EXP3] = {
+			[T_INT] = &R_seven,
+			[T_STRING] = &R_seven,
+			[T_DOUBLE] = &R_seven,
+			[T_ID] = &R_seven,
+			[T_COMMA] = &R_seven,
+			[T_END] = &R_eps
+		},
+		[NT_EXP3_] = {
+			[T_NIL_TEST] = &R_eps,
+			[T_EQUAL] = &R_eps,
+			[T_N_EQUAL] = &R_eps,
+			[T_N_EQUAL] = &R_eps,
+			[T_GT] = &R_eps,
+			[T_LTE] = &R_eps,
+			[T_GTE] = &R_eps,
+			[T_ADD] = &R_eps,
+			[T_SUB] = &R_eps,
+			[T_MULT] = &R_eight_mult,
+			[T_DIV] = &R_eight_div,
+			[T_NT_EXCLAMATION] = &R_eps,
+			[T_PAR_L] = &R_eps,
+			[T_INT] = &R_eps,
+			[T_STRING] = &R_eps,
+			[T_DOUBLE] = &R_eps,
+			[T_ID] = &R_eps,
+			[T_COMMA] = &R_eps,
+			[T_PAR_R] = &R_eps,
+			[T_END] = &R_eps
+		},
+		[NT_EXP4] = {
+			[T_INT] = &R_nine,
+			[T_STRING] = &R_nine,
+			[T_DOUBLE] = &R_nine,
+			[T_ID] = &R_nine,
+			[T_COMMA] = &R_nine,
+			[T_END] = &R_eps
+		},
+		[NT_EXP4_] = {
+			[T_NIL_TEST] = &R_eps,
+			[T_EQUAL] = &R_eps,
+			[T_N_EQUAL] = &R_eps,
+			[T_N_EQUAL] = &R_eps,
+			[T_GT] = &R_eps,
+			[T_LTE] = &R_eps,
+			[T_GTE] = &R_eps,
+			[T_ADD] = &R_eps,
+			[T_SUB] = &R_eps,
+			[T_MULT] = &R_eps,
+			[T_DIV] = &R_eps,
+			[T_NT_EXCLAMATION] = &R_ten,
+			[T_PAR_L] = &R_eps,
+			[T_INT] = &R_eps,
+			[T_STRING] = &R_eps,
+			[T_DOUBLE] = &R_eps,
+			[T_ID] = &R_eps,
+			[T_COMMA] = &R_eps,
+			[T_PAR_R] = &R_eps,
+			[T_END] = &R_eps
+		},
+		[NT_EXP5] = {
+			[T_INT] = &R_eleven_exp,
+			[T_STRING] = &R_eleven_t_int,
+			[T_DOUBLE] = &R_eleven_t_string,
+			[T_ID] = &R_eleven_t_double,
+			[T_COMMA] = &R_eleven_id_args,
+			[T_END] = &R_eps
+		},
+		[NT_ARGS] = {
+			[T_PAR_L] = &R_twelve,
+			[T_END] = &R_eps
+		},
+		[NT_ARGS_LIST] = {
+			[T_PAR_L] = &R_eleven_id_args,
+			[T_INT] = &R_eleven_id_args,
+			[T_STRING] = &R_eleven_id_args,
+			[T_DOUBLE] = &R_eleven_id_args,
+			[T_ID] = &R_eleven_id_args,
+			[T_END] = &R_eps
+		},
+		[NT_E_ID] = {
+			[T_ID] = &R_sixteen
+		},
+		[NT_ARG_LIST_N] = {
+			[T_COMMA] = &R_eighteen
+		},
+		[NT_EXP_ID] = {
+			[T_PAR_L] = &R_twentythree
+		}
 	}
 };
 
@@ -97,168 +270,6 @@ get_rule(NonTerminal nt, Terminal t) {
 		return NULL;
 	if (nt < 0 || nt >= NT_END)
 		return NULL;
-
-	// tabulka v "../LL-table.csv"
-	RuleTable rule_table;
-	rule_table.table[NT_EXP][T_INT] = &R_one;
-	rule_table.table[NT_EXP][T_STRING] = &R_one;
-	rule_table.table[NT_EXP][T_DOUBLE] = &R_one;
-	rule_table.table[NT_EXP][T_ID] = &R_one;
-	rule_table.table[NT_EXP][T_COMMA] = &R_one;
-
-	rule_table.table[NT_EXP_][T_NIL_TEST] = &R_two;
-	rule_table.table[NT_EXP_][T_EQUAL] = &eps;
-	rule_table.table[NT_EXP_][T_N_EQUAL] = &eps;
-	rule_table.table[NT_EXP_][T_N_EQUAL] = &eps;
-	rule_table.table[NT_EXP_][T_GT] = &eps;
-	rule_table.table[NT_EXP_][T_LTE] = &eps;
-	rule_table.table[NT_EXP_][T_GTE] = &eps;
-	rule_table.table[NT_EXP_][T_ADD] = &eps;
-	rule_table.table[NT_EXP_][T_SUB] = &eps;
-	rule_table.table[NT_EXP_][T_MULT] = &eps;
-	rule_table.table[NT_EXP_][T_DIV] = &eps;
-	rule_table.table[NT_EXP_][T_NT_EXCLAMATION] = &eps;
-	rule_table.table[NT_EXP_][T_PAR_L] = &eps;
-	rule_table.table[NT_EXP_][T_INT] = &eps;
-	rule_table.table[NT_EXP_][T_STRING] = &eps;
-	rule_table.table[NT_EXP_][T_DOUBLE] = &eps;
-	rule_table.table[NT_EXP_][T_ID] = &eps;
-	rule_table.table[NT_EXP_][T_COMMA] = &eps;
-	rule_table.table[NT_EXP_][T_PAR_R] = &eps;
-	rule_table.table[NT_EXP_][T_END] = &eps;
-
-	rule_table.table[NT_EXP1][T_INT] = &R_three;
-	rule_table.table[NT_EXP1][T_STRING] = &R_three;
-	rule_table.table[NT_EXP1][T_DOUBLE] = &R_three;
-	rule_table.table[NT_EXP1][T_ID] = &R_three;
-	rule_table.table[NT_EXP1][T_COMMA] = &R_three;
-	rule_table.table[NT_EXP1][T_END] = &eps;
-
-	rule_table.table[NT_EXP1_][T_NIL_TEST] = &eps;
-	rule_table.table[NT_EXP1_][T_EQUAL] = &R_four_equals;
-	rule_table.table[NT_EXP1_][T_N_EQUAL] = &R_four_n_equals;
-	rule_table.table[NT_EXP1_][T_N_EQUAL] = &R_four_lt;
-	rule_table.table[NT_EXP1_][T_GT] = &R_four_gt;
-	rule_table.table[NT_EXP1_][T_LTE] = &R_four_lte;
-	rule_table.table[NT_EXP1_][T_GTE] = &R_four_gte;
-	rule_table.table[NT_EXP1_][T_ADD] = &eps;
-	rule_table.table[NT_EXP1_][T_SUB] = &eps;
-	rule_table.table[NT_EXP1_][T_MULT] = &eps;
-	rule_table.table[NT_EXP1_][T_DIV] = &eps;
-	rule_table.table[NT_EXP1_][T_NT_EXCLAMATION] = &eps;
-	rule_table.table[NT_EXP1_][T_PAR_L] = &eps;
-	rule_table.table[NT_EXP1_][T_INT] = &eps;
-	rule_table.table[NT_EXP1_][T_STRING] = &eps;
-	rule_table.table[NT_EXP1_][T_DOUBLE] = &eps;
-	rule_table.table[NT_EXP1_][T_ID] = &eps;
-	rule_table.table[NT_EXP1_][T_COMMA] = &eps;
-	rule_table.table[NT_EXP1_][T_PAR_R] = &eps;
-	rule_table.table[NT_EXP1_][T_END] = &eps;
-
-	rule_table.table[NT_EXP2][T_INT] = &R_five;
-	rule_table.table[NT_EXP2][T_STRING] = &R_five;
-	rule_table.table[NT_EXP2][T_DOUBLE] = &R_five;
-	rule_table.table[NT_EXP2][T_ID] = &R_five;
-	rule_table.table[NT_EXP2][T_COMMA] = &R_five;
-	rule_table.table[NT_EXP2][T_END] = &eps;
-
-	rule_table.table[NT_EXP2_][T_NIL_TEST] = &eps;
-	rule_table.table[NT_EXP2_][T_EQUAL] = &eps;
-	rule_table.table[NT_EXP2_][T_N_EQUAL] = &eps;
-	rule_table.table[NT_EXP2_][T_N_EQUAL] = &eps;
-	rule_table.table[NT_EXP2_][T_GT] = &eps;
-	rule_table.table[NT_EXP2_][T_LTE] = &eps;
-	rule_table.table[NT_EXP2_][T_GTE] = &eps;
-	rule_table.table[NT_EXP2_][T_ADD] = &R_six_add;
-	rule_table.table[NT_EXP2_][T_SUB] = &R_six_sub;
-	rule_table.table[NT_EXP2_][T_MULT] = &eps;
-	rule_table.table[NT_EXP2_][T_DIV] = &eps;
-	rule_table.table[NT_EXP2_][T_NT_EXCLAMATION] = &eps;
-	rule_table.table[NT_EXP2_][T_PAR_L] = &eps;
-	rule_table.table[NT_EXP2_][T_INT] = &eps;
-	rule_table.table[NT_EXP2_][T_STRING] = &eps;
-	rule_table.table[NT_EXP2_][T_DOUBLE] = &eps;
-	rule_table.table[NT_EXP2_][T_ID] = &eps;
-	rule_table.table[NT_EXP2_][T_COMMA] = &eps;
-	rule_table.table[NT_EXP2_][T_PAR_R] = &eps;
-	rule_table.table[NT_EXP2_][T_END] = &eps;
-
-	rule_table.table[NT_EXP3][T_INT] = &R_seven;
-	rule_table.table[NT_EXP3][T_STRING] = &R_seven;
-	rule_table.table[NT_EXP3][T_DOUBLE] = &R_seven;
-	rule_table.table[NT_EXP3][T_ID] = &R_seven;
-	rule_table.table[NT_EXP3][T_COMMA] = &R_seven;
-	rule_table.table[NT_EXP3][T_END] = &eps;
-
-	rule_table.table[NT_EXP3_][T_NIL_TEST] = &eps;
-	rule_table.table[NT_EXP3_][T_EQUAL] = &eps;
-	rule_table.table[NT_EXP3_][T_N_EQUAL] = &eps;
-	rule_table.table[NT_EXP3_][T_N_EQUAL] = &eps;
-	rule_table.table[NT_EXP3_][T_GT] = &eps;
-	rule_table.table[NT_EXP3_][T_LTE] = &eps;
-	rule_table.table[NT_EXP3_][T_GTE] = &eps;
-	rule_table.table[NT_EXP3_][T_ADD] = &eps;
-	rule_table.table[NT_EXP3_][T_SUB] = &eps;
-	rule_table.table[NT_EXP3_][T_MULT] = &R_eight_mult;
-	rule_table.table[NT_EXP3_][T_DIV] = &R_eight_div;
-	rule_table.table[NT_EXP3_][T_NT_EXCLAMATION] = &eps;
-	rule_table.table[NT_EXP3_][T_PAR_L] = &eps;
-	rule_table.table[NT_EXP3_][T_INT] = &eps;
-	rule_table.table[NT_EXP3_][T_STRING] = &eps;
-	rule_table.table[NT_EXP3_][T_DOUBLE] = &eps;
-	rule_table.table[NT_EXP3_][T_ID] = &eps;
-	rule_table.table[NT_EXP3_][T_COMMA] = &eps;
-	rule_table.table[NT_EXP3_][T_PAR_R] = &eps;
-	rule_table.table[NT_EXP3_][T_END] = &eps;
-
-	rule_table.table[NT_EXP4][T_INT] = &R_nine;
-	rule_table.table[NT_EXP4][T_STRING] = &R_nine;
-	rule_table.table[NT_EXP4][T_DOUBLE] = &R_nine;
-	rule_table.table[NT_EXP4][T_ID] = &R_nine;
-	rule_table.table[NT_EXP4][T_COMMA] = &R_nine;
-	rule_table.table[NT_EXP4][T_END] = &eps;
-
-	rule_table.table[NT_EXP4_][T_NIL_TEST] = &eps;
-	rule_table.table[NT_EXP4_][T_EQUAL] = &eps;
-	rule_table.table[NT_EXP4_][T_N_EQUAL] = &eps;
-	rule_table.table[NT_EXP4_][T_N_EQUAL] = &eps;
-	rule_table.table[NT_EXP4_][T_GT] = &eps;
-	rule_table.table[NT_EXP4_][T_LTE] = &eps;
-	rule_table.table[NT_EXP4_][T_GTE] = &eps;
-	rule_table.table[NT_EXP4_][T_ADD] = &eps;
-	rule_table.table[NT_EXP4_][T_SUB] = &eps;
-	rule_table.table[NT_EXP4_][T_MULT] = &eps;
-	rule_table.table[NT_EXP4_][T_DIV] = &eps;
-	rule_table.table[NT_EXP4_][T_NT_EXCLAMATION] = &R_ten;
-	rule_table.table[NT_EXP4_][T_PAR_L] = &eps;
-	rule_table.table[NT_EXP4_][T_INT] = &eps;
-	rule_table.table[NT_EXP4_][T_STRING] = &eps;
-	rule_table.table[NT_EXP4_][T_DOUBLE] = &eps;
-	rule_table.table[NT_EXP4_][T_ID] = &eps;
-	rule_table.table[NT_EXP4_][T_COMMA] = &eps;
-	rule_table.table[NT_EXP4_][T_PAR_R] = &eps;
-	rule_table.table[NT_EXP4_][T_END] = &eps;
-
-	rule_table.table[NT_EXP5][T_INT] = &R_eleven_exp;
-	rule_table.table[NT_EXP5][T_STRING] = &R_eleven_t_int;
-	rule_table.table[NT_EXP5][T_DOUBLE] = &R_eleven_t_string;
-	rule_table.table[NT_EXP5][T_ID] = &R_eleven_t_double;
-	rule_table.table[NT_EXP5][T_COMMA] = &R_eleven_id_args;
-	rule_table.table[NT_EXP5][T_END] = &eps;
-
-	rule_table.table[NT_ARGS][T_PAR_L] = &R_twelve;
-	rule_table.table[NT_ARGS][T_END] = &eps;
-
-	rule_table.table[NT_ARGS_LIST][T_PAR_L] = &R_eleven_id_args; //! check this
-	rule_table.table[NT_ARGS_LIST][T_INT] = &R_eleven_id_args; //! check this
-	rule_table.table[NT_ARGS_LIST][T_STRING] = &R_eleven_id_args; //! check this
-	rule_table.table[NT_ARGS_LIST][T_DOUBLE] = &R_eleven_id_args; //! check this
-	rule_table.table[NT_ARGS_LIST][T_ID] = &R_eleven_id_args; //! check this
-	rule_table.table[NT_ARGS_LIST][T_END] = &eps;
-
-	rule_table.table[NT_E_ID][T_ID] = &R_sixteen;
-	rule_table.table[NT_ARG_LIST_N][T_COMMA] = &R_eighteen;
-	rule_table.table[NT_EXP_ID][T_PAR_L] = &R_twentythree;
 
 	return rt.table[t][nt];
 }

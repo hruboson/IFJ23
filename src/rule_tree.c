@@ -30,6 +30,9 @@ void rule_tree_insert(Node* root, size_t node_index, Token* val) {
 
 	if (node_index >= 0 && node_index < 3) {
 		root->children_nodes[node_index] = rule;
+		for (size_t i = 0; i < 3; i++) {
+			rule->children_nodes[i] = NULL;
+		}
 	} else {
 		exit(99);
 	}

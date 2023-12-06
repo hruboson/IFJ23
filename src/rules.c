@@ -81,7 +81,7 @@ RULE(sixteen) { &T_id, & NT_exp_id } ENDRULE;
 RULE(eighteen) { &T_comma, & NT_arg_list } ENDRULE;
 RULE(twenty) { &NT_exp4_, & NT_exp3_, & NT_exp2_, & NT_exp1_, & NT_exp_ } ENDRULE;
 RULE(twentythree) { &T_left_par, & NT_arg_list, & T_right_par } ENDRULE;
-RULE(twentyfour) { &T_colon, &NT_exp} ENDRULE;
+RULE(twentyfour) { &T_colon, & NT_exp } ENDRULE;
 RULE(eps) {} ENDRULE;
 
 //TEMP
@@ -298,7 +298,8 @@ static RuleTable rt = {
 			[T_DOUBLE] = &R_fourteen_else,
 			[T_COMMA] = &R_fourteen_else, // ?
 			[T_ID] = &R_fourteen_id,
-			[T_PAR_R] = &R_eps
+			[T_PAR_R] = &R_eps,
+			[T_PAR_L] = &R_fourteen_else
 		},
 		[NT_E_ID] = {
 			[T_NIL_TEST] = &R_eps,

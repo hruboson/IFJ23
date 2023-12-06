@@ -179,49 +179,45 @@ int set_type(VarTableStack *stack, FuncTable *func_table, Expression *exp){
                     func_table_insert(func_table, func);
                 
             } else { // uz je definovana
-                printf("LINE: %d\n", __LINE__);
                 // muzou se zkontrolovat argumenty
                 if (func->is_write && exp->fn_call.arg_count < 1) {
-                     printf("LINE: %d\n", __LINE__);
+                    SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
+                }
+
+                //check_params1
+                if(func->is_write == false && func->param_count == exp->fn_call.arg_count){
+                    for(size_t i = 0; i < func->param_count; i++){
+                        if(func->parameters[i].extern_id != exp->fn_call.args[i].id){
+                            ERROR;
+                        }
+                        
+                        //CHECK
+                        ret = semantic_type_match(&func->parameters[i].type, &exp->fn_call.args[i].exp->data_type);
+                        if (ret != 0)
+                            return ret;
+                    }
+                }
+                else if (func->is_write == false) {
+                    printf("FAILED HERE: %d\n", __LINE__);
                     SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
                 }
 
                 for (size_t i = 0; i < exp->fn_call.arg_count; ++i) {
-                    printf("LINE: %d\n", __LINE__);
+                    Expression* arg = exp->fn_call.args[i].exp;
 
                     ret = set_type(stack, func_table, exp->fn_call.args[i].exp);
 
-                    printf("LINE: %d\n", __LINE__);
-
                     if (ret != 0)
                         return ret;
-                    
-                    printf("LINE: %d\n", __LINE__);
 
-                    if (exp->data_type.type == VARTYPE_VOID && exp->data_type.nil_allowed == false) {
+                    if (arg->data_type.type == VARTYPE_VOID && arg->data_type.nil_allowed == false) {
                         printf("PROCEDURA JAKO ARGUMENT\n");
                         SEMANTIC_ERROR_TYPE_MISMATCH;
                     }
 
                     if (func->is_write) continue; // na write se vola jenom set_var
 
-                    //check_params1
-                    if(func->param_count == exp->fn_call.arg_count){
-                        for(size_t i = 0; i < func->param_count; i++){
-                            if(func->parameters[i].extern_id != exp->fn_call.args[i].id){
-                                ERROR;
-                            }
-                            
-                            //CHECK
-                            ret = semantic_type_match(&func->parameters[i].type, &exp->fn_call.args[i].exp->data_type);
-                            if (ret != 0)
-                                return ret;
-                        }
-                    }
-                    else{
-                        printf("FAILED HERE: %d\n", __LINE__);
-                        SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
-                    }
+                    
                 }
             }
             return 0;

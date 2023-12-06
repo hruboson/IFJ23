@@ -18,6 +18,7 @@
             \Huge{Projektová dokumentace} \\
             \Large{\textbf{Implementace překladače imperativního jazyka IFJ23}} \\
             \Large{Tým xhrubo01, varianta TRP-izp} \\ 
+            \Large{Rozšíření: FUNEXP}\\
             \vspace{\stretch{0.6}}
         \end{center}
         \begin{minipage}{0.4 \textwidth}
@@ -28,10 +29,10 @@
 			\normalsize
             \begin{flushright}
                 \begin{tabular}{l l l}
-    				Dominik Borek & (xborek12) & 25\%\\
-    				\textbf{Ondřej Hruboš} & \textbf{(xhrubo01)} & 25\%\\
-    				Radek Jestřabík & (xjestr04)  & 25\%\\
-    				Ondřej Šatinský & (xsatin03)  & 25\%\\
+    				Dominik Borek & (xborek12) & 22\%\\
+    				\textbf{Ondřej Hruboš} & \textbf{(xhrubo01)} & 22\%\\
+    				Radek Jestřabík & (xjestr04)  & 22\%\\
+    				Ondřej Šatinský & (xsatin03)  & 26\%\\
     			\end{tabular}
             \end{flushright}
 		\end{minipage}
@@ -183,17 +184,17 @@ Implementace je provedena pomocí jednotlivých, po sobě jdoucích částí, kt
 
 \subsection{Popis struktur}
 \subsubsection{AST}
-
+Je to struktura ukládající tabulku symbolů a seznam příkazů, které simulují strukturu programu.
 \subsubsection{Expression}
-
+Je struktura, které seskupuje všechny potřebné data pro vyhodnocování výrazů.
 \subsubsection{Statement}
-
+Simuluje dílčí příkaz.
 \subsubsection{VarTable}
-Existuje jeden globální VarTable a následně se na VarTableStack přidávají VarTables jednotlivých rámců.
+Existuje jedena globální tabulka proměnných a následně se na zásobník přidávají tabulky jednotlivých rámců.
 \subsubsection{VarTableStack}
-
+Je zásobník tabulek ramců.
 \subsubsection{FuncTable}
-
+V celém programu je jedna globální tabulka funkcí, která ukládá všechny uživatelsky vytvořené a vestavěné funkce.
     
 \clearpage
 

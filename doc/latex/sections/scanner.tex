@@ -1,6 +1,7 @@
 \documentclass[../main.tex]{subfiles}
 \begin{document}
 
+Lexikární analyzátor se nachází v souboru \texttt{scanner.c}
 Při tvorbě projektu se začalo s lexikálním analyzátorem. Hlavní úkol této analýzy je čtení jednotlivých znaků ze zdrojového souboru a následně se převádí na strukturu tokenů. Typy tokenů jsou konec souboru, základní operace, různé typy závorek, porovnávající operátory, číslo, desetinné číslo, řetězec, nebo identifikátor.\\
 Lexikální analyzátor funguje jako jeden veliký deterministický konečný automat, který je k zobrazení v následující sekci. Tento automat je implementován jako přepínač, ve kterém jsou jednotlivé případy pro jeden stav automatu s možností přejít do dalšího stavu, pokud přijde na tento stav další znak, který mění podstatu tohoto tokenu. Přecházení do stavů bude probíhat, dokud se nenalezne znak EOF. Tyto tokeny se následně po zpracování vloží do tabulky symbolů, se kterou následně pracuje syntaktický analyzátor.
 

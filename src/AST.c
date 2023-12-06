@@ -26,6 +26,31 @@ void clear_ast(AST* ast) {
 	clear_symboltable(&ast->symtab);
 }
 
+void print_datatype( DataType t ) {
+	switch (t.type) {
+	case VARTYPE_DOUBLE:
+		printf("double");
+		break;
+	case VARTYPE_INT:
+		printf("int");
+		break;
+	case VARTYPE_STRING:
+		printf("string");
+		break;
+	case VARTYPE_VOID:
+		printf("void");
+		break;
+	case VARTYPE_BOOL:
+		printf("bool");
+		break;
+	default:
+		printf("DEFAULT");
+		break;
+	}
+	if ( t.nil_allowed )
+		printf( "?" );
+}
+
 void
 print_exp( const Expression* e ) {
 	if ( e == NULL ) {
@@ -34,6 +59,10 @@ print_exp( const Expression* e ) {
 	}
 
 	printf( "(" );
+
+	printf( "[" );
+	print_datatype( e->data_type );
+	printf( "]" );
 
 	switch ( e->type ) {
 	case ET_EXCLAMATION:
@@ -232,6 +261,9 @@ void print_ast(AST* ast) {
 			printf("if {\n");
 			// todo print_exp(stm->if_.exp)
 			printf("\tcheck_nil: %s\n", stm->if_.check_nil ? "true" : "false");
+			printf( "\tcond: " );
+			print_exp( stm->if_.exp );
+			printf( "\n" );
 			printf("\tbody {\n");
 			Statement* stm_if = stm->if_.body;
 			while (stm_if) {
@@ -281,7 +313,9 @@ void print_ast(AST* ast) {
 			break;
 		case ST_WHILE:
 			printf("while {\n");
-			// todo print_exp(stm->while_.exp);
+			printf( "\tcond: " );
+			print_exp( stm->if_.exp );
+			printf( "\n" );
 			Statement* stm_while = stm->while_.body;
 			while (stm_while) {
 				print_statement(stm_while, 1);

@@ -32,12 +32,20 @@ first(x):
 		id, t_double, t_int, t_string, (
 ______________________________________________________________________________________
 
+0. <eps>
 1. <exp> 	-> <exp1> <exp'>
 2. <exp'>	-> ?? <exp>
 3. <exp1>	-> <exp2> <exp1'>
-4. <exp1'>	-> {==, !=, <, >, <=, >=} <exp1>
+4. <exp1'>	-> {==, 
+				!=, 
+				<, 
+				>, 
+				<=, 
+				>=} 
+				<exp1>
 5. <exp2>	-> <exp3> <exp2'>
-6. <exp2'>	-> {+, -} <exp2>
+6. <exp2'>	-> {+, 
+				-} <exp2>
 7. <exp3>	-> <exp4> <exp3'>
 8. <exp3'>	-> {*, /} <exp3>
 9. <exp4>	-> <exp5> <exp4'>
@@ -47,28 +55,33 @@ ________________________________________________________________________________
 
 12. <args> -> ( <args_list> )
 13. <args> -> eps
-14. <arg_list> -> <e_id> <exp> <arg_list_n>
+14. <arg_list> id -> <e_id> <arg_list_n>
+	<arg_list> 'else -> <exp> <arg_list_n>
 15. <arg_list> -> eps
 16. <e_id> -> id <exp_id>
 17. <e_id> -> eps
 18. <arg_list_n> -> , <arg_list>
 19. <arg_list_n> -> eps
-20. <exp_id> -> <exp'>
-21. <exp_id> -> <exp6'> //CHECK: exp6' ?
-22. <exp_id> -> <exp'>
+20. <exp_id> -> <exp4'> <exp3'> <exp2'> <exp1'> <exp'>
 23. <exp_id> -> ( <arg_list> )
-24. <exp_id> -> eps
+25. <exp_id> -> eps
 
 first(x):
+	1.			<exp>			(, t_int, t_string, t_double, id
 	2. 			<exp'>		  	??
+	3.			<exp1>			(, t_int, t_string, t_double, id
 	4. 			<exp1'>		  	==, !=, <, >, <=, >=
+	5.			<exp2>			(, t_int, t_string, t_double, id
 	6. 			<exp2'> 	  	+, -
-	8. 			<exp3'> 	  	*, \
+	7.			<exp3>			(, t_int, t_string, t_double, id
+	8. 			<exp3'> 	  	*, /
+	9.			<exp4>			(, t_int, t_string, t_double, id
 	10. 		<exp4'> 	  	!
 	11. 		<exp5> 		  	(, t_int, t_string, t_double, id
-	12., 13. 	<args> 		  	(, eps
-	15. 		<arg_list> 		eps
-	16., 17. 	<e_id> 		  	id, eps
-	18., 19. 	<arg_list_n>	',', eps
-	23., 24. 	<exp_id> 		(, eps 
+	12., 13. 	<args> 		  	(
+	15. 		<arg_list> id 	id
+				<arg_list> else (, t_int, t_string, t_double, id
+	16., 17. 	<e_id> 		  	id
+	18., 19. 	<arg_list_n>	','
+	23., 24. 	<exp_id> 		(, ??, +, -, *, /, !
 

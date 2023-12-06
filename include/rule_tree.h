@@ -22,3 +22,6 @@ void init_rule_tree(Node** tree);
 void dispose_rule_tree(Node* tree);
 void rule_tree_insert(Node* root, size_t index, Token* val);
 void rule_tree_postorder(Node* tree, ExpStack* stack);
+
+// pomocná funkce
+size_t rule_tree_fn_args(Node* root, ExpStack* stack);

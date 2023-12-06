@@ -118,8 +118,8 @@ static RuleTable rt = {
 			[T_ID] = &R_eps,
 			[T_COMMA] = &R_eps,
 			[T_PAR_R] = &R_eps,
-			[T_END] = &R_eps
-		},
+			[T_END] = &R_eps,
+					},
 		[NT_EXP1] = {
 			[T_INT] = &R_three,
 			[T_STRING] = &R_three,
@@ -150,8 +150,8 @@ static RuleTable rt = {
 			[T_ID] = &R_eps,
 			[T_COMMA] = &R_eps,
 			[T_PAR_R] = &R_eps,
-			[T_END] = &R_eps
-		},
+			[T_END] = &R_eps,
+					},
 		[NT_EXP2] = {
 			[T_PAR_L] = &R_five,
 			[T_INT] = &R_five,
@@ -182,8 +182,8 @@ static RuleTable rt = {
 			[T_ID] = &R_eps,
 			[T_COMMA] = &R_eps,
 			[T_PAR_R] = &R_eps,
-			[T_END] = &R_eps
-		},
+			[T_END] = &R_eps,
+					},
 		[NT_EXP3] = {
 			[T_PAR_L] = &R_seven,
 			[T_INT] = &R_seven,
@@ -214,8 +214,8 @@ static RuleTable rt = {
 			[T_ID] = &R_eps,
 			[T_COMMA] = &R_eps,
 			[T_PAR_R] = &R_eps,
-			[T_END] = &R_eps
-		},
+			[T_END] = &R_eps,
+					},
 		[NT_EXP4] = {
 			[T_PAR_L] = &R_nine,
 			[T_INT] = &R_nine,
@@ -246,8 +246,8 @@ static RuleTable rt = {
 			[T_ID] = &R_eps,
 			[T_COMMA] = &R_eps,
 			[T_PAR_R] = &R_eps,
-			[T_END] = &R_eps
-		},
+			[T_END] = &R_eps,
+					},
 		[NT_EXP5] = {
 			[T_PAR_L] = &R_eleven_exp,
 			[T_INT] = &R_eleven_t_int,
@@ -278,8 +278,8 @@ static RuleTable rt = {
 			[T_COMMA] = &R_eps,
 			[T_PAR_L] = &R_twelve,
 			[T_PAR_R] = &R_eps,
-			[T_END] = &R_eps
-		},
+			[T_END] = &R_eps,
+					},
 		[NT_ARGS_LIST] = {
 			[T_NIL_TEST] = &R_fourteen_else,
 			[T_EQUAL] = &R_fourteen_else,
@@ -299,8 +299,8 @@ static RuleTable rt = {
 			[T_COMMA] = &R_fourteen_else, // ?
 			[T_ID] = &R_fourteen_id,
 			[T_PAR_R] = &R_eps,
-			[T_PAR_L] = &R_fourteen_else
-		},
+			[T_PAR_L] = &R_fourteen_else,
+					},
 		[NT_E_ID] = {
 			[T_NIL_TEST] = &R_eps,
 			[T_EQUAL] = &R_eps,
@@ -346,7 +346,7 @@ static RuleTable rt = {
 			[T_PAR_R] = &R_eps,
 			[T_END] = &R_eps,
 			[T_ID] = &R_eps,
-			[T_COMMA] = &R_eighteen
+			[T_COMMA] = &R_eighteen,
 		},
 		[NT_EXP_ID] = {
 			[T_NIL_TEST] = &R_twenty,
@@ -369,6 +369,7 @@ static RuleTable rt = {
 			[T_PAR_R] = &R_eps,
 			[T_END] = &R_eps,
 			[T_PAR_L] = &R_twentythree,
+			[T_COLON] = &R_eps,
 			[T_COMMA] = &R_eps,
 		}
 	}

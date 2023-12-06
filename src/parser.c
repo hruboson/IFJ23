@@ -669,7 +669,7 @@ print_token( const Token* t ) {
 		printf( "id( %s )", t->value.id->symbol.data );
 		break;
 	case TOKENTYPE_STRING:
-		printf( "\"" );
+		printf( "string( \"" );
 		for ( size_t i = 0; i < t->value.str_.length; i++ ) {
 			char c = t->value.str_.data[ i ];
 			if ( c <= 31 )
@@ -677,13 +677,13 @@ print_token( const Token* t ) {
 			else
 				printf( "%c", c );
 		}
-		printf( "\"" );
+		printf( "\" )" );
 		break;
 	case TOKENTYPE_INT:
-		printf( "%i", t->value.int_ );
+		printf( "int( %i )", t->value.int_ );
 		break;
 	case TOKENTYPE_DOUBLE:
-		printf( "%f", t->value.double_ );
+		printf( "double( %f )", t->value.double_ );
 		break;
 	case TOKENTYPE_KEYWORD:
 		printf( "KEYWORD" );
@@ -903,7 +903,9 @@ int parse_expression(
 			top.node->isTerminal = false;
 			top.node->nt = top.tnt->non_terminal;
 
-			printf( "%i -> ", top.tnt->non_terminal );
+			printf( "%s -> ",
+				nonterminal_to_string( top.tnt->non_terminal )
+			);
 			for ( int i = 0; i < 3; i++ ) {
 				if ( r->expand_to[ i ] == NULL )
 					break;

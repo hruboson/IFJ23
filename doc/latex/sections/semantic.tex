@@ -1,6 +1,40 @@
 \documentclass[../main.tex]{subfiles}
 \begin{document}
+    Úkol sémantické analýzy je kontrola typů, návratových hodnot, podmínek, cyklů, volání funkcí a kontrola, jestli jsou platné samotné výrazy. \\
+    Sémantická analýza je volána v během syntaktické analýzy. Získá výraz, který se zpracuje tak, že se zkontroluje jeho platnost a nastaví se datové typy. Následně se metoda vrací do syntaktické analýzy již sémanticky zkontrolovaný
+    \\
+    %Sémantická analýza sturčně řešeno kontroluje typy návratové hodnoty, podmínky, cykly, volání funkcí a jestli jsou samotné výrazy platné. Pokud ano, odešle se do syntaktické analýzy 0 (žádná chyba nenastala), nebo číslo odpovídajícího erroru. Sémantická analýza potřebuje pro práci \texttt{Statement, VarTableStack a FuncTable}. V jistých metodách potřebuje navíc \texttt{SymbolTable, nebo SymbolRecord}.\\
+    
 
-TODO napsat dokumentaci k semantické analýze
+    %Sémantická analýza je volaná ze syntaktické analýzy. Přesněji z parser.c v jednotlivých typů tokenu. Tedy například, pokud je \texttt{token->value.type = KEYWORD\_IF}, zavolá se sémantická analýza pro podmínku: \texttt{semantic\_if}. Obecně řečeno, parser zavolá sémantickou analýzu ve chvíli, kdy potřebuje zkontrolovat, zda je kód sémantický správně. Například pro podmínku if kontroluje, zda je správně její podmínka. Zda má správně typy, zda to je boolean, jestli jsou vůbec definované proměnné v podmínce atd.
+    
+    %Popis jednotlivých metod sémantické analýzy:
+    %\begin{itemize}
+    %  \item \textbf{set\_type}: \\
+    %  Pomocná metoda \texttt{set\_type} nastaví \texttt{exp->data\_type} podle \texttt{exp->type}. Pokud je typ \texttt{exp->type} sčítání, násobení, odečítání, dělení, pak se znovu zavolá metoda \texttt{set\_type} pro levou a pravou tranu tohoto typu a takto pokračuje, dokud nevyhodnotí a nenastaví veškeré potřebné typy. To stejné například u porovnávání. Pokud zde nastane sémantická chyba, zavolá se odpovídající error a vrátí se číslo tohoto erroru
+      
+    %  \item \textbf{set\_type\_match}: \\
+    %  Pomocná metoda \texttt{set\_type\_match} porovnává 2 typy, které získá v parametrech. Pokud tyto 2 typy sémanticky odpodvídají, to znamená například že jsou oba int, nebo pokud je jeden void..., pak vrátí 0. Pokud se stala nějaká sémantická chyba, vrátí se odpovídající číslo erroru
+      
+     % \item \textbf{semantic\_variable}: \\
+     %  Metoda, která ověřuje, zda je proměnná sémanticky korektní \texttt{Var x = 5}. Po zavolání metody se nejdřív do \texttt{statement->var.unique\_id} uloží unikátní vytvořený název proměnné, se kterým následně pracuje generátor kódu. Hlavní účel metody je uložit \texttt{var} do \texttt{var\_table}
 
+     %  \item \textbf{semantic\_assignment}: \\
+     %  Metoda, která ověřuje, zda se proměná, která se chce uložit do jiné proměnné, může uložit \\\texttt{(x = y)}. Ověřuje například, zda jsou typy obou proměnných validní tím, že zavolá metodu \texttt{set\_type\_match} . V takovém případě vrací 0, jinak číslo erroru.
+
+     %  \item \textbf{semantic\_if}: \\
+     %  Metoda, která ověřuje, zda podmínka pro if je sémanticky korektní. Jestli je to porovnání (BOOL), případně jestli je to constanta. \texttt{If (expression) { ... } else { ... }}. Pokud je kokrektní, vrací se 0, jinak číslo erroru.
+
+     %  \item \textbf{semantic\_while}: \\
+     %  Metoda, která ověřuje, zda je podmínka pro while sémanticky korektní. Tedy jestli se porovnávají správné typy a jestli je to porovnání boolean. \texttt{While (expression) { ... }}. pokud ano, vrací se 0, jinak číslo erroru.
+    
+     %   \item \textbf{semantic\_return}: \\
+     %   Metoda, která ověřuje, zda návratový typ, který se nachází ve funkci je sémanticky správně. To znamená, jestli odpovídá typu funkce. Pokud ano, vrátí se 0, jinak číslo erroru.
+
+    %  \item \textbf{semantic\_expression}: \\
+    %    Metoda, která volá metodu \texttt{set\_type}, aby ověřila, zda je tato expression korektní.
+
+    %    \item \textbf{semantic\_function}: \\
+    %    Metoda, která ověřuje, zda je funkce sémanticky správně implementována. To znamená, jestli funkce existuje, pokud ne, vytvoří se a vloží do \texttt{FuncTable}, v opačném případě se ověří, jestli je již definována. Pokud není, definuje se a ověřuje se, zda jsou správně parametry a uloží se do \texttt{VarTable}. Pokud je Implementace funkce sémanticky správně, vrátí se 0, v opačném případě číslo erroru
+    %\end{itemize}
 \end{document}

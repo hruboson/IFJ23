@@ -43,6 +43,7 @@ typedef enum Terminal {
 	T_ID,
 	T_COMMA,
 	T_PAR_R,
+	T_COLON,
 	T_END,
 
 	T_END__

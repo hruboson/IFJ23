@@ -215,7 +215,7 @@ int set_type(VarTableStack *stack, FuncTable *func_table, Expression *exp){
                 SEMANTIC_ERROR_TYPE_MISMATCH;
 
             if ( left.type == right.type ||
-                (left.type == VOID && left.nil_allowed)
+                (left.type == VARTYPE_VOID && left.nil_allowed)
             ) {
                 exp->data_type = exp->ops[1]->data_type; 
                 return 0; 

@@ -11,8 +11,8 @@ void init_tnt_stack(TNTStack* stack) {
 		exit(99);
 
 	stack->size = 0;
-	stack->capacity = STACK_SIZE;
-	stack->tnts = malloc(sizeof( *stack->tnts ) * STACK_SIZE);
+	stack->capacity = TNT_STACK_SIZE;
+	stack->tnts = malloc(sizeof(*stack->tnts) * TNT_STACK_SIZE);
 	if (!stack->tnts) {
 		exit(99);
 	}

@@ -45,6 +45,7 @@ T(t_double, T_DOUBLE);
 T(id, T_ID);
 T(comma, T_COMMA);
 T(end, T_END);
+T(colon, T_COLON);
 
 #define RULE(n) static Rule R_##n = { .expand_to =
 #define ENDRULE }
@@ -78,6 +79,7 @@ RULE(sixteen) { &T_id, & NT_exp_id } ENDRULE;
 RULE(eighteen) { &T_comma, & NT_arg_list } ENDRULE;
 RULE(twenty) { &NT_exp4_, & NT_exp3_, & NT_exp2_, & NT_exp1_, & NT_exp_ } ENDRULE;
 RULE(twentythree) { &T_left_par, & NT_arg_list, & T_right_par } ENDRULE;
+RULE(twentyfour) { &T_colon, &NT_exp} ENDRULE;
 RULE(eps) {} ENDRULE;
 
 //TEMP
@@ -308,6 +310,7 @@ static RuleTable rt = {
 			[T_ID] = &R_eps,
 			[T_COMMA] = &R_eps,
 			[T_PAR_R] = &R_eps,
+			[T_COLON] = &R_twentyfour,
 			[T_ID] = &R_sixteen,
 			[T_END] = &R_eps,
 		},

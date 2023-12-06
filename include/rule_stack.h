@@ -3,7 +3,7 @@
 #include "rules.h"
 #include "stdbool.h"
 
-#define STACK_SIZE 128
+#define RULE_STACK_SIZE 128
 
 typedef struct RuleStack {
     Rule** rules;

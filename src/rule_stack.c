@@ -7,8 +7,8 @@ void init_rule_stack(RuleStack* stack) {
         exit(99);
     } else {
         stack->size = -1;
-		stack->capacity = STACK_SIZE;
-        stack->rules = malloc(sizeof(Rule*) * STACK_SIZE);
+		stack->capacity = RULE_STACK_SIZE;
+        stack->rules = malloc(sizeof(Rule*) * RULE_STACK_SIZE);
         if (!stack->rules) {
             exit(99);
         }

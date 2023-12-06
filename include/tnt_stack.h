@@ -6,7 +6,7 @@
 
 #include "rule_tree.h"
 
-#define STACK_SIZE 128
+#define TNT_STACK_SIZE 128
 
 typedef struct TS_Item {
 	TNT* tnt;

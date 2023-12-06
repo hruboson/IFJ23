@@ -16,30 +16,37 @@
 
 // Sémantické chyby odpovídající kódům specifikovaným v zadání
 #define SEMANTIC_ERROR_UNDEFINED_VARIABLE do { \
+    printf("ERROR: undefined variable: %d\n", __LINE__); \
     return 5; \
 } while (0)
 
 #define SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG do { \
+    printf("ERROR: Chybny Pocet parametru nebo typ parametru: %d\n", __LINE__); \
     return 4; \
 } while(0)
 
 #define SEMANTIC_ERROR_WRONG_RETURN_TYPE_OF_FUNCTION do { \
+    printf("ERROR: Chybny return type: %d\n", __LINE__); \
     return 4; \
 } while (0)
 
 #define SEMANTIC_ERROR_WRONG_EXP_OF_FUNC do { \
+    printf("ERROR: : wrong exp of func: %d\n", __LINE__); \
     return 6; \
 } while (0)
 
 #define SEMANTIC_ERROR_UNDEFINED_FUNCTION do { \
+    printf("ERROR: undefined function: %d\n", __LINE__); \
     return 3; \
 } while (0)
 
 #define SEMANTIC_ERROR_TYPE_MISMATCH do { \
+    printf("ERROR: Type mismatch: %d\n", __LINE__); \
     return 7; \
 } while (0)
 
 #define SEMANTIC_ERROR_TYPE_INFERENCE do { \
+    printf("ERROR: Type Inference: %d\n", __LINE__); \
     return 8; \
 } while (0)
 
@@ -205,13 +212,13 @@ int set_type(VarTableStack *stack, FuncTable *func_table, Expression *exp){
                 for (size_t i = 0; i < exp->fn_call.arg_count; ++i) {
                     Expression* arg = exp->fn_call.args[i].exp;
 
-                    ret = set_type(stack, func_table, exp->fn_call.args[i].exp);
+                    ret = set_type(stack, func_table, arg);
 
                     if (ret != 0)
                         return ret;
 
                     if (arg->data_type.type == VARTYPE_VOID && arg->data_type.nil_allowed == false) {
-                        printf("PROCEDURA JAKO ARGUMENT\n");
+                        printf("PROCEDURA JAKO ARGUMENT %lu\n",i);
                         SEMANTIC_ERROR_TYPE_MISMATCH;
                     }
 

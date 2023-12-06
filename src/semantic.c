@@ -644,7 +644,8 @@ int semantic_were_all_functions_defined( FuncTable *func_table ) {
     
     for (size_t i = 0; i < func_table->funcs_size; i++) {
         if (func_table->funcs[i].is_defined == false) {
-            SEMANTIC_ERROR_UNDEFINED_FUNCTION;;
+            printf("Funkce: '%s' neni definovana: Line: %d\n", func_table->funcs[i].id->symbol.data, __LINE__);
+            SEMANTIC_ERROR_UNDEFINED_FUNCTION;
         }
     }
 

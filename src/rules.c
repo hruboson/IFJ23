@@ -3,10 +3,10 @@
 #include <stddef.h>
 
 #define T( n, _t ) \
-	static TNT T_##n = {.is_terminal = true, .terminal = _t}
+	TNT T_##n = {.is_terminal = true, .terminal = _t}
 
 #define NT( n, _n ) \
-	static TNT NT_##n = {.is_terminal = false, .non_terminal = _n}
+	TNT NT_##n = {.is_terminal = false, .non_terminal = _n}
 
 NT(exp, NT_EXP);
 NT(exp_, NT_EXP_);
@@ -44,6 +44,7 @@ T(t_string, T_STRING);
 T(t_double, T_DOUBLE);
 T(id, T_ID);
 T(comma, T_COMMA);
+T(end, T_END);
 
 #define RULE(n) static Rule R_##n = { .expand_to =
 #define ENDRULE }
@@ -233,24 +234,24 @@ static RuleTable rt = {
 			[T_END] = &R_eps
 		},
 		[NT_EXP5] = {
-			[T_INT] = &R_eleven_exp,
-			[T_STRING] = &R_eleven_t_int,
-			[T_DOUBLE] = &R_eleven_t_string,
-			[T_ID] = &R_eleven_t_double,
-			[T_COMMA] = &R_eleven_id_args,
-			[T_END] = &R_eps
+			[T_INT] = &R_eleven_t_int,
+			[T_STRING] = &R_eleven_t_string,
+			[T_DOUBLE] = &R_eleven_t_double,
+			[T_ID] = &R_eleven_id_args,
+			[T_END] = &R_eps,
+			[T_PAR_R] = &R_eps,
 		},
 		[NT_ARGS] = {
 			[T_PAR_L] = &R_twelve,
 			[T_END] = &R_eps
 		},
 		[NT_ARGS_LIST] = {
-			[T_PAR_L] = &R_eleven_id_args,
-			[T_INT] = &R_eleven_id_args,
-			[T_STRING] = &R_eleven_id_args,
-			[T_DOUBLE] = &R_eleven_id_args,
+		//	[T_PAR_L] = &R_eleven_id_args,
+		//	[T_INT] = &R_eleven_id_args,
+		//	[T_STRING] = &R_eleven_id_args,
+		//	[T_DOUBLE] = &R_eleven_id_args,
 			[T_ID] = &R_eleven_id_args,
-			[T_END] = &R_eps
+			[T_PAR_R] = &R_eps
 		},
 		[NT_E_ID] = {
 			[T_ID] = &R_sixteen
@@ -271,5 +272,5 @@ get_rule(NonTerminal nt, Terminal t) {
 	if (nt < 0 || nt >= NT_END)
 		return NULL;
 
-	return rt.table[t][nt];
+	return rt.table[ nt ][ t ];
 }

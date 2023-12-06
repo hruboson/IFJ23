@@ -1289,11 +1289,49 @@ void test_complex(void) {
 	TEST_ASSERT_EQUAL_DOUBLE(2.0, st->return_.exp->double_);
 }
 
+void test_exp(void) {
+	const char* data = "write( a, b, 1 )";
+
+	Input in = {
+		.type = INT_STRING,
+		.string = {
+			.s = data,
+			.i = 0, .store = 0,
+		},
+	};
+
+	int ret;
+
+	SymbolTable symtab;
+	init_symboltable( &symtab );
+
+	Expression* exp;
+
+	bool t_out;
+	Token t_out_t;
+
+	ret = parse_expression( &in, &symtab, &exp, NULL, &t_out_t, NULL, &t_out );
+
+	printf( "ret = %i\n", ret );
+	if ( ret != 0 )
+		goto END;
+
+	printf( "exp: " );
+	print_exp( exp );
+	printf( "\n" );
+
+END:
+	clear_symboltable( &symtab );
+
+}
 
 int main(void) {
 	do_semantic_analysis = false;
 
-    UNITY_BEGIN();
+	UNITY_BEGIN();
+	RUN_TEST(test_exp);
+	return UNITY_END();
+
 
     RUN_TEST(test_var_int_simple);
     RUN_TEST(test_let_int_simple);

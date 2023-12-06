@@ -27,9 +27,8 @@ void rule_tree_insert(Node* root, size_t node_index, Token* val) {
 	//todo naplnit rule
 
 	if (node_index >= 0 && node_index < 3) {
-		rule->children_nodes[node_index] = rule;
-	}
-	else {
+		root->children_nodes[node_index] = rule;
+	} else {
 		exit(99);
 	}
 }

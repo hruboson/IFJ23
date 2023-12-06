@@ -11,6 +11,7 @@
 #include "vartable_stack.h"
 #include "symtable.h"
 #include "table.h"
+#include <assert.h>
 
 // newline check
 // pars: Input* input, SymbolTable* symtab, Token* token
@@ -637,6 +638,88 @@ int parse_statement_list(Input* input, SymbolTable* symtab, Statement** statemen
 	return ret;
 }
 
+void
+print_token( const Token* t ) {
+	switch ( t->type ) {
+	case TOKENTYPE_NEWLINE: printf( "NL" ); break;
+	case TOKENTYPE_EOF: printf( "EOF" ); break;
+	case TOKENTYPE_PLUS: printf( "+" ); break;
+	case TOKENTYPE_MINUS: printf( "-" ); break;
+	case TOKENTYPE_STAR: printf( "*" ); break;
+	case TOKENTYPE_SLASH: printf( "/" ); break;
+	case TOKENTYPE_QUESTIONMARK2: printf( "??" ); break;
+	case TOKENTYPE_EQUALS2: printf( "==" ); break;
+	case TOKENTYPE_NOT_EQUALS: printf( "!=" ); break;
+	case TOKENTYPE_LESSER: printf( "<" ); break;
+	case TOKENTYPE_GREATER: printf( ">" ); break;
+	case TOKENTYPE_LESSER_OR_EQUAL: printf( "<=" ); break;
+	case TOKENTYPE_GREATER_OR_EQUAL: printf( ">=" ); break;
+	case TOKENTYPE_EXCLAMATION: printf( "!" ); break;
+	case TOKENTYPE_QUESTIONMARK: printf( "?" ); break;
+	case TOKENTYPE_EQUALS: printf( "=" ); break;
+	case TOKENTYPE_ARROW: printf( "->" ); break;
+	case TOKENTYPE_COLON: printf( ":" ); break;
+	case TOKENTYPE_PAR_L: printf( "(" ); break;
+	case TOKENTYPE_PAR_R: printf( ")" ); break;
+	case TOKENTYPE_BRACE_L: printf( "{" ); break;
+	case TOKENTYPE_BRACE_R: printf( "}" ); break;
+	case TOKENTYPE_COMMA: printf( "," ); break;
+	case TOKENTYPE_UNDERSCORE: printf( "_" ); break;
+	case TOKENTYPE_ID:
+		printf( "id( %s )", t->value.id->symbol.data );
+		break;
+	case TOKENTYPE_STRING:
+		printf( "\"" );
+		for ( size_t i = 0; i < t->value.str_.length; i++ ) {
+			char c = t->value.str_.data[ i ];
+			if ( c <= 31 )
+				printf( "\\u{%x}", c );
+			else
+				printf( "%c", c );
+		}
+		printf( "\"" );
+		break;
+	case TOKENTYPE_INT:
+		printf( "%i", t->value.int_ );
+		break;
+	case TOKENTYPE_DOUBLE:
+		printf( "%f", t->value.double_ );
+		break;
+	case TOKENTYPE_KEYWORD:
+		printf( "KEYWORD" );
+		break;
+	default:
+		printf( "DEFAULT(%i)", t->type );
+	}
+}
+
+void
+print_rule_tree( const Node* n, size_t i ) {
+	if ( n == NULL )
+		return;
+
+	for ( size_t j = 0; j < i; j++ )
+		printf( "  " );
+
+	printf( "%s ", n->isTerminal ? "T" : "NT" );
+	if ( n->isTerminal ) {
+		print_token( n->val );
+
+		printf( "\n" );
+
+		return;
+	} else {
+		printf( "%i", n->nt );
+
+		printf( "\n" );
+		for ( size_t ii = 0; ii < 3; ii++ )
+			print_rule_tree( n->children_nodes[ ii ], i + 1 );
+
+		return;
+	}
+
+}
+
 // vraci int 0 pokud je ten exp validni
 // vraci expression pointer
 // vraci ukazatel na to kde skoncila
@@ -648,15 +731,6 @@ int parse_expression(
 	Token* out_token, Token* in_token_2,
 	bool* out_token_returned
 ) {
-	Token _token;
-	Token* token = &_token;
-
-	if (in_token != NULL) {
-		token = in_token;
-	} else {
-		get_token(input, symtab, token);
-	}
-
 	//TODO: pokud prijdou in_token a in_token_2 prvni je dat do listu tokenu a pak teprve nacitat
 
 	*exp = (Expression*)malloc(sizeof(Expression));
@@ -670,107 +744,153 @@ int parse_expression(
 	bool token_accepted = true;
 	Token token_list[MAX_EXP_LEN];
 	size_t token_index = 0;
+	size_t token_count = 0;
 
+	Token token;
 
 	if (in_token) {
-		token_list[token_index++] = *in_token;
+		token_list[token_count++] = *in_token;
 		if (in_token_2) {
-			token_list[token_index++] = *in_token_2;
+			token_list[token_count++] = *in_token_2;
 		}
 	}
 
-	// while (token_accepted) {
-	// 	get_token(input, symtab, token);
-	// 	if (token->type != TOKENTYPE_QUESTIONMARK2 ||
-	// 		token->type != TOKENTYPE_EQUALS2 ||
-	// 		token->type != TOKENTYPE_NOT_EQUALS ||
-	// 		token->type != TOKENTYPE_LESSER ||
-	// 		token->type != TOKENTYPE_GREATER ||
-	// 		token->type != TOKENTYPE_LESSER_OR_EQUAL ||
-	// 		token->type != TOKENTYPE_GREATER_OR_EQUAL ||
-	// 		token->type != TOKENTYPE_PLUS ||
-	// 		token->type != TOKENTYPE_MINUS ||
-	// 		token->type != TOKENTYPE_SLASH ||
-	// 		token->type != TOKENTYPE_EXCLAMATION ||
-	// 		token->type != TOKENTYPE_INT ||
-	// 		token->type != TOKENTYPE_STRING ||
-	// 		token->type != TOKENTYPE_DOUBLE ||
-	// 		token->type != TOKENTYPE_ID ||
-	// 		token->type != TOKENTYPE_COMMA) {
-	// 		*out_token = *token; //! correct ?
-	// 		*out_token_returned = true;
-	// 		token_accepted = false;
-	// 	}
-	// 	token_list[token_index++] = *token;
-	// }
+	while (token_accepted) {
+	 	get_token(input, symtab, &token);
+	 	if (
+			token.type != TOKENTYPE_QUESTIONMARK2 &&
+	 		token.type != TOKENTYPE_EQUALS2 &&
+	 		token.type != TOKENTYPE_NOT_EQUALS &&
+	 		token.type != TOKENTYPE_LESSER &&
+	 		token.type != TOKENTYPE_GREATER &&
+	 		token.type != TOKENTYPE_LESSER_OR_EQUAL &&
+	 		token.type != TOKENTYPE_GREATER_OR_EQUAL &&
+	 		token.type != TOKENTYPE_PLUS &&
+	 		token.type != TOKENTYPE_MINUS &&
+	 		token.type != TOKENTYPE_SLASH &&
+	 		token.type != TOKENTYPE_EXCLAMATION &&
+	 		token.type != TOKENTYPE_INT &&
+	 		token.type != TOKENTYPE_STRING &&
+	 		token.type != TOKENTYPE_DOUBLE &&
+	 		token.type != TOKENTYPE_ID &&
+	 		token.type != TOKENTYPE_COMMA &&
+			token.type != TOKENTYPE_PAR_L &&
+			token.type != TOKENTYPE_PAR_R
+		) {
+	 		*out_token = token; //! correct ?
+	 		*out_token_returned = true;
+	 		token_accepted = false;
+			break;
+	 	}
+	 	token_list[token_count++] = token;
+	}
+
+	printf( "token count = %lu\n", token_count );
+	for ( size_t i = 0; i < token_count; i++ ) {
+		printf( "\t" );
+		print_token( &token_list[ i ] );
+		printf( "\n" );
+	}
 
 	// Máš nějaký stack terminálů a neterminálů, na spodu je terminál "$" nad tím je neterminál <exp>
 	TNTStack tnt_stack_;
 	TNTStack* tnt_stack = &tnt_stack_;
 	init_tnt_stack(tnt_stack);
-	TNT tnt_end = { .is_terminal = true, .terminal = T_END };
-	tnt_stack_push(tnt_stack, &tnt_end);
 
-	TNT tnt_exp = { .is_terminal = false, .non_terminal = NT_EXP }; // počáteční <exp>
-	tnt_stack_push(tnt_stack, &tnt_exp);
+	Node* tree_root;
+	init_rule_tree(&tree_root);
+
+	tnt_stack_push( tnt_stack, ( TS_Item ){ &NT_exp, tree_root } );
 
 	// Tvoříš strom, pomocí pomocí pravidel zjištěných z tabulky (2D pole) - Enumy na řádky a na sloupce
 	ExpStack exp_stack_;
 	ExpStack* exp_stack = &exp_stack_;
-	Node* tree;
-	init_rule_tree(&tree);
-	rule_tree_insert(tree, 0, NULL);
 
 	token_index = 0;
-	// while (!(tnt_stack_is_empty(tnt_stack))) { // stack není prázdný
-	// 	TNT* top;
-	// 	tnt_stack_pop(tnt_stack, &top);
+	while (!(tnt_stack_is_empty(tnt_stack))) { // stack není prázdný
+	 	TS_Item top;
+	 	tnt_stack_pop(tnt_stack, &top);
 
-	// 	if (!(top->is_terminal)) { // není terminál
-	// 		// podivej se do tabulky, rozepiš na stack, přidej do stromu
-	// 		size_t column = 0;
-	// 		if (token->type == TOKENTYPE_QUESTIONMARK2) column = T_NIL_TEST;
-	// 		if (token->type == TOKENTYPE_EQUALS2) column = T_EQUAL;
-	// 		if (token->type == TOKENTYPE_NOT_EQUALS) column = T_N_EQUAL;
-	// 		if (token->type == TOKENTYPE_LESSER) column = T_LT;
-	// 		if (token->type == TOKENTYPE_GREATER) column = T_GT;
-	// 		if (token->type == TOKENTYPE_LESSER_OR_EQUAL) column = T_LTE;
-	// 		if (token->type == TOKENTYPE_GREATER_OR_EQUAL) column = T_GTE;
-	// 		if (token->type == TOKENTYPE_PLUS) column = T_ADD;
-	// 		if (token->type == TOKENTYPE_MINUS) column = T_SUB;
-	// 		if (token->type == TOKENTYPE_STAR) column = T_MULT;
-	// 		if (token->type == TOKENTYPE_SLASH) column = T_DIV;
-	// 		if (token->type == TOKENTYPE_EXCLAMATION) column = T_NT_EXCLAMATION;
-	// 		if (token->type == TOKENTYPE_INT) column = T_INT;
-	// 		if (token->type == TOKENTYPE_STRING) column = T_STRING;
-	// 		if (token->type == TOKENTYPE_DOUBLE) column = T_DOUBLE;
-	// 		if (token->type == TOKENTYPE_ID) column = T_ID;
-	// 		Rule* r = rule_table->table[top->non_terminal][column];
-	// 		for (size_t i = 0; i < 3; i++) {
-	// 			if (r->valid) {
-	// 				if (r->expand_to[i] != NULL) {
-	// 					// pushni všechna nová pravidla na stack
-	// 					tnt_stack_push(tnt_stack, r->expand_to[i]);
-	// 					rule_tree_insert(tree, i, NULL);
-	// 					tree = tree->children_nodes[0]; // pokaždé se posunu doleva
-	// 				}
-	// 			}
-	// 			else {
-	// 				// syntaktická chyba
-	// 			}
-	// 		}
-	// 	}
-	// 	else {
-	// 		// porovnej a přidej do stromu
-	// 		//! tady se to musí dávat jinak
-	// 		for (size_t i = 0; i < 3; i++) {
-	// 			rule_tree_insert(tree, i, NULL);
-	// 		}
-	// 		tree = tree->children_nodes[0]; // pokaždé se posunu doleva
-	// 	}
+		Token* t = token_list + token_index;
+		//print_token( t );
+		//printf( "\n" );
+
+		Terminal term = T_END;
+		switch ( t->type ) {
+		case TOKENTYPE_QUESTIONMARK2: term = T_NIL_TEST; break;
+		case TOKENTYPE_EQUALS2: term = T_EQUAL; break;
+		case TOKENTYPE_NOT_EQUALS: term = T_N_EQUAL; break;
+		case TOKENTYPE_LESSER: term = T_LT; break;
+		case TOKENTYPE_GREATER: term = T_GT; break;
+		case TOKENTYPE_LESSER_OR_EQUAL: term = T_LTE; break;
+		case TOKENTYPE_GREATER_OR_EQUAL: term = T_GTE; break;
+		case TOKENTYPE_PLUS: term = T_ADD; break;
+		case TOKENTYPE_MINUS: term = T_SUB; break;
+		case TOKENTYPE_STAR: term = T_MULT; break;
+		case TOKENTYPE_SLASH: term = T_DIV; break;
+		case TOKENTYPE_EXCLAMATION: term = T_NT_EXCLAMATION; break;
+		case TOKENTYPE_INT: term = T_INT; break;
+		case TOKENTYPE_STRING: term = T_STRING; break;
+		case TOKENTYPE_DOUBLE: term = T_DOUBLE; break;
+		case TOKENTYPE_ID: term = T_ID; break;
+		case TOKENTYPE_PAR_L: term = T_PAR_L; break;
+		case TOKENTYPE_PAR_R: term = T_PAR_R; break;
+		}
+
+	 	if ( top.tnt->is_terminal == false ) { // není terminál
+	 		// podivej se do tabulky, rozepiš na stack, přidej do stromu
+	 		Rule* r = get_rule( top.tnt->non_terminal, term );
+			if ( r == NULL ) {
+				//*(int*)NULL = 0;
+				return 2;
+			}
+
+			top.node->isTerminal = false;
+			top.node->nt = top.tnt->non_terminal;
+
+			printf( "%i -> ", top.tnt->non_terminal );
+			for ( int i = 0; i < 3; i++ ) {
+				if ( r->expand_to[ i ] == NULL )
+					break;
+				printf( "%p ", r->expand_to[i] );
+			}
+			printf( "\n" );
+
+	 		for (int i = 2; i >= 0; i--) {
+	 			if (r->expand_to[i] != NULL) {
+	 				// pushni všechna nová pravidla na stack
+	 				rule_tree_insert(top.node, i, NULL);
+	 				tnt_stack_push(
+						tnt_stack,
+						(TS_Item){ r->expand_to[i], top.node->children_nodes[i] }
+					);
+	 			}
+	 		}
+
+			continue;
+	 	} else {
+
+			if ( term != top.tnt->terminal ) {
+				//*(int*)NULL = 0;
+				return 2;
+			}
+
+			if ( term == T_END )
+				break;
+
+			top.node->isTerminal = true;
+			top.node->val = t;
+
+			token_index++;
+
+			continue;
+	 	}
 
 
-	//}
+	}
+
+	print_rule_tree( tree_root, 0 );
+
 	return 0;
 }
 

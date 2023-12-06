@@ -56,6 +56,8 @@ typedef struct TNT { // Terminal / Non Terminal
 	};
 } TNT;
 
+extern TNT NT_exp;
+
 // (valid, expand_to) =>
 // (1, neprazdne) == standardni pravidlo
 // (1, prazdne) == epsilon pravidlo

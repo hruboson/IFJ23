@@ -60,6 +60,7 @@ int set_type(VarTableStack *stack, FuncTable *func_table, Expression *exp){
     DataType d0, d1;
 
     Function *func = NULL;
+    int ret;
     switch(exp->type){
         case ET_ADD:
             set_type(stack, func_table, exp->ops[0]);
@@ -158,10 +159,7 @@ int set_type(VarTableStack *stack, FuncTable *func_table, Expression *exp){
             SEMANTIC_ERROR_TYPE_MISMATCH;
 
         case ET_FUNC:
-            Function *func = func_table_get(func_table, exp->fn_call.id);
-
-            int ret;
-
+            func = func_table_get(func_table, exp->fn_call.id);
             if(func == NULL){
                 Function func;
                 func.id = exp->fn_call.id;

@@ -69,8 +69,8 @@ int parse(Input* input, AST* ast) {
 	}
 
 	if (do_semantic_analysis) {
-		// TODO: ret = semantic_check_if_called_functions_were_declared() // + check parameters
-		// TODO: if (ret != 0) return ret;	
+		int ret_defined = semantic_were_all_functions_defined( &func_table ); // + check parameters
+		if (ret_defined != 0) return ret_defined;	
 	}
 
 	return ret;

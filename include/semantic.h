@@ -13,4 +13,5 @@ int semantic_while(VarTableStack*, FuncTable*, Statement* );
 int semantic_return(VarTableStack*, FuncTable*, Statement*, SymbolRecord *funcId);
 int semantic_expression(VarTableStack*, FuncTable*, Statement*);
 int semantic_function(VarTableStack*, FuncTable*, Statement* );
-int semantic_type_match(DataType* L, DataType* R);
+int semantic_type_match(DataType*, DataType*);
+int semantic_were_all_functions_defined(FuncTable*);

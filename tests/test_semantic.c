@@ -106,6 +106,10 @@ void test_assign(void) {
 		{ "var a : Double = 1.0\n a = 3.0\n", {VARTYPE_DOUBLE, false}, 0},
 		{ "var a : Int? = 1\n a = nil\n", {VARTYPE_INT, true}, 0},
 		{ "var a : Int = 1.0\n a = nil\n", {}, 7},
+
+		{ "let a : Int = 1\n a = 10\n", {}, 9}, // asign to let
+		{ "let a : Int? = 1\n a = 10\n", {}, 9}, // asign to let
+		{ "let a : Double? = 1.0\n a = 10.0\n", {}, 9}, // asign to let
 	};
 
 	for (size_t i = 0; i < arraysize(tests); i++) {
@@ -193,7 +197,13 @@ void test_while(void){
         const char* str;
         int ret;
     } tests[] = {
-        { "while a {}\n", 5},
+        { "while a {}\n", 5}, //var not defined
+
+        { "var a : Int = 5\n while a {}\n", 7},
+        { "let a : Int = 5\n while a {}\n", 7},
+        { "var a : Int? = 5\n while a {}\n", 7},
+        { "let a : Int? = 5\n while a {}\n", 7},
+		
         { "let a : Int = 1\n while a {}", 7},
 		//TODO: následující test je správně, ale parser neumí bool
         //{ "let a : Int = 10\n while a == 10 {}\n", 0},

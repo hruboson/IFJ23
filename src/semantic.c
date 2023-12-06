@@ -330,6 +330,10 @@ int semantic_assignment(VarTableStack *stack, Statement* statement, FuncTable *f
     DataType *L = &get_var->type;
     DataType *R = &statement->assign.exp->data_type;
 
+    if (get_var->is_const) {
+        ERROR;
+    }
+
     ret = semantic_type_match(L, R);
     if ( ret != 0){
         return ret;
@@ -348,7 +352,7 @@ int semantic_if(VarTableStack *stack, FuncTable *func_table, Statement *statemen
         SEMANTIC_ERROR_UNDEFINED_VARIABLE;
     }
     
-    if(statement->if_.check_nil){ //TODO
+    if(statement->if_.check_nil){
         Variable *var = var_table_stack_get_var(stack, statement->if_.exp->id);
         if (!var) {
             SEMANTIC_ERROR_UNDEFINED_VARIABLE;
@@ -405,7 +409,7 @@ int semantic_while(VarTableStack *stack, FuncTable *table, Statement *statement)
 int semantic_return(VarTableStack *stack, FuncTable *table, Statement *statement, SymbolRecord *funcId) {
 
     if (funcId == NULL) {
-        SEMANTIC_ERROR_WRONG_RETURN_TYPE_OF_FUNCTION;
+        ERROR;
     }
     
     Function *function = func_table_get(table, funcId);
@@ -458,11 +462,11 @@ int semantic_expression(VarTableStack *stack, FuncTable *table, Statement *state
 /// @param table 
 /// @param statement 
 /// @return pokud je metoda sémanticky správně, vrátí se 0, jinak číslo erroru
-int semantic_function(VarTableStack *stack, FuncTable *table, Statement *statement) {
+int semantic_function(VarTableStack *stack, FuncTable *func_table, Statement *statement) {
 
-    Function *func = func_table_get(table, statement->func.id);
+    Function *func = func_table_get(func_table, statement->func.id);
 
-    if(func == NULL){
+    if(func == NULL){ // funkce jeste nebyla ani definovana, ani zavolana
 
         Function new_function;
         new_function.id = statement->func.id;
@@ -483,41 +487,48 @@ int semantic_function(VarTableStack *stack, FuncTable *table, Statement *stateme
         }
 
         new_function.return_type = statement->func.return_type;
-        func_table_insert(table, new_function);
+        func_table_insert(func_table, new_function);
     }
-    else{
+    else {
         if(func->is_defined == true){
             ERROR;
         }
-        else{
+        else{ // funkce jiz byla zavolana
+            Function called_function = *func;
+
             func->is_defined = true;
+            func->param_count = statement->func.param_count;
+            func->parameters = malloc(sizeof(Parameter) * (statement->func.param_count));
+            if(func->parameters == NULL){
+                exit(99);
+            }
+
+            if(func->param_count != called_function.param_count){
+                SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
+            }
+
+            for (size_t i = 0; i < statement->func.param_count; ++i) {
+                Parameter *param_in = func->parameters + i;
+                const Parameter *param_out = statement->func.parameters + i;
+
+                param_in->extern_id = param_out->extern_id;
+                param_in->intern_id = param_out->intern_id;
+                param_in->type = param_out->type;
+            }
+
+            func->return_type = statement->func.return_type;
+            func_table_insert(func_table, called_function);
 
             //check_params1
-            if(func->param_count == statement->func.param_count){
-                for(size_t i = 0; i < func->param_count; i++){
-                    if(func->parameters[i].extern_id != statement->func.parameters[i].extern_id){
-                        ERROR;
-                    }
-                    
-                    if(func->parameters[i].type.type != statement->func.parameters[i].type.type){
-                        if(func->parameters[i].type.type != VARTYPE_VOID){
-                            ERROR;
-                        }
-                        func->parameters[i].type.type = statement->func.parameters[i].type.type;
-                    }
-                    
-                    if(statement->func.parameters[i].type.nil_allowed){
-                        func->parameters[i].type.nil_allowed = true;
-                    }
-                    else{
-                        if(func->parameters[i].type.nil_allowed == true){
-                            ERROR;
-                        }
-                    }
+            for(size_t i = 0; i < func->param_count; i++){
+                if(func->parameters[i].extern_id != called_function.parameters[i].extern_id){
+                    ERROR;
                 }
-            }
-            else{
-                SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
+
+                ret = semantic_type_match(func->parameters[i].type, called_function.parameters[i].type);
+                if (ret != 0)
+                    return ret;
+
             }
         }
     }
@@ -525,7 +536,7 @@ int semantic_function(VarTableStack *stack, FuncTable *table, Statement *stateme
     VarTable *var_table;
     vartable_stack_peek(stack, &var_table);
     for(size_t i = 0; i < statement->func.param_count; i++){
-        DataType dt = {.type = statement->func.parameters[i].type.type, .nil_allowed = statement->func.parameters[i].type.nil_allowed };
+        DataType dt = statement->func.parameters[i].type;
         Variable var = {
             .id = statement->func.parameters[i].intern_id,
             .initialized = true,
@@ -533,5 +544,80 @@ int semantic_function(VarTableStack *stack, FuncTable *table, Statement *stateme
         };
         var_table_insert(var_table, var);
     }
+
+    return 0;
+}
+
+// Function call
+int semantic_function_call(VarTableStack *stack, FuncTable *func_table, Expression *exp) {
+
+    Function *func = func_table_get(func_table, exp->fn_call.id);
+
+    int ret;
+
+    if(func == NULL){
+        Function func;
+        func.id = exp->fn_call.id;
+        func.is_defined = false;
+        func.param_count = exp->fn_call.arg_count;
+
+        // naplni argumenty, se kterymi byla zavolana
+        func.parameters = malloc(sizeof(Parameter) * (exp->fn_call.arg_count));
+            if(func.parameters == NULL){
+                exit(99);
+            }
+
+            for (size_t i = 0; i < exp->fn_call.arg_count; ++i) {
+                //CHECK
+                Parameter *param_in = func.parameters + i;
+                const Argument *argument = exp->fn_call.args + i;
+
+                param_in->extern_id = argument->id;
+                param_in->type = argument->exp->data_type;
+            }
+
+            func_table_insert(func_table, func);
+        
+    } else { // uz je definovana
+        // muzou se zkontrolovat argumenty
+        for (size_t i = 0; i < func->param_count; ++i) {
+            ret = set_type(stack, func_table, exp);
+
+            if (ret != 0)
+                return ret;
+
+            if (func->is_write) continue; // na write se vola jenom set_var
+
+            //check_params1
+            if(func->param_count == called_function.param_count){
+                for(size_t i = 0; i < func->param_count; i++){
+                    if(func->parameters[i].extern_id != exp->fn_call.args[i].id){
+                        ERROR;
+                    }
+                    
+                    //CHECK
+                    ret = semantic_type_match(func->parameters[i].type, exp->fn_call.args[i].exp->data_type);
+                    if (ret != 0)
+                        return ret;
+                }
+            }
+            else{
+                SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
+            }
+        }
+        
+    }
+    return 0;
+}
+
+// zkontroluje jestli volane funkce byly definovany
+int semantic_were_all_functions_defined( FuncTable *func_table ) {
+    
+    for (size_t i = 0; i < func_table->funcs_size; i++) {
+        if (func_table->funcs[i].is_defined == false) {
+            return SEMANTIC_ERROR_UNDEFINED_FUNCTION;
+        }
+    }
+
     return 0;
 }

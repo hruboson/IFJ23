@@ -188,27 +188,6 @@ void ast_append(AST* ast, Statement* st) {
 	curr->next = st;
 }
 
-void print_datatype( DataType t ) {
-	switch (t.type) {
-	case VARTYPE_DOUBLE:
-		printf("double");
-		break;
-	case VARTYPE_INT:
-		printf("int");
-		break;
-	case VARTYPE_STRING:
-		printf("string");
-		break;
-	case VARTYPE_VOID:
-		printf("void");
-		break;
-	default:
-		printf("DEFAULT");
-		break;
-	}
-	if ( t.nil_allowed )
-		printf( "?" );
-}
 
 void print_ast(AST* ast) {
 	String s;

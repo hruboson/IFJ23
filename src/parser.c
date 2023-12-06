@@ -421,7 +421,9 @@ int parse_statement(
     
 		if (ret != 0) {
 			return ret;
-    }
+    	}
+
+		(*statement)->return_.exp = exp;
     
 		if (do_semantic_analysis) {
 			if (current_function == NULL) {
@@ -432,8 +434,6 @@ int parse_statement(
 			if (ret != 0)
 					return ret;
 		}
-
-		(*statement)->return_.exp = exp;
 
 		if (do_semantic_analysis) {
 			if (current_function == NULL) {
@@ -481,6 +481,10 @@ int parse_statement(
 			if (ret != 0) {
 				return ret;
 			}
+
+			ret = semantic_expression(var_table_stack, func_table, *statement);
+			if (ret != 0)
+				return ret;
 
 			return 0;
 		}

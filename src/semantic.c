@@ -171,6 +171,7 @@ int set_type(VarTableStack *stack, FuncTable *func_table, Expression *exp){
             }
             else{
                 if(func->param_count == exp->fn_call.arg_count){
+                    exp->data_type = func->return_type;
                     for(size_t i = 0; i < func->param_count; i++){
                         if(func->parameters[i].extern_id != exp->fn_call.args[i].id){
                             ERROR;
@@ -440,7 +441,7 @@ int semantic_return(VarTableStack *stack, FuncTable *table, Statement *statement
         exit(99);
     }
     
-    if(!statement->return_.exp){
+    if(statement->return_.exp == NULL){
         if(function->return_type.type == VARTYPE_VOID){
             return 0;
         }
@@ -604,8 +605,9 @@ int semantic_function_call(VarTableStack *stack, FuncTable *func_table, Expressi
         
     } else { // uz je definovana
         // muzou se zkontrolovat argumenty
-        if (func->is_write && func->param_count < 1)
+        if (func->is_write && func->param_count < 1) {
             SEMANTIC_ERROR_COUNT_OR_TYPE_OF_PARAM_IS_WRONG;
+        }
 
         for (size_t i = 0; i < func->param_count; ++i) {
             ret = set_type(stack, func_table, exp);

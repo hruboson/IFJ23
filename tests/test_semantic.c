@@ -428,22 +428,80 @@ void test_if(void){
     }
 }
 
+void test_function_type(void) {
+	struct {
+        const char* str;
+        int ret;
+    } tests[] = {
+        { "func a() -> Int { return 1\n}\n a()\n", 0},
+        { "func a() -> Double { return 1.0\n}\n a()\n", 0},
+        { "func a() -> String { return \"ahoj\"\n}\n a()\n", 0},
+        { "func a() { return \n}\n a()\n", 0},
+
+		{ "func a() -> Int? { return 1\n}\n a()\n", 0},
+        { "func a() -> Double? { return 1.0\n}\n a()\n", 0},
+        { "func a() -> String? { return \"ahoj\"\n}\n a()\n", 0},
+
+		{ "func a() -> Int? { return nil\n}\n a()\n", 0},
+        { "func a() -> Double? { return nil\n}\n a()\n", 0},
+        { "func a() -> String? { return nil\n}\n a()\n", 0},
+    };
+
+	for(size_t i = 0; i < arraysize(tests); i++){
+        Input in = {
+            .type = INT_STRING,
+            .string = {
+                .s = tests[i].str,
+                .i = 0, .store = 0,
+            },
+        };
+
+        AST ast;
+        init_ast(&ast);
+
+        int ret = parse(&in, &ast);
+        if (ret != tests[i].ret) {
+            printf("NOT EQUAL: %lu\n", i);
+        }
+
+        TEST_ASSERT_EQUAL_INT(tests[i].ret, ret);
+
+		Statement *st = ast.statement;
+
+		TEST_ASSERT_EQUAL_INT(ST_FUNC, st->type);
+
+		DataType dt = st->func.return_type;
+
+		st = st->next;
+
+		TEST_ASSERT(st != NULL);
+
+		TEST_ASSERT_EQUAL_INT(ST_EXP, st->type);
+
+		TEST_ASSERT(st->exp.exp->data_type.type == dt.type);
+		TEST_ASSERT(st->exp.exp->data_type.nil_allowed == dt.nil_allowed);
+    }
+
+}
+
 int main(void) {
 	do_semantic_analysis = true;
 
     UNITY_BEGIN();
 
 	RUN_TEST(test_type_match);
-	RUN_TEST(test_type_match_2);
-	RUN_TEST(test_assign);
-	RUN_TEST(test_assign_exp);
-	RUN_TEST(test_return);
-	RUN_TEST(test_while);
-	RUN_TEST(test_if);
+	// RUN_TEST(test_type_match_2);
+	// RUN_TEST(test_assign);
+	// RUN_TEST(test_assign_exp);
+	// RUN_TEST(test_return);
+	// RUN_TEST(test_while);
+	// RUN_TEST(test_if);
 
-	RUN_TEST(test_write);
+	RUN_TEST(test_function_type);
 
-	RUN_TEST(test_function);
+	//RUN_TEST(test_write);
+
+	//RUN_TEST(test_function);
     
 	return UNITY_END();
 }

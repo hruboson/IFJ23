@@ -463,6 +463,7 @@ int semantic_expression(VarTableStack *stack, FuncTable *table, Statement *state
 /// @param statement 
 /// @return pokud je metoda sémanticky správně, vrátí se 0, jinak číslo erroru
 int semantic_function(VarTableStack *stack, FuncTable *func_table, Statement *statement) {
+    int ret;
 
     Function *func = func_table_get(func_table, statement->func.id);
 
@@ -525,7 +526,7 @@ int semantic_function(VarTableStack *stack, FuncTable *func_table, Statement *st
                     ERROR;
                 }
 
-                ret = semantic_type_match(func->parameters[i].type, called_function.parameters[i].type);
+                ret = semantic_type_match(&func->parameters[i].type, &called_function.parameters[i].type);
                 if (ret != 0)
                     return ret;
 
@@ -589,14 +590,14 @@ int semantic_function_call(VarTableStack *stack, FuncTable *func_table, Expressi
             if (func->is_write) continue; // na write se vola jenom set_var
 
             //check_params1
-            if(func->param_count == called_function.param_count){
+            if(func->param_count == exp->fn_call.arg_count){
                 for(size_t i = 0; i < func->param_count; i++){
                     if(func->parameters[i].extern_id != exp->fn_call.args[i].id){
                         ERROR;
                     }
                     
                     //CHECK
-                    ret = semantic_type_match(func->parameters[i].type, exp->fn_call.args[i].exp->data_type);
+                    ret = semantic_type_match(&func->parameters[i].type, &exp->fn_call.args[i].exp->data_type);
                     if (ret != 0)
                         return ret;
                 }
@@ -615,7 +616,7 @@ int semantic_were_all_functions_defined( FuncTable *func_table ) {
     
     for (size_t i = 0; i < func_table->funcs_size; i++) {
         if (func_table->funcs[i].is_defined == false) {
-            return SEMANTIC_ERROR_UNDEFINED_FUNCTION;
+            SEMANTIC_ERROR_UNDEFINED_FUNCTION;
         }
     }
 

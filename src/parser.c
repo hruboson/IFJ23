@@ -787,37 +787,43 @@ int parse_expression(
 	 	tnt_stack_pop(tnt_stack, &top);
 
 		Token* t = token_list + token_index;
+		if ( token_index >= token_count )
+			t = NULL;
 #ifdef DEBUG
-		print_token( t );
-		printf( "\n" );
+		if ( t != NULL ) {
+			print_token( t );
+			printf( "\n" );
+		}
 #endif
 
 		Terminal term = T_END;
-		switch ( t->type ) {
-		case TOKENTYPE_QUESTIONMARK2: term = T_NIL_TEST; break;
-		case TOKENTYPE_EQUALS2: term = T_EQUAL; break;
-		case TOKENTYPE_NOT_EQUALS: term = T_N_EQUAL; break;
-		case TOKENTYPE_LESSER: term = T_LT; break;
-		case TOKENTYPE_GREATER: term = T_GT; break;
-		case TOKENTYPE_LESSER_OR_EQUAL: term = T_LTE; break;
-		case TOKENTYPE_GREATER_OR_EQUAL: term = T_GTE; break;
-		case TOKENTYPE_PLUS: term = T_ADD; break;
-		case TOKENTYPE_MINUS: term = T_SUB; break;
-		case TOKENTYPE_STAR: term = T_MULT; break;
-		case TOKENTYPE_SLASH: term = T_DIV; break;
-		case TOKENTYPE_EXCLAMATION: term = T_NT_EXCLAMATION; break;
-		case TOKENTYPE_INT: term = T_INT; break;
-		case TOKENTYPE_STRING: term = T_STRING; break;
-		case TOKENTYPE_DOUBLE: term = T_DOUBLE; break;
-		case TOKENTYPE_ID: term = T_ID; break;
-		case TOKENTYPE_PAR_L: term = T_PAR_L; break;
-		case TOKENTYPE_PAR_R: term = T_PAR_R; break;
-		case TOKENTYPE_COMMA: term = T_COMMA; break;
-		case TOKENTYPE_KEYWORD:
-			assert( t->value.keyword == KEYWORD_NIL );
-			term = T_NIL;
-			break;
-		}
+		if ( t != NULL )
+			switch ( t->type ) {
+			case TOKENTYPE_QUESTIONMARK2: term = T_NIL_TEST; break;
+			case TOKENTYPE_EQUALS2: term = T_EQUAL; break;
+			case TOKENTYPE_NOT_EQUALS: term = T_N_EQUAL; break;
+			case TOKENTYPE_LESSER: term = T_LT; break;
+			case TOKENTYPE_GREATER: term = T_GT; break;
+			case TOKENTYPE_LESSER_OR_EQUAL: term = T_LTE; break;
+			case TOKENTYPE_GREATER_OR_EQUAL: term = T_GTE; break;
+			case TOKENTYPE_PLUS: term = T_ADD; break;
+			case TOKENTYPE_MINUS: term = T_SUB; break;
+			case TOKENTYPE_STAR: term = T_MULT; break;
+			case TOKENTYPE_SLASH: term = T_DIV; break;
+			case TOKENTYPE_EXCLAMATION: term = T_NT_EXCLAMATION; break;
+			case TOKENTYPE_INT: term = T_INT; break;
+			case TOKENTYPE_STRING: term = T_STRING; break;
+			case TOKENTYPE_DOUBLE: term = T_DOUBLE; break;
+			case TOKENTYPE_ID: term = T_ID; break;
+			case TOKENTYPE_PAR_L: term = T_PAR_L; break;
+			case TOKENTYPE_PAR_R: term = T_PAR_R; break;
+			case TOKENTYPE_COMMA: term = T_COMMA; break;
+			case TOKENTYPE_KEYWORD:
+				if ( t->value.keyword != KEYWORD_NIL )
+					return 2;
+				term = T_NIL;
+				break;
+			}
 
 	 	if ( top.tnt->is_terminal == false ) { // není terminál
 	 		// podivej se do tabulky, rozepiš na stack, přidej do stromu

@@ -53,7 +53,7 @@ size_t rule_tree_fn_args(Node* root, ExpStack* stack) {
 		rule_tree_postorder(c0, stack);
 		break;
 	case NT_E_ID:
-		
+		rule_tree_postorder(c0,stack);
 		break;
 	default:
 		break;

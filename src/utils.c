@@ -5,6 +5,45 @@
 
 #include "utils.h"
 
+const char*
+tokentype_to_string( TokenType t ) {
+	switch ( t ) {
+	case TOKENTYPE_NEWLINE: return "NEWLINE";
+	case TOKENTYPE_EOF: return "EOF";
+	case TOKENTYPE_PLUS: return "+";
+	case TOKENTYPE_MINUS: return "-";
+	case TOKENTYPE_STAR: return "*";
+	case TOKENTYPE_SLASH: return "/";
+	case TOKENTYPE_QUESTIONMARK2: return "??";
+	case TOKENTYPE_EQUALS2: return "==";
+	case TOKENTYPE_NOT_EQUALS: return "!=";
+	case TOKENTYPE_LESSER: return "<";
+	case TOKENTYPE_GREATER: return ">";
+	case TOKENTYPE_LESSER_OR_EQUAL: return "<=";
+	case TOKENTYPE_GREATER_OR_EQUAL: return ">=";
+	case TOKENTYPE_EXCLAMATION: return "!";
+
+	case TOKENTYPE_QUESTIONMARK: return "?";
+	case TOKENTYPE_EQUALS: return "=";
+	case TOKENTYPE_ARROW: return "->";
+	case TOKENTYPE_COLON: return ":";
+	case TOKENTYPE_PAR_L: return "(";
+	case TOKENTYPE_PAR_R: return ")";
+	case TOKENTYPE_BRACE_L: return "{";
+	case TOKENTYPE_BRACE_R: return "}";
+	case TOKENTYPE_COMMA: return ",";
+	case TOKENTYPE_UNDERSCORE: return "_";
+
+	case TOKENTYPE_ID: return "ID";
+	case TOKENTYPE_STRING: return "String";
+	case TOKENTYPE_INT: return "Int";
+	case TOKENTYPE_DOUBLE: return "Double";
+	case TOKENTYPE_KEYWORD: return "KEYWORD";
+
+	default: return "DEFAULT";
+	}
+}
+
 void
 print_formatted_string( FILE* f, const String* s ) {
 

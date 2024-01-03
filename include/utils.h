@@ -13,6 +13,7 @@
 #include "rule_tree.h"
 
 void print_token( const Token* );
+const char* tokentype_to_string( TokenType );
 const char* nonterminal_to_string( NonTerminal );
 const char* terminal_to_string( Terminal );
 void print_formatted_string( FILE*, const String* );

@@ -41,7 +41,7 @@
 //#define PRINT_ERROR(expected, found) fprintf( stderr, "PARSER ERROR: EXPECTED '%i' FOUND '%i'\n\t%s:%i\n", expected, found->type, __FILE__, __LINE__ ) 
 
 #define PRINT_ERROR(expected, found) do { \
-	printf("LINE: %d EXPECTED: %d,", __LINE__, expected); \
+	printf("%s:%d EXPECTED: %s,", __FILE__, __LINE__, tokentype_to_string( expected ) ); \
 	printf("FOUND: "); \
 	print_token(found); \
 	printf("\n"); \
@@ -395,7 +395,7 @@ int parse_statement(
 					get_token(input, symtab, token);
 				}
 
-				if (token->type == TOKENTYPE_NEWLINE) {
+				if (token->type == TOKENTYPE_NEWLINE || token->type == TOKENTYPE_EOF) {
 					return 0;
 				}
 			}
@@ -727,7 +727,9 @@ int parse_expression(
 	}
 
 	while (token_accepted) {
-	 	get_token(input, symtab, &token);
+		int i = get_token(input, symtab, &token);
+		if ( i != 0 )
+			return i;
 	 	if (
 			token.type != TOKENTYPE_QUESTIONMARK2 &&
 	 		token.type != TOKENTYPE_EQUALS2 &&
@@ -785,8 +787,10 @@ int parse_expression(
 	 	tnt_stack_pop(tnt_stack, &top);
 
 		Token* t = token_list + token_index;
-		//print_token( t );
-		//printf( "\n" );
+#ifdef DEBUG
+		print_token( t );
+		printf( "\n" );
+#endif
 
 		Terminal term = T_END;
 		switch ( t->type ) {

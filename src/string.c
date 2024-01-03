@@ -4,7 +4,7 @@
  * xjestr04 Radek Jestřabík
 */
 
-#include "../include/string_.h"
+#include "string_.h"
 
 #include <stdlib.h>
 #include <string.h>

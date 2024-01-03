@@ -197,20 +197,20 @@ append_ir_inst( String* code, const IR_Inst* i, enum frame f, const IR_Func* fn 
 		break;
 	case IRT_branch_nil:
 		string_append( code, "JUMPIFEQ " );
-		append_label( code, i->ops[ 0 ] );
+		append_label( code, i->ops[ 1 ] );
 		string_append( code, " " );
 		string_append( code, "nil@nil" );
 		string_append( code, " " );
-		append_var( code, f, i->ops[ 1 ] );
+		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, "\n" );
 		break;
 	case IRT_branch_false:
 		string_append( code, "JUMPIFEQ " );
-		append_label( code, i->ops[ 0 ] );
+		append_label( code, i->ops[ 1 ] );
 		string_append( code, " " );
 		string_append( code, "bool@false" );
 		string_append( code, " " );
-		append_var( code, f, i->ops[ 1 ] );
+		append_var( code, f, i->ops[ 0 ] );
 		string_append( code, "\n" );
 		break;
 	case IRT_call:

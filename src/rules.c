@@ -198,7 +198,7 @@ static RuleTable rt = {
 			[T_ID] = &R_seven,
 			[T_NIL] = &R_seven,
 			[T_COMMA] = &R_seven,
-			[T_END] = &R_eps
+		//	[T_END] = &R_eps
 		},
 		[NT_EXP3_] = {
 			[T_NIL_TEST] = &R_eps,
@@ -230,7 +230,7 @@ static RuleTable rt = {
 			[T_ID] = &R_nine,
 			[T_NIL] = &R_nine,
 			[T_COMMA] = &R_nine,
-			[T_END] = &R_eps
+		//	[T_END] = &R_eps
 		},
 		[NT_EXP4_] = {
 			[T_NIL_TEST] = &R_eps,
@@ -261,7 +261,7 @@ static RuleTable rt = {
 			[T_DOUBLE] = &R_eleven_t_double,
 			[T_NIL] = &R_eleven_nil,
 			[T_ID] = &R_eleven_id_args,
-			[T_END] = &R_eps,
+		//	[T_END] = &R_eps,
 			[T_PAR_R] = &R_eps,
 		},
 		[NT_ARGS] = {
